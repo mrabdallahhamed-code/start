@@ -55,17 +55,10 @@ const I18N = {
     svc3_li3: 'تصديق المستندات الجديدة', svc3_li4: 'شحن الأوراق إلى المملكة',
     svc4_title: 'خدمات الدعم',
     svc4_p: 'نرافقك في إدارة أعمالك بعد التأسيس عبر أربعة محاور رئيسية:',
-    svc4_li1: '<strong>الموارد البشرية:</strong> التوظيف، العقود، وإدارة المنصات الحكومية',
-    svc4_li2: '<strong>الحسابات العامة:</strong> مسك الدفاتر، إعداد القوائم المالية، والإقرارات الضريبية وفق الأنظمة السعودية',
+    svc4_li1: '<strong>الموارد البشرية:</strong> التوظيف، إدارة العقود، وإدارة المنصات الحكومية وفق الأنظمة السعودية',
+    svc4_li2: '<strong>الحسابات العامة:</strong> إدارة الحسابات، إعداد الميزانيات، وتقديم الإقرارات الضريبية والزكوية وفق الأنظمة السعودية',
     svc4_li3: '<strong>التسويق الرقمي:</strong> إدارة حسابات التواصل الاجتماعي، تحسين محركات البحث، وحملات إعلانية تناسب السوق المحلي',
     svc4_li4: '<strong>الإدارة والتشغيل والحوكمة:</strong> بناء الهيكل التنظيمي، السياسات الداخلية، ولوائح الحوكمة المتوافقة مع الأنظمة السعودية',
-
-    // ---------- لماذا الآن ----------
-    why_eyebrow: 'لماذا الآن', why_title: 'لماذا الاستثمار في السعودية الآن؟', why_sub: 'اضغط على أي بطاقة للاطلاع على التفاصيل',
-    why1_title: 'اقتصاد متسارع النمو', why1_p: 'ناتج محلي إجمالي يتجاوز 1.1 تريليون دولار، وخطط توسع ضخمة ضمن رؤية 2030 في مختلف القطاعات.',
-    why2_title: 'انفتاح تنظيمي غير مسبوق', why2_p: 'ملكية أجنبية كاملة بنسبة 100% في معظم القطاعات، بإجراءات مبسّطة عبر منصات حكومية رقمية.',
-    why3_title: 'موقع استراتيجي', why3_p: 'بوابة إلى أسواق الخليج والشرق الأوسط، بقربها من ثلاث قارات وشبكة طرق ومطارات متطورة.',
-    why4_title: 'حوافز استثمارية', why4_p: 'إعفاءات ضريبية في مناطق محددة، تمويل حكومي لمشاريع مختارة، ودعم مباشر من صناديق التنمية.',
 
     // ---------- استثمر باقتصاد يتوسع بثقة ----------
     kingdom_title: 'استثمر في اقتصاد يتوسع بثقة',
@@ -99,69 +92,63 @@ const I18N = {
   en: {
 
     nav_about: 'About', nav_services: 'Services', nav_paths: 'Get Started', nav_contact: 'Contact',
-    nav_learn_more: 'Learn About Itqan',
+    nav_learn_more: 'Discover Itqan',
     nav_login: 'Log In', nav_register: 'Sign Up',
 
-    hero_title: 'The Itqan Platform for Managing Your Company Incorporation Journey in Saudi Arabia',
-    hero_p: 'From assessing your readiness, to requesting quotes, to electronically signing your contract, to tracking every step in real time — one digital platform managing your incorporation and investment journey in Saudi Arabia from start to finish.',
-    hero_btn_start: 'Start Your Readiness Assessment', hero_btn_services: "What's Inside the Platform?",
+    hero_title: 'The Itqan Platform: Your Company Incorporation Journey in Saudi Arabia, Simplified',
+    hero_p: 'From a readiness assessment to requesting quotes, e-signing your contract, and tracking every milestone in real time — one platform to manage your entire incorporation and investment journey in Saudi Arabia, start to finish.',
+    hero_btn_start: 'Start Your Free Assessment', hero_btn_services: 'Explore the Platform',
     stat_investors: 'Foreign investors', stat_ownership: 'Full foreign ownership', stat_countries: 'Countries worldwide', stat_days: 'Days to incorporate',
 
-    pf_eyebrow: 'Inside the Platform', pf_title: 'What Do You Get After Signing Up?',
-    pf1_title: 'Readiness Compass', pf1_p: 'The first mandatory step — a quick 2-minute assessment that determines your exact path: whether you already have a foreign company or need our help sourcing one.',
-    pf2_title: 'Request Offers', pf2_p: 'After the assessment, request a customized quote for your incorporation in one click — no calls or appointments needed.',
-    pf3_title: 'Signing & Contracts', pf3_p: 'Sign your offer and contract electronically, by hand, directly from the platform — no printing, no in-person appointments.',
-    pf4_title: 'Real-Time Tracking', pf4_p: "Track every stage of your incorporation as it happens from your own dashboard — no need to ask 'where's my request?'",
+    pf_eyebrow: 'Inside the Platform', pf_title: 'Everything You Need, One Sign-Up Away',
+    pf1_title: 'Readiness Compass', pf1_p: 'Your journey starts here — a 2-minute assessment that instantly maps your fastest path forward, whether you already own a foreign company or need help sourcing one.',
+    pf2_title: 'Request Offers', pf2_p: 'Get a tailored incorporation quote in a single click. No cold calls, no back-and-forth, no waiting rooms.',
+    pf3_title: 'Sign & Seal It', pf3_p: 'Sign your offer and contract electronically, right from your dashboard — no printers, no in-person visits, no delays.',
+    pf4_title: 'Live Progress Tracking', pf4_p: "Watch your incorporation move forward in real time from your dashboard. You'll always know exactly where things stand.",
 
-    journey_eyebrow: 'Your Journey With Us', journey_title: 'From Assessment to Execution',
+    journey_eyebrow: 'Your Journey With Us', journey_title: 'From First Click to Fully Incorporated',
     j1: 'Readiness Assessment', j2: 'Path Determined', j3: 'Request Offers', j4: 'Electronic Signature', j5: 'Execution Tracking',
 
-    trust1: 'Certified Electronic Signature', trust2: 'Secure Document Storage', trust3: 'Full Data Confidentiality', trust4: 'Real-Time Request Tracking',
+    trust1: 'Certified E-Signature', trust2: 'Bank-Grade Document Security', trust3: 'Complete Data Confidentiality', trust4: 'Real-Time Request Tracking',
 
-    about_eyebrow: 'About Itqan', about_title: 'Your Trusted Partner from Start to Incorporation',
-    about_p: 'From assessing your readiness to electronically signing your contract — we guide you through one digital platform built on speed and transparency, with real-time tracking of your file until your company is incorporated.',
+    about_eyebrow: 'About Itqan', about_title: 'Your Trusted Partner, From First Step to Incorporation',
+    about_p: 'From your readiness assessment to the final e-signature, Itqan brings you one platform built on speed and transparency — with real-time visibility into your file until your company is officially incorporated.',
 
-    invest_eyebrow: 'Investment Opportunity', invest_title: 'Invest Smart, Invest Now',
-    invest_p: 'Full ownership, streamlined procedures, and genuine growth opportunities across sectors — Itqan shortens the distance between your idea and your incorporation contract, through one platform managing your entire journey.',
+    invest_eyebrow: 'Investment Opportunity', invest_title: 'Invest Smart. Invest Now.',
+    invest_p: 'Full ownership, streamlined procedures, and real growth opportunities across every sector — Itqan closes the gap between your idea and your incorporation contract, managing your entire journey on a single platform.',
 
-    services_eyebrow: 'Our Services', services_title: 'Click any service to see the details',
+    services_eyebrow: 'Our Services', services_title: 'Click Any Service to Learn More',
     svc1_title: 'Foreign Investment License (MISA)',
-    svc1_p: 'We obtain your investment license from the Saudi Ministry of Investment on your behalf, as quickly and smoothly as possible.',
-    svc1_li1: 'Investor and sector eligibility assessment', svc1_li2: 'Full file preparation and submission',
-    svc1_li3: 'Direct liaison with government entities', svc1_li4: 'Follow-up until license issuance',
+    svc1_p: "We secure your investment license from Saudi Arabia's Ministry of Investment on your behalf — fast, and hassle-free.",
+    svc1_li1: 'Investor and sector eligibility review', svc1_li2: 'Complete file preparation and submission',
+    svc1_li3: 'Direct liaison with government entities', svc1_li4: 'Follow-through until your license is issued',
     svc2_title: 'Saudi Company Incorporation',
-    svc2_p: 'A Saudi legal entity with 100% foreign ownership — no local partner required — from registration to opening your bank account.',
+    svc2_p: 'A fully licensed Saudi entity with 100% foreign ownership — no local partner required — from registration all the way to your bank account.',
     svc2_li1: 'Ministry of Commerce registration', svc2_li2: 'Commercial registration and Articles of Association',
     svc2_li3: 'Government file setup', svc2_li4: 'Bank account opening',
-    svc3_title: 'Acquiring Foreign Companies',
-    svc3_p: 'Our team across 14 countries helps you acquire a company that meets licensing requirements.',
-    svc3_li1: 'Acquiring a company that meets licensing conditions', svc3_li2: 'Completing ownership transfer procedures',
-    svc3_li3: 'Certifying the new documents', svc3_li4: 'Shipping documents to the Kingdom',
-    svc4_title: 'Support Services',
-    svc4_p: 'We support your business operations after incorporation across four key pillars:',
-    svc4_li1: '<strong>HR:</strong> Recruitment, contracts, and government platform management',
-    svc4_li2: '<strong>Accounting:</strong> Bookkeeping, financial statements, and tax filings per Saudi regulations',
-    svc4_li3: '<strong>Digital Marketing:</strong> Social media management, SEO, and locally-tailored ad campaigns',
-    svc4_li4: '<strong>Management, Operations & Governance:</strong> Organizational structure, internal policies, and compliance frameworks',
+    svc3_title: 'Acquiring an Existing Foreign Company',
+    svc3_p: "No foreign entity yet? Our team, active across 14 countries, sources and secures one that meets every licensing requirement.",
+    svc3_li1: 'Sourcing a company that meets licensing conditions', svc3_li2: 'Handling the full ownership transfer',
+    svc3_li3: 'Certifying all new documentation', svc3_li4: 'Shipping documents to the Kingdom',
+    svc4_title: 'Ongoing Support Services',
+    svc4_p: 'Beyond incorporation, we keep your business running smoothly across four key pillars:',
+    svc4_li1: '<strong>Human Resources:</strong> End-to-end recruitment, contract management, and seamless compliance across Saudi government platforms',
+    svc4_li2: '<strong>Accounting:</strong> Full-cycle bookkeeping, smart budgeting, and precise tax and Zakat filings — fully compliant with Saudi regulations',
+    svc4_li3: '<strong>Digital Marketing:</strong> Social media management, SEO, and ad campaigns tailored to the local market',
+    svc4_li4: '<strong>Management, Operations & Governance:</strong> Organizational design, internal policy frameworks, and governance aligned with Saudi regulations',
 
-    why_eyebrow: 'Why Now', why_title: 'Why Invest in Saudi Arabia Now?', why_sub: 'Click any card to see the details',
-    why1_title: 'A Fast-Growing Economy', why1_p: 'A GDP exceeding $1.1 trillion, with massive expansion plans across sectors under Vision 2030.',
-    why2_title: 'Unprecedented Regulatory Openness', why2_p: '100% full foreign ownership in most sectors, with streamlined procedures via digital government platforms.',
-    why3_title: 'Strategic Location', why3_p: 'A gateway to Gulf and Middle Eastern markets, near three continents with advanced road and airport networks.',
-    why4_title: 'Investment Incentives', why4_p: 'Tax exemptions in select zones, government funding for specific projects, and direct support from development funds.',
+    kingdom_title: 'Invest in an Economy Growing with Confidence',
+    kingdom_p: "Under Saudi Vision 2030, foreign investors can now build companies with 100% ownership across a wide range of sectors — inside an economy topping $1.1 trillion in GDP, and a business environment evolving faster than ever.",
 
-    kingdom_title: 'Invest in an Economy Expanding with Confidence',
-    kingdom_p: 'Under Saudi Vision 2030, foreign investors can now establish companies with 100% ownership across a wide range of sectors, within an economy exceeding $1.1 trillion in GDP and a rapidly evolving business environment.',
-
-    paths_eyebrow: 'Get Started', paths_title: 'Are you an investor looking to incorporate?',
+    paths_eyebrow: 'Get Started', paths_title: 'Ready to Invest and Incorporate?',
     client_existing_title: 'Existing Client', client_existing_p: 'Already have an account?', client_existing_btn: 'Log In',
-    client_new_title: 'New Client', client_new_p: 'Start your free readiness assessment (just 2 minutes)', client_new_btn: 'Sign Up',
+    client_new_title: 'New Client', client_new_p: 'Start your free readiness assessment — just 2 minutes', client_new_btn: 'Sign Up',
 
-    partner_eyebrow: 'Become Our Partner', partner_title: 'Are you a company-incorporation service provider?',
+    partner_eyebrow: 'Become Our Partner', partner_title: 'Are You an Incorporation Service Provider?',
     provider_existing_title: 'Existing Provider', provider_existing_p: 'Log in to view available requests', provider_existing_btn: 'Log In',
-    provider_new_title: 'New Provider', provider_new_p: 'Join as an approved partner of Itqan', provider_new_btn: 'Join as Partner',
+    provider_new_title: 'New Provider', provider_new_p: 'Join Itqan as an approved partner', provider_new_btn: 'Join as Partner',
 
-    contact_eyebrow: 'Contact Us', contact_title: 'Our team is ready to answer your questions',
+    contact_eyebrow: 'Contact Us', contact_title: "Our Team Is Ready to Help",
     contact_whatsapp: 'WhatsApp', contact_location: 'Riyadh, Saudi Arabia',
 
     footer_text: '© Itqan Business Services — إتقان لخدمات الأعمال',
@@ -174,6 +161,7 @@ const I18N = {
     register_password: 'Password', register_btn: 'Create Account', register_have_account: 'Already have an account?', register_login_link: 'Log In',
   }
 };
+
 
 function getLang(){
   return localStorage.getItem('itqan_lang') || 'ar';
