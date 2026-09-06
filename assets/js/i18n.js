@@ -12,7 +12,7 @@ const I18N = {
     nav_login: 'تسجيل الدخول', nav_register: 'إنشاء حساب',
 
     // ---------- Hero ----------
-    hero_title: 'منصة إتقان لإدارة رحلة تأسيس شركتك في المملكة العربية السعودية',
+    hero_brand: 'منصة إتقان', hero_title: 'لإدارة رحلة تأسيس شركتك في المملكة العربية السعودية',
     hero_p: 'من تقييم جاهزيتك، إلى طلب عروض الأسعار، إلى التوقيع الإلكتروني على عقدك، ومتابعة كل خطوة أولاً بأول — منصة رقمية واحدة تدير رحلة تأسيس شركتك واستثمارك في المملكة العربية السعودية من البداية حتى النهاية.',
     hero_btn_start: 'ابدأ بتقييم جاهزيتك', hero_btn_services: 'اكتشف ما تقدمه المنصة',
     stat_investors: 'مستثمر أجنبي', stat_ownership: 'ملكية أجنبية كاملة', stat_countries: 'دولة حول العالم', stat_days: 'يوماً للتأسيس',
@@ -33,7 +33,7 @@ const I18N = {
 
     // ---------- عن إتقان ----------
     about_eyebrow: 'عن إتقان', about_title: 'شريكك الموثوق في رحلة التأسيس',
-    about_p: 'من تقييم جاهزيتك إلى التوقيع الإلكتروني على عقدك، نرافقك عبر منصة رقمية واحدة تجمع بين السرعة والشفافية، مع متابعة لحظية لملفك حتى إتمام عقد تأسيس شركتك.',
+    about_p: 'إتقان شركة سعودية مرخّصة، مقرّها مدينة الرياض، تجمع تحت مظلة واحدة نخبة من الخبراء السعوديين والدوليين لخدمة المستثمر الأجنبي. من التقييم والترخيص إلى التأسيس والتشغيل، نوفّر لك كل ما تحتاجه في مكان واحد — عبر منصة رقمية تجمع بين السرعة والشفافية والمتابعة اللحظية.',
 
     // ---------- فرصة استثمارية ----------
     invest_eyebrow: 'فرصة استثمارية', invest_title: 'استثمر بذكاء، استثمر الآن',
@@ -95,7 +95,7 @@ const I18N = {
     nav_learn_more: 'Discover Itqan',
     nav_login: 'Log In', nav_register: 'Sign Up',
 
-    hero_title: 'The Itqan Platform: Your Company Incorporation Journey in Saudi Arabia, Simplified',
+    hero_brand: 'Itqan Platform', hero_title: 'Your Company Incorporation Journey in Saudi Arabia, Simplified',
     hero_p: 'From a readiness assessment to requesting quotes, e-signing your contract, and tracking every milestone in real time — one platform to manage your entire incorporation and investment journey in Saudi Arabia, start to finish.',
     hero_btn_start: 'Start Your Free Assessment', hero_btn_services: 'Explore the Platform',
     stat_investors: 'Foreign investors', stat_ownership: 'Full foreign ownership', stat_countries: 'Countries worldwide', stat_days: 'Days to incorporate',
@@ -112,7 +112,7 @@ const I18N = {
     trust1: 'Certified E-Signature', trust2: 'Bank-Grade Document Security', trust3: 'Complete Data Confidentiality', trust4: 'Real-Time Request Tracking',
 
     about_eyebrow: 'About Itqan', about_title: 'Your Trusted Partner, From First Step to Incorporation',
-    about_p: 'From your readiness assessment to the final e-signature, Itqan brings you one platform built on speed and transparency — with real-time visibility into your file until your company is officially incorporated.',
+    about_p: 'Itqan is a licensed Saudi company headquartered in Riyadh, bringing together a team of Saudi and international experts to serve foreign investors. From assessment and licensing to incorporation and ongoing operations, we bring everything you need under one roof — through a single digital platform built on speed, transparency, and real-time visibility.',
 
     invest_eyebrow: 'Investment Opportunity', invest_title: 'Invest Smart. Invest Now.',
     invest_p: 'Full ownership, streamlined procedures, and real growth opportunities across every sector — Itqan closes the gap between your idea and your incorporation contract, managing your entire journey on a single platform.',
