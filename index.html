@@ -154,6 +154,8 @@
   .about-split img{width:100%; border-radius:var(--radius); box-shadow:var(--shadow);}
   .about-split .text-side{text-align:right;}
   html[dir="ltr"] .about-split .text-side{text-align:left;}
+  .about-split .text-side .section-eyebrow{text-align:right;}
+  html[dir="ltr"] .about-split .text-side .section-eyebrow{text-align:left;}
   .about-split .text-side h2{text-align:right; margin-bottom:14px;}
   html[dir="ltr"] .about-split .text-side h2{text-align:left;}
   .about-split .text-side p{font-size:14px; color:var(--ink-soft); line-height:1.85;}
@@ -317,8 +319,8 @@
     <div class="about-split">
       <img src="assets/images/digital-services.png" alt="خدمات إتقان الرقمية">
       <div class="text-side">
-        <span class="section-eyebrow" style="text-align:right;" data-i18n="about_eyebrow">عن إتقان</span>
-        <h2 class="section-title" style="text-align:right;" data-i18n="about_title">شريكك الموثوق في رحلة التأسيس</h2>
+        <span class="section-eyebrow" data-i18n="about_eyebrow">عن إتقان</span>
+        <h2 class="section-title" data-i18n="about_title">شريكك الموثوق في رحلة التأسيس</h2>
         <p data-i18n="about_p">إتقان شركة سعودية مرخّصة، مقرّها مدينة الرياض، تجمع تحت مظلة واحدة نخبة من الخبراء السعوديين والدوليين لخدمة المستثمر الأجنبي. من التقييم والترخيص إلى التأسيس والتشغيل، نوفّر لك كل ما تحتاجه في مكان واحد — عبر منصة رقمية تجمع بين السرعة والشفافية والمتابعة اللحظية.</p>
       </div>
     </div>
@@ -330,8 +332,8 @@
   <section class="block">
     <div class="about-split">
       <div class="text-side">
-        <span class="section-eyebrow" style="text-align:right;" data-i18n="invest_eyebrow">فرصة استثمارية</span>
-        <h2 class="section-title" style="text-align:right;" data-i18n="invest_title">استثمر بذكاء، استثمر الآن</h2>
+        <span class="section-eyebrow" data-i18n="invest_eyebrow">فرصة استثمارية</span>
+        <h2 class="section-title" data-i18n="invest_title">استثمر بذكاء، استثمر الآن</h2>
         <p data-i18n="invest_p">ملكية كاملة، إجراءات مبسّطة، وفرص نمو حقيقية بمختلف القطاعات — إتقان تختصر عليك الطريق من الفكرة إلى عقد التأسيس، عبر منصة واحدة تدير رحلتك كاملة.</p>
       </div>
       <img src="assets/images/invest-icons.png" alt="فرص الاستثمار في السعودية">
@@ -488,7 +490,7 @@
 
 <footer class="site" data-i18n="footer_text">© إتقان لخدمات الأعمال — Itqan Business Services</footer>
 
-<script src="assets/js/i18n.js?v=7"></script>
+<script src="assets/js/i18n.js?v=8"></script>
 <script>
 function toggleService(btn){
   const card = btn.closest('.service-card');
