@@ -80,7 +80,7 @@ async function loadRequests(){
     .order('created_at', {ascending:false});
 
   if(error){ list.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
-  if(!requests || !requests.length){ list.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">لا يوجد لديك أي طلب تأسيس حالياً.</p>'; return; }
+  if(!requests || !requests.length){ list.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">ما عندك أي طلب تأسيس حالياً.</p>'; return; }
 
   const statusMap = {
     pending_admin_review: 'قيد المراجعة — فريق إتقان يجهّز عرضك',

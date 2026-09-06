@@ -9,7 +9,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// شبكة أولاً، دون تخزين مؤقت معقد — يضمن أن يكون المحتوى محدثاً دائماً
+// شبكة أولاً، بدون تخزين مؤقت معقد — يضمن المحتوى دايماً محدث
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))

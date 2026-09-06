@@ -103,7 +103,7 @@ async function loadOffers(){
   const { data: requests } = await query;
 
   if(!requests || !requests.length){
-    area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">لا يوجد لديك طلب تأسيس حتى الآن، لذا لا توجد عروض بعد. <a href="requests.html">اطلب عروضاً من هنا</a></p>';
+    area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">ما عندك طلب تأسيس، فما فيه عروض بعد. <a href="requests.html">اطلب عروض من هنا</a></p>';
     return;
   }
   activeRequest = requests[0];
