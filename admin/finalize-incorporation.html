@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل التأسيس النهائي — إتقان</title>
+<link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><img src="../assets/images/logo.jpeg" alt="إتقان"></div>
+    <nav>
+      <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
+      <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
+      <a href="requests.html" class="side-link active"><span class="ic">🏢</span> طلبات العروض</a>
+      <a href="post-incorp.html" class="side-link"><span class="ic">🗂️</span> خدمات ما بعد التأسيس</a>
+      <a href="company-settings.html" class="side-link"><span class="ic">🏛️</span> بيانات الشركة</a>
+      <a href="team.html" class="side-link"><span class="ic">🧑‍💼</span> الفريق</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <div style="flex:1;display:flex;flex-direction:column;">
+    <header class="app-topbar"><div id="notifBellContainer"></div></header>
+    <main class="app-main">
+      <div class="app-main-inner" style="max-width:560px;">
+        <a href="requests.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع لطلبات العروض</a>
+        <h1 class="page-title" style="margin-top:10px;">تسجيل التأسيس النهائي</h1>
+        <p style="font-size:13px;color:var(--ink-soft);margin-top:-14px;margin-bottom:20px;">أدخل بيانات الشركة السعودية بعد وصول السجل التجاري الفعلي من الجهات الحكومية. هذا الإدخال يُعتبر تأكيداً رسمياً لاكتمال التأسيس، وسيُفعَّل بموجبه ملف الشركة تلقائياً على منصة "صمام" لمتابعة خدمات ما بعد التأسيس.</p>
+
+        <div class="card">
+          <label>اسم الشركة السعودية (كما بالسجل التجاري)</label>
+          <input id="company_name" placeholder="مثال: شركة إتقان لتقنية المعلومات">
+
+          <label>رقم السجل التجاري</label>
+          <input id="cr_number" placeholder="1010xxxxxx">
+
+          <label>الكيان القانوني</label>
+          <select id="entity_type">
+            <option value="">اختر...</option>
+            <option value="llc">شركة ذات مسؤولية محدودة</option>
+            <option value="joint_stock">شركة مساهمة</option>
+            <option value="sole_proprietorship">مؤسسة فردية</option>
+            <option value="branch">فرع شركة أجنبية</option>
+          </select>
+
+          <label>تاريخ إصدار السجل التجاري</label>
+          <input id="issue_date" type="date">
+
+          <button class="btn gold" onclick="finalizeIncorporation()">تأكيد اكتمال التأسيس ومزامنة صمام</button>
+          <div id="msg"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="../assets/js/supabaseClient.js"></script>
+<script>
+let profile, requestId, clientId;
+requestId = new URLSearchParams(window.location.search).get('request_id');
+
+async function init(){
+  profile = await requireRole(['admin']);
+  if(!profile) return;
+  initNotificationBell(profile.id);
+  if(!requestId){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">لم يتم تحديد الطلب.</p>'; return; }
+
+  const { data: req } = await supabase.from('service_requests').select('client_id, final_company_name, final_cr_number, final_entity_type').eq('id', requestId).single();
+  if(req){
+    clientId = req.client_id;
+    if(req.final_company_name) document.getElementById('company_name').value = req.final_company_name;
+    if(req.final_cr_number) document.getElementById('cr_number').value = req.final_cr_number;
+    if(req.final_entity_type) document.getElementById('entity_type').value = req.final_entity_type;
+  }
+}
+
+async function finalizeIncorporation(){
+  const msg = document.getElementById('msg');
+  const company_name = document.getElementById('company_name').value.trim();
+  const cr_number = document.getElementById('cr_number').value.trim();
+  const entity_type = document.getElementById('entity_type').value;
+  const issue_date = document.getElementById('issue_date').value;
+
+  if(!company_name || !cr_number || !entity_type){
+    msg.className = 'msg err'; msg.textContent = 'الرجاء تعبئة اسم الشركة، رقم السجل، والكيان القانوني على الأقل';
+    return;
+  }
+
+  const { error } = await supabase.from('service_requests').update({
+    final_company_name: company_name,
+    final_cr_number: cr_number,
+    final_entity_type: entity_type,
+    incorporation_completed_at: new Date().toISOString(),
+    status: 'completed',
+    simam_sync_status: 'pending'
+  }).eq('id', requestId);
+
+  if(error){ msg.className = 'msg err'; msg.textContent = error.message; return; }
+
+  msg.className = 'msg ok';
+  msg.textContent = 'تم تسجيل بيانات التأسيس. جارٍ تفعيل ملف الشركة على منصة صمام...';
+
+  if(clientId){
+    await createNotification(clientId, 'تهانينا! تم تأسيس شركتك 🎉', 'شركتك ' + company_name + ' صارت رسمية — تابع خدماتك القادمة من منصة صمام', '../client/dashboard.html');
+  }
+
+  setTimeout(() => { window.location.href = 'requests.html'; }, 2000);
+}
+
+init();
+</script>
+</body>
+</html>

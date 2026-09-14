@@ -61,13 +61,16 @@ async function loadAllRequests(){
   const body = document.getElementById('allRequestsBody');
   const { data: requests, error } = await supabase
     .from('service_requests')
-    .select('id, status, activity_type, created_at, client_id, clients(profiles(full_name))')
+    .select('id, status, activity_type, created_at, client_id, incorporation_completed_at, clients(profiles(full_name))')
     .order('created_at', {ascending:false});
 
   if(error){ body.innerHTML = `<tr><td colspan="5">${error.message}</td></tr>`; return; }
   if(!requests || !requests.length){ body.innerHTML = '<tr><td colspan="5">لا توجد طلبات بعد</td></tr>'; return; }
 
   const { data: offers } = await supabase.from('offers').select('id, request_id, status');
+  const { data: allContracts } = await supabase.from('contracts').select('offer_id, itqan_signed_at');
+  const contractSignedMap = {};
+  (allContracts || []).forEach(c => { if(c.itqan_signed_at) contractSignedMap[c.offer_id] = true; });
   const { data: allStages } = await supabase.from('request_stages').select('request_id, started_at, completed_at, status');
 
   const offerCountMap = {};
@@ -114,7 +117,14 @@ async function loadAllRequests(){
     } else if(!isCompleted && offerCount > 0 && !acceptedSet.has(r.id)){
       actionCell = `<a href="submit-offer.html?request_id=${r.id}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تعديل العرض</a>`;
     } else if(!isCompleted && acceptedSet.has(r.id)){
-      actionCell = `<a href="../contract-view.html?offer_id=${acceptedOfferIdMap[r.id]}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">العقد والتوقيع</a>`;
+      const offerId = acceptedOfferIdMap[r.id];
+      if(contractSignedMap[offerId] && !r.incorporation_completed_at){
+        actionCell = `<a href="finalize-incorporation.html?request_id=${r.id}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">تسجيل التأسيس النهائي</a>`;
+      } else if(r.incorporation_completed_at){
+        actionCell = `<span class="badge ready">تم التأسيس ✓</span>`;
+      } else {
+        actionCell = `<a href="../contract-view.html?offer_id=${offerId}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">العقد والتوقيع</a>`;
+      }
     }
 
     return `<tr>
