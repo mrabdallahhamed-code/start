@@ -91,6 +91,7 @@ async function loadRequests(){
 
   list.innerHTML = requests.map(r => {
     const canEdit = r.status === 'pending_admin_review' && (Date.now() - new Date(r.created_at).getTime()) < TWO_HOURS_MS;
+    const simamReady = r.simam_sync_status === 'synced';
     return `
     <div class="list-item-card">
       <p style="font-size:14px;margin-bottom:4px;"><strong>${statusMap[r.status] || r.status}</strong></p>
@@ -98,8 +99,31 @@ async function loadRequests(){
       <a href="offers.html?request_id=${r.id}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">عرض العروض</a>
       <a href="journey.html?request_id=${r.id}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">رحلة الطلب</a>
       ${canEdit ? `<a href="request-offers.html?edit_id=${r.id}" class="btn gold" style="padding:7px 14px;font-size:12.5px;margin-top:0;">تعديل الطلب</a>` : ''}
+      ${simamReady ? `<button onclick="goToSimam('${r.id}')" class="btn gold" style="padding:7px 14px;font-size:12.5px;margin-top:0;">🎉 الانتقال إلى صمام لمتابعة خدماتك ←</button>` : ''}
     </div>`;
   }).join('');
+}
+
+async function goToSimam(requestId){
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'جارٍ تجهيز الدخول...';
+  try{
+    const res = await fetch('https://fpjaupjwikaaxehcqprk.supabase.co/functions/v1/simam-login-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requestId })
+    });
+    const data = await res.json();
+    if(data.loginUrl){
+      window.open(data.loginUrl, '_blank');
+    } else {
+      alert('تعذر تجهيز الدخول التلقائي، جرّب تسجّل دخول يدوياً على simam.itqanbs.sa');
+      window.open('https://simam.itqanbs.sa', '_blank');
+    }
+  } catch(e){
+    window.open('https://simam.itqanbs.sa', '_blank');
+  }
+  btn.disabled = false; btn.textContent = '🎉 الانتقال إلى صمام لمتابعة خدماتك ←';
 }
 
 init();
