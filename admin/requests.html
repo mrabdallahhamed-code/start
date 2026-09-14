@@ -119,7 +119,7 @@ async function loadAllRequests(){
     } else if(!isCompleted && acceptedSet.has(r.id)){
       const offerId = acceptedOfferIdMap[r.id];
       if(contractSignedMap[offerId] && !r.incorporation_completed_at){
-        actionCell = `<a href="finalize-incorporation.html?request_id=${r.id}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">تسجيل التأسيس النهائي</a>`;
+        actionCell = `<a href="journey-tracker.html?request_id=${r.id}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">متابعة المراحل</a>`;
       } else if(r.incorporation_completed_at){
         actionCell = `<span class="badge ready">تم التأسيس ✓</span>`;
       } else {
