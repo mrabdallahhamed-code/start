@@ -295,11 +295,24 @@ async function confirmAcceptWithSignature(){
 async function createStagesIfNeeded(requestId){
   const { data: existing } = await supabase.from('request_stages').select('id').eq('request_id', requestId).limit(1);
   if(existing && existing.length) return;
-  const stageNames = [
-    'بدء إجراءات الاستحواذ', 'بدء إجراءات نقل الملكية للشركة الخارجية', 'تصديق المستندات', 'شحن المستندات',
-    'التقديم على رخصة الاستثمار', 'حجز الاسم التجاري', 'التقديم على عقد التأسيس والسجل التجاري', 'صدور عقد التأسيس والسجل التجاري'
+
+  const { data: clientRow } = await supabase.from('clients').select('has_foreign_company').eq('id', profile.id).single();
+  const hasCompany = clientRow?.has_foreign_company === true;
+
+  const stages = [
+    { name: 'مرحلة الاستحواذ على شركة أجنبية', skip: hasCompany },
+    { name: 'مرحلة ترخيص الاستثمار', skip: false },
+    { name: 'مرحلة التأسيس', skip: false },
   ];
-  const rows = stageNames.map((name,i)=>({ request_id: requestId, stage_order: i+1, stage_name: name }));
+
+  const rows = stages.map((s, i) => ({
+    request_id: requestId,
+    stage_order: i + 1,
+    stage_name: s.name,
+    status: s.skip ? 'completed' : 'pending',
+    completed_at: s.skip ? new Date().toISOString() : null,
+    admin_note: s.skip ? 'العميل يملك شركة أجنبية قائمة بالفعل — هذي المرحلة غير مطلوبة.' : null,
+  }));
   await supabase.from('request_stages').insert(rows);
 }
 

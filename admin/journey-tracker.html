@@ -6,15 +6,19 @@
 <link rel="stylesheet" href="../assets/css/itqan.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  .tl{display:flex;flex-direction:column;gap:0;}
-  .tl-item{display:flex;gap:1.2rem;position:relative;padding-right:2rem;padding-bottom:1.8rem;border-right:2px solid var(--line);}
-  .tl-item:last-child{border-right:2px solid transparent;padding-bottom:0;}
-  .tl-item.done{border-right-color:var(--green);}
-  .tl-dot{position:absolute;right:-9px;top:0;width:18px;height:18px;border-radius:50%;background:var(--white);border:3px solid var(--line);}
-  .tl-item.done .tl-dot{background:var(--green);border-color:var(--green);}
-  .tl-item.active .tl-dot{background:var(--gold);border-color:var(--gold);}
-  .tl-text strong{font-size:14px;color:var(--ink);}
-  .tl-date{font-size:11.5px;color:var(--ink-soft);}
+  .stage-card{border:1px solid var(--line-soft); border-radius:var(--radius); padding:18px 20px; margin-bottom:14px; background:var(--white);}
+  .stage-card.completed{background:var(--green-tint); border-color:var(--green-tint2);}
+  .stage-card.waiting{background:#FFF8EC; border-color:#E8C77A;}
+  .stage-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .stage-head strong{font-size:14.5px;}
+  .stage-status{font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px;}
+  .stage-status.pending{background:var(--line-soft); color:var(--ink-soft);}
+  .stage-status.in_progress{background:var(--gold-soft); color:var(--gold-deep);}
+  .stage-status.waiting_client{background:#F5D98A; color:#7A5A0A;}
+  .stage-status.completed{background:var(--green-tint2); color:var(--green-dark);}
+  .stage-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  .doc-row{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--line-soft);}
+  .note-box{background:var(--white); border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; margin-top:8px; font-size:12.5px;}
 </style>
 </head>
 <body>
@@ -37,14 +41,12 @@
   <div style="flex:1;display:flex;flex-direction:column;">
     <header class="app-topbar"><div id="notifBellContainer"></div></header>
     <main class="app-main">
-      <div class="app-main-inner" style="max-width:560px;">
+      <div class="app-main-inner" style="max-width:620px;">
         <a href="requests.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع لطلبات العروض</a>
         <h1 class="page-title" style="margin-top:10px;">متابعة مراحل التنفيذ</h1>
         <p id="clientNameLine" style="font-size:13px;color:var(--ink-soft);margin-top:-14px;margin-bottom:20px;"></p>
 
-        <div class="card">
-          <div id="stagesContainer" class="tl"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
-        </div>
+        <div id="stagesContainer"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
 
         <div id="finalizeBox" style="display:none;" class="card">
           <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">✅ كل المراحل اكتملت — الخطوة الأخيرة: سجّل بيانات الشركة النهائية.</p>
@@ -59,6 +61,7 @@
 <script>
 let profile;
 const requestId = new URLSearchParams(window.location.search).get('request_id');
+const statusLabels = { pending: 'لم تبدأ', in_progress: 'جاري العمل', waiting_client: 'بانتظار رد العميل', completed: 'مكتملة ✓' };
 
 async function init(){
   profile = await requireRole(['admin']);
@@ -68,7 +71,6 @@ async function init(){
 
   const { data: req } = await supabase.from('service_requests').select('client_id, clients(profiles(full_name))').eq('id', requestId).single();
   if(req) document.getElementById('clientNameLine').textContent = 'العميل: ' + (req.clients?.profiles?.full_name || '—');
-
   document.getElementById('finalizeLink').href = 'finalize-incorporation.html?request_id=' + requestId;
 
   loadStages();
@@ -80,33 +82,75 @@ async function loadStages(){
   if(error){ container.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
   if(!stages || !stages.length){ container.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لم تُنشأ مراحل التنفيذ بعد — تأكد العميل وقّع العقد أولاً.</p>'; return; }
 
-  container.innerHTML = stages.map(s => {
-    const cls = s.status === 'completed' ? 'done' : (s.status === 'in_progress' ? 'active' : '');
-    let actionBtn = '';
-    if(s.status === 'pending') actionBtn = `<button class="btn ghost" style="padding:6px 14px;font-size:11.5px;margin-top:6px;" onclick="updateStage('${s.id}','in_progress')">بدء المرحلة</button>`;
-    else if(s.status === 'in_progress') actionBtn = `<button class="btn gold" style="padding:6px 14px;font-size:11.5px;margin-top:6px;" onclick="updateStage('${s.id}','completed')">إنهاء المرحلة</button>`;
-    return `<div class="tl-item ${cls}">
-      <span class="tl-dot"></span>
-      <div class="tl-text">
+  let html = '';
+  for(const s of stages){
+    const cls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : '');
+    const { data: docs } = await supabase.from('stage_documents').select('*').eq('stage_id', s.id).order('uploaded_at', {ascending:false});
+
+    let actions = '';
+    if(s.status === 'pending'){
+      actions = `<button class="btn ghost" style="padding:6px 14px;font-size:11.5px;margin-top:0;" onclick="updateStage('${s.id}','in_progress')">بدء المرحلة</button>`;
+    } else if(s.status === 'in_progress' || s.status === 'waiting_client'){
+      actions = `
+        <button class="btn gold" style="padding:6px 14px;font-size:11.5px;margin-top:0;" onclick="updateStage('${s.id}','completed')">إنهاء المرحلة</button>
+        <button class="btn ghost" style="padding:6px 14px;font-size:11.5px;margin-top:0;" onclick="promptWaiting('${s.id}')">طلب رد العميل</button>
+        <label class="btn ghost" style="padding:6px 14px;font-size:11.5px;margin-top:0;cursor:pointer;">رفع ملف
+          <input type="file" style="display:none;" onchange="uploadDoc('${s.id}', this)">
+        </label>`;
+    }
+
+    html += `<div class="stage-card ${cls}">
+      <div class="stage-head">
         <strong>${s.stage_order}. ${s.stage_name}</strong>
-        ${s.completed_at ? `<br><span class="tl-date">اكتملت: ${new Date(s.completed_at).toLocaleDateString('ar-SA')}</span>` : ''}
-        <br>${actionBtn}
+        <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
       </div>
+      ${s.admin_note ? `<div class="note-box">📝 ${s.admin_note}</div>` : ''}
+      ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
+      <div class="stage-actions">${actions}</div>
     </div>`;
-  }).join('');
+  }
+  container.innerHTML = html;
 
   const allDone = stages.every(s => s.status === 'completed');
   document.getElementById('finalizeBox').style.display = allDone ? 'block' : 'none';
 }
 
 async function updateStage(stageId, newStatus){
-  const payload = { status: newStatus };
+  const payload = { status: newStatus, waiting_on_client: false };
   if(newStatus === 'in_progress') payload.started_at = new Date().toISOString();
   if(newStatus === 'completed') payload.completed_at = new Date().toISOString();
-
   const { error } = await supabase.from('request_stages').update(payload).eq('id', stageId);
   if(error){ alert(error.message); return; }
   loadStages();
+}
+
+async function promptWaiting(stageId){
+  const note = prompt('اكتب الملاحظة أو الطلب اللي تبي توصله للعميل:');
+  if(!note) return;
+  const { error } = await supabase.from('request_stages').update({ status: 'waiting_client', waiting_on_client: true, admin_note: note }).eq('id', stageId);
+  if(error){ alert(error.message); return; }
+
+  const { data: stageRow } = await supabase.from('request_stages').select('request_id').eq('id', stageId).single();
+  const { data: reqRow } = await supabase.from('service_requests').select('client_id').eq('id', stageRow.request_id).single();
+  if(reqRow) createNotification(reqRow.client_id, 'إتقان محتاجة ردّك', note.slice(0,60), '../client/journey.html?request_id=' + stageRow.request_id);
+
+  loadStages();
+}
+
+async function uploadDoc(stageId, input){
+  if(!input.files.length) return;
+  const file = input.files[0];
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  const filePath = `${profile.id}/stage_${stageId}_${Date.now()}_${safeName}`;
+  const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
+  if(upErr){ alert(upErr.message); return; }
+  await supabase.from('stage_documents').insert({ stage_id: stageId, file_path: filePath, file_name: file.name, uploaded_by_role: 'admin' });
+  loadStages();
+}
+
+async function downloadDoc(filePath){
+  const { data } = await supabase.storage.from('offer-attachments').createSignedUrl(filePath, 3600);
+  if(data?.signedUrl) window.open(data.signedUrl, '_blank');
 }
 
 init();

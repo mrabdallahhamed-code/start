@@ -8,10 +8,24 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="إتقان">
-
 <title>رحلة الطلب — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .stage-card{border:1px solid var(--line-soft); border-radius:var(--radius); padding:18px 20px; margin-bottom:14px; background:var(--white);}
+  .stage-card.completed{background:var(--green-tint); border-color:var(--green-tint2);}
+  .stage-card.waiting{background:#FFF8EC; border-color:#E8C77A; box-shadow:0 0 0 3px rgba(232,199,122,.25);}
+  .stage-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .stage-head strong{font-size:14.5px;}
+  .stage-status{font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px;}
+  .stage-status.pending{background:var(--line-soft); color:var(--ink-soft);}
+  .stage-status.in_progress{background:var(--gold-soft); color:var(--gold-deep);}
+  .stage-status.waiting_client{background:#F5D98A; color:#7A5A0A;}
+  .stage-status.completed{background:var(--green-tint2); color:var(--green-dark);}
+  .note-box{background:var(--white); border:1px solid #E8C77A; border-radius:10px; padding:12px 14px; margin-top:10px; font-size:13px;}
+  .doc-row{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--line-soft);}
+  .upload-row{margin-top:10px;}
+</style>
 </head>
 <body>
 <div class="app-shell">
@@ -25,8 +39,8 @@
       <a href="post-incorp.html" class="side-link sub"><span class="ic">🗂️</span> طلبات بعد التأسيس</a>
       <a href="journey.html" class="side-link sub active"><span class="ic">🛤️</span> رحلة الطلب</a>
       <a href="offers.html" class="side-link sub"><span class="ic">💰</span> العروض</a>
-      <a href="profile.html" class="side-link"><span class="ic">👤</span> بياناتي</a>
       <a href="messages.html" class="side-link"><span class="ic">💬</span> الرسائل</a>
+      <a href="profile.html" class="side-link"><span class="ic">👤</span> بياناتي</a>
       <a href="files.html" class="side-link"><span class="ic">📁</span> ملفاتي</a>
     </nav>
     <div class="sidebar-footer">
@@ -41,17 +55,19 @@
       <div id="notifBellContainer"></div>
     </header>
     <main class="app-main">
-      <div class="app-main-inner">
+      <div class="app-main-inner" style="max-width:620px;">
         <h1 class="page-title">رحلة الطلب</h1>
-        <div class="card" id="journeyArea"><p style="color:var(--ink-soft);font-size:13.5px;">جارٍ التحميل...</p></div>
+        <div id="journeyArea"><p style="color:var(--ink-soft);font-size:13.5px;">جارٍ التحميل...</p></div>
       </div>
     </main>
   </div>
 </div>
 
 <script src="../assets/js/supabaseClient.js"></script>
+<script src="../assets/js/i18n.js"></script>
 <script>
 let profile;
+const statusLabels = { pending: 'لم تبدأ', in_progress: 'جاري العمل', waiting_client: 'بانتظار ردك', completed: 'مكتملة ✓' };
 
 async function init(){
   profile = await requireRole(['client']);
@@ -65,7 +81,7 @@ async function init(){
   const area = document.getElementById('journeyArea');
 
   if(!requests || !requests.length){
-    area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">ما عندك طلب تأسيس حالياً — رحلة الطلب تظهر بعد ما تطلب عروض ويوافَق على عرض.</p>';
+    area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">ما عندك طلب تأسيس حالياً.</p>';
     return;
   }
 
@@ -77,38 +93,51 @@ async function init(){
     return;
   }
 
-  area.innerHTML = '<div id="stagesArea"></div>';
-  loadStages(requests[0].id, 'stagesArea');
+  loadStages(requests[0].id, area);
 }
 
-async function loadStages(requestId, containerId){
-  const container = document.getElementById(containerId);
-  const { data: req } = await supabase.from('service_requests').select('id, created_at, status, client_id').eq('id', requestId).single();
-  const { data: offersData } = await supabase.from('offers').select('created_at, status').eq('request_id', requestId).order('created_at');
-  const { data: clientData } = await supabase.from('clients').select('created_at, assessment_completed_at').eq('id', req.client_id).single();
+async function loadStages(requestId, area){
+  const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
+  if(error){ area.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(!stages || !stages.length){ area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">مراحل التنفيذ بتظهر هنا قريباً.</p>'; return; }
 
-  const autoStages = [
-    { name:'تم التسجيل', done:true, date: clientData?.created_at },
-    { name:'تم اعتماد طلبه', done: !!clientData?.assessment_completed_at, date: clientData?.assessment_completed_at },
-    { name:'تم الرفع للعروض', done: req.status !== 'pending_admin_review', date: req.created_at },
-    { name:'تم إرسال عروض', done: !!(offersData && offersData.length), date: offersData?.[0]?.created_at },
-    { name:'اعتماد العروض', done: !!(offersData && offersData.some(o=>o.status==='accepted')), date: offersData?.find(o=>o.status==='accepted')?.created_at },
-  ];
+  let html = '';
+  for(const s of stages){
+    const cls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : '');
+    const { data: docs } = await supabase.from('stage_documents').select('*').eq('stage_id', s.id).order('uploaded_at', {ascending:false});
 
-  const { data: stages } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
-
-  let html = '<div class="timeline">';
-  autoStages.forEach(s => {
-    html += `<div class="tl-item ${s.done?'done':''}"><span class="tl-dot"></span><div class="tl-text"><strong>${s.name}</strong>${s.date?` <span class="tl-date">${new Date(s.date).toLocaleDateString('ar-SA')}</span>`:''}</div></div>`;
-  });
-  if(stages && stages.length){
-    stages.forEach(s => {
-      const cls = s.status === 'completed' ? 'done' : (s.status==='in_progress' ? 'active' : '');
-      html += `<div class="tl-item ${cls}"><span class="tl-dot"></span><div class="tl-text"><strong>${s.stage_name}</strong>${s.completed_at?` <span class="tl-date">${new Date(s.completed_at).toLocaleDateString('ar-SA')}</span>`:''}</div></div>`;
-    });
+    html += `<div class="stage-card ${cls}">
+      <div class="stage-head">
+        <strong>${s.stage_order}. ${s.stage_name}</strong>
+        <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
+      </div>
+      ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${s.admin_note}</div>` : ''}
+      ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
+      ${s.status === 'waiting_client' ? `<div class="upload-row"><label class="btn gold" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع الملف المطلوب<input type="file" style="display:none;" onchange="uploadDoc('${s.id}', this, '${requestId}')"></label></div>` : ''}
+    </div>`;
   }
-  html += '</div>';
-  container.innerHTML = html;
+  area.innerHTML = html;
+}
+
+async function uploadDoc(stageId, input, requestId){
+  if(!input.files.length) return;
+  const file = input.files[0];
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  const filePath = `${profile.id}/stage_${stageId}_${Date.now()}_${safeName}`;
+  const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
+  if(upErr){ alert(upErr.message); return; }
+  await supabase.from('stage_documents').insert({ stage_id: stageId, file_path: filePath, file_name: file.name, uploaded_by_role: 'client' });
+
+  // إشعار الأدمن بوصول الرد
+  const { data: admins } = await supabase.from('profiles').select('id').eq('role','admin').limit(3);
+  (admins||[]).forEach(a => createNotification(a.id, 'العميل رفع ملف مطلوب', 'بانتظار مراجعتك', '../admin/requests.html'));
+
+  init();
+}
+
+async function downloadDoc(filePath){
+  const { data } = await supabase.storage.from('offer-attachments').createSignedUrl(filePath, 3600);
+  if(data?.signedUrl) window.open(data.signedUrl, '_blank');
 }
 
 init();

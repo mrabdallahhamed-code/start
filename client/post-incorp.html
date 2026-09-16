@@ -138,7 +138,8 @@ async function loadPostIncorp(){
       </div>`;
   } else if(req.status === 'accepted'){
     html += `<a href="../post-incorp-offer-view.html?id=${req.id}" class="btn ghost" style="padding:8px 16px;font-size:12.5px;">عرض التفاصيل الكاملة</a>
-      <a href="../post-incorp-contract-view.html?request_id=${req.id}" class="btn gold" style="padding:8px 16px;font-size:12.5px;">عرض الاتفاقية والتوقيع</a>`;
+      <a href="../post-incorp-contract-view.html?request_id=${req.id}" class="btn gold" style="padding:8px 16px;font-size:12.5px;">عرض الاتفاقية والتوقيع</a>
+      <button onclick="goToSimamFromClient()" class="btn gold" style="padding:8px 16px;font-size:12.5px;">🎉 الانتقال إلى صمام لمتابعة خدماتك ←</button>`;
   } else if(req.status === 'rejected'){
     html += `<button class="btn gold" onclick="resetPostIncorp()">طلب جديد</button>`;
   }
@@ -187,6 +188,28 @@ async function respondPostIncorp(id, decision){
   }
   loadPostIncorp();
   notifyAdmins(decision === 'accepted' ? 'العميل قبل عرض خدمات ما بعد التأسيس' : 'العميل رفض عرض خدمات ما بعد التأسيس', profile.full_name, '../admin/post-incorp.html');
+}
+
+async function goToSimamFromClient(){
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'جارٍ تجهيز الدخول...';
+  try{
+    const res = await fetch('https://fpjaupjwikaaxehcqprk.supabase.co/functions/v1/simam-login-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: profile.id })
+    });
+    const data = await res.json();
+    if(data.loginUrl){
+      window.open(data.loginUrl, '_blank');
+    } else {
+      alert('تعذر تجهيز الدخول التلقائي — تأكد إن شركتك اكتمل تأسيسها أولاً، أو جرّب تسجّل دخول يدوياً على simam.itqanbs.sa');
+      window.open('https://simam.itqanbs.sa', '_blank');
+    }
+  } catch(e){
+    window.open('https://simam.itqanbs.sa', '_blank');
+  }
+  btn.disabled = false; btn.textContent = '🎉 الانتقال إلى صمام لمتابعة خدماتك ←';
 }
 
 init();
