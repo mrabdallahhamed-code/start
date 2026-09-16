@@ -121,7 +121,7 @@ async function loadAllRequests(){
       if(contractSignedMap[offerId] && !r.incorporation_completed_at){
         actionCell = `<a href="journey-tracker.html?request_id=${r.id}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">متابعة المراحل</a>`;
       } else if(r.incorporation_completed_at){
-        actionCell = `<span class="badge ready">تم التأسيس ✓</span>`;
+        actionCell = `<a href="journey-tracker.html?request_id=${r.id}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تم التأسيس ✓ — مراجعة المراحل</a>`;
       } else {
         actionCell = `<a href="../contract-view.html?offer_id=${offerId}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">العقد والتوقيع</a>`;
       }
