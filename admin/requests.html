@@ -112,17 +112,17 @@ async function loadAllRequests(){
     }
 
     let actionCell = '—';
-    if(!isCompleted && offerCount === 0){
+    if(isCompleted){
+      actionCell = `<a href="journey-tracker.html?request_id=${r.id}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تم التأسيس ✓ — مراجعة المراحل</a>`;
+    } else if(offerCount === 0){
       actionCell = `<a href="submit-offer.html?request_id=${r.id}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">تقديم عرض</a>`;
-    } else if(!isCompleted && offerCount > 0 && !acceptedSet.has(r.id)){
+    } else if(offerCount > 0 && !acceptedSet.has(r.id)){
       actionCell = `<a href="submit-offer.html?request_id=${r.id}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تعديل العرض</a>`;
-    } else if(!isCompleted && acceptedSet.has(r.id)){
+    } else if(acceptedSet.has(r.id)){
       const offerId = acceptedOfferIdMap[r.id];
       if(contractSignedMap[offerId] && !r.incorporation_completed_at){
         actionCell = `<a href="journey-tracker.html?request_id=${r.id}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">متابعة المراحل</a>`;
-      } else if(r.incorporation_completed_at){
-        actionCell = `<a href="journey-tracker.html?request_id=${r.id}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تم التأسيس ✓ — مراجعة المراحل</a>`;
-      } else {
+      } else if(!contractSignedMap[offerId]){
         actionCell = `<a href="../contract-view.html?offer_id=${offerId}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">العقد والتوقيع</a>`;
       }
     }
