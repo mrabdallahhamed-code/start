@@ -299,21 +299,35 @@ async function createStagesIfNeeded(requestId){
   const { data: clientRow } = await supabase.from('clients').select('has_foreign_company').eq('id', profile.id).single();
   const hasCompany = clientRow?.has_foreign_company === true;
 
-  const stages = [
-    { name: 'مرحلة الاستحواذ على شركة أجنبية', skip: hasCompany },
-    { name: 'مرحلة ترخيص الاستثمار', skip: false },
-    { name: 'مرحلة التأسيس', skip: false },
+  const phases = [
+    { name: 'مرحلة الاستحواذ على شركة أجنبية', skip: hasCompany,
+      procedures: ['بدء إجراءات الاستحواذ', 'بدء إجراءات نقل الملكية للشركة الخارجية', 'تصديق المستندات'] },
+    { name: 'مرحلة شحن المستندات', skip: false,
+      procedures: ['شحن المستندات'] },
+    { name: 'مرحلة ترخيص الاستثمار', skip: false,
+      procedures: ['التقديم على رخصة الاستثمار', 'صدور رخصة الاستثمار'] },
+    { name: 'مرحلة التأسيس', skip: false,
+      procedures: ['حجز الاسم التجاري', 'التقديم على عقد التأسيس والسجل التجاري', 'صدور عقد التأسيس والسجل التجاري'] },
   ];
 
-  const rows = stages.map((s, i) => ({
-    request_id: requestId,
-    stage_order: i + 1,
-    stage_name: s.name,
-    status: s.skip ? 'completed' : 'pending',
-    completed_at: s.skip ? new Date().toISOString() : null,
-    admin_note: s.skip ? 'العميل يملك شركة أجنبية قائمة بالفعل — هذي المرحلة غير مطلوبة.' : null,
-  }));
-  await supabase.from('request_stages').insert(rows);
+  for(let i = 0; i < phases.length; i++){
+    const p = phases[i];
+    const { data: stageRow } = await supabase.from('request_stages').insert({
+      request_id: requestId,
+      stage_order: i + 1,
+      stage_name: p.name,
+      status: p.skip ? 'completed' : 'pending',
+      completed_at: p.skip ? new Date().toISOString() : null,
+      admin_note: p.skip ? 'العميل يملك شركة أجنبية قائمة بالفعل — هذي المرحلة غير مطلوبة.' : null,
+    }).select().single();
+
+    if(stageRow){
+      const procRows = p.procedures.map((name, idx) => ({
+        stage_id: stageRow.id, procedure_order: idx + 1, procedure_name: name, is_done: p.skip
+      }));
+      await supabase.from('stage_procedures').insert(procRows);
+    }
+  }
 }
 
 init();

@@ -105,12 +105,20 @@ async function loadStages(requestId, area){
   for(const s of stages){
     const cls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : '');
     const { data: docs } = await supabase.from('stage_documents').select('*').eq('stage_id', s.id).order('uploaded_at', {ascending:false});
+    const { data: procs } = await supabase.from('stage_procedures').select('*').eq('stage_id', s.id).order('procedure_order');
+
+    const procsHtml = (procs || []).map(p => `
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0;">
+        <span style="color:${p.is_done ? 'var(--green-dark)' : 'var(--ink-faint)'};">${p.is_done ? '✅' : '⬜'}</span>
+        <span style="${p.is_done ? 'color:var(--ink-soft);' : 'color:var(--ink);'}">${p.procedure_name}</span>
+      </div>`).join('');
 
     html += `<div class="stage-card ${cls}">
       <div class="stage-head">
         <strong>${s.stage_order}. ${s.stage_name}</strong>
         <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
       </div>
+      ${procsHtml ? `<div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin:8px 0;">${procsHtml}</div>` : ''}
       ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${s.admin_note}</div>` : ''}
       ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
       ${s.status === 'waiting_client' ? `<div class="upload-row"><label class="btn gold" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع الملف المطلوب<input type="file" style="display:none;" onchange="uploadDoc('${s.id}', this, '${requestId}')"></label></div>` : ''}

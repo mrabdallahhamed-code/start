@@ -86,6 +86,15 @@ async function loadStages(){
   for(const s of stages){
     const cls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : '');
     const { data: docs } = await supabase.from('stage_documents').select('*').eq('stage_id', s.id).order('uploaded_at', {ascending:false});
+    const { data: procs } = await supabase.from('stage_procedures').select('*').eq('stage_id', s.id).order('procedure_order');
+
+    const doneCount = (procs || []).filter(p => p.is_done).length;
+    const totalCount = (procs || []).length;
+    const procsHtml = (procs || []).map(p => `
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0;cursor:pointer;">
+        <input type="checkbox" ${p.is_done ? 'checked' : ''} onchange="toggleProcedure('${p.id}', this.checked, '${s.id}')" style="margin:0;width:16px;height:16px;">
+        <span style="${p.is_done ? 'text-decoration:line-through;color:var(--ink-soft);' : ''}">${p.procedure_name}</span>
+      </label>`).join('');
 
     let actions = '';
     if(s.status === 'pending'){
@@ -104,6 +113,7 @@ async function loadStages(){
         <strong>${s.stage_order}. ${s.stage_name}</strong>
         <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
       </div>
+      ${totalCount ? `<p style="font-size:11px;color:var(--ink-soft);margin-bottom:6px;">الإجراءات: ${doneCount}/${totalCount}</p><div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin-bottom:8px;">${procsHtml}</div>` : ''}
       ${s.admin_note ? `<div class="note-box">📝 ${s.admin_note}</div>` : ''}
       ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
       <div class="stage-actions">${actions}</div>
@@ -113,6 +123,11 @@ async function loadStages(){
 
   const allDone = stages.every(s => s.status === 'completed');
   document.getElementById('finalizeBox').style.display = allDone ? 'block' : 'none';
+}
+
+async function toggleProcedure(procId, isDone, stageId){
+  await supabase.from('stage_procedures').update({ is_done: isDone, completed_at: isDone ? new Date().toISOString() : null }).eq('id', procId);
+  loadStages();
 }
 
 async function updateStage(stageId, newStatus){
