@@ -126,11 +126,35 @@ async function loadStages(requestId, area){
       </div>
       ${procsHtml ? `<div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin:8px 0;">${procsHtml}</div>` : ''}
       ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${s.admin_note}</div>` : ''}
+      ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>ردّك السابق:</strong><br>${s.client_reply_text}</div>` : ''}
       ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
-      ${s.status === 'waiting_client' ? `<div class="upload-row"><label class="btn gold" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع الملف المطلوب<input type="file" style="display:none;" onchange="uploadDoc('${s.id}', this, '${requestId}')"></label></div>` : ''}
+      ${s.status === 'waiting_client' ? `
+        <div class="upload-row">
+          <textarea id="reply-${s.id}" rows="2" placeholder="اكتب ردّك هنا (لو مو محتاج ترفع ملف)..." style="margin-bottom:8px;"></textarea>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn gold" style="padding:8px 16px;font-size:12.5px;" onclick="sendReply('${s.id}')">📝 إرسال الرد المكتوب</button>
+            <label class="btn ghost" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع ملف بدل ذلك<input type="file" style="display:none;" onchange="uploadDoc('${s.id}', this, '${requestId}')"></label>
+          </div>
+        </div>` : ''}
     </div>`;
   }
   area.innerHTML = html;
+}
+
+async function sendReply(stageId){
+  const textarea = document.getElementById('reply-' + stageId);
+  const text = textarea.value.trim();
+  if(!text){ alert('اكتب ردّك أولاً'); return; }
+
+  const { error } = await supabase.from('request_stages').update({
+    client_reply_text: text, client_replied_at: new Date().toISOString()
+  }).eq('id', stageId);
+  if(error){ alert(error.message); return; }
+
+  const { data: admins } = await supabase.from('profiles').select('id').eq('role','admin').limit(3);
+  (admins||[]).forEach(a => createNotification(a.id, 'العميل ردّ على طلبك', text.slice(0,60), '../admin/requests.html'));
+
+  init();
 }
 
 async function uploadDoc(stageId, input, requestId){

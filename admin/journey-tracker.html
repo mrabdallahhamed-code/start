@@ -122,6 +122,7 @@ async function loadStages(){
       </div>
       ${totalCount ? `<p style="font-size:11px;color:var(--ink-soft);margin-bottom:6px;">الإجراءات: ${doneCount}/${totalCount}</p><div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin-bottom:8px;">${procsHtml}</div>` : ''}
       ${s.admin_note ? `<div class="note-box">📝 ${s.admin_note}</div>` : ''}
+      ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>💬 ردّ العميل:</strong><br>${s.client_reply_text}${s.client_replied_at ? `<br><span style="font-size:10.5px;color:var(--ink-soft);">${new Date(s.client_replied_at).toLocaleString('ar-SA')}</span>` : ''}</div>` : ''}
       ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
       <div class="stage-actions">${actions}</div>
     </div>`;
