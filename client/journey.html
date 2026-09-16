@@ -72,13 +72,15 @@ const statusLabels = { pending: 'لم تبدأ', in_progress: 'جاري العم
 async function init(){
   profile = await requireRole(['client']);
   if(!profile) return;
+ try{
   initNotificationBell(profile.id);
 
   const requestIdParam = new URLSearchParams(window.location.search).get('request_id');
   let query = supabase.from('service_requests').select('id, status').eq('client_id', profile.id);
   query = requestIdParam ? query.eq('id', requestIdParam) : query.order('created_at', {ascending:false}).limit(1);
-  const { data: requests } = await query;
+  const { data: requests, error: reqErr } = await query;
   const area = document.getElementById('journeyArea');
+  if(reqErr) throw new Error('فشل جلب الطلب: ' + reqErr.message);
 
   if(!requests || !requests.length){
     area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">ما عندك طلب تأسيس حالياً.</p>';
@@ -93,7 +95,11 @@ async function init(){
     return;
   }
 
-  loadStages(requests[0].id, area);
+  await loadStages(requests[0].id, area);
+ } catch(err){
+  document.getElementById('journeyArea').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${err.message || err}</div>`;
+  console.error(err);
+ }
 }
 
 async function loadStages(requestId, area){

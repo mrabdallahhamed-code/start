@@ -64,23 +64,30 @@ const requestId = new URLSearchParams(window.location.search).get('request_id');
 const statusLabels = { pending: 'لم تبدأ', in_progress: 'جاري العمل', waiting_client: 'بانتظار رد العميل', completed: 'مكتملة ✓' };
 
 async function init(){
-  profile = await requireRole(['admin']);
-  if(!profile) return;
-  initNotificationBell(profile.id);
-  if(!requestId){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">لم يتم تحديد الطلب.</p>'; return; }
+  try{
+    profile = await requireRole(['admin']);
+    if(!profile) return;
+    initNotificationBell(profile.id);
+    if(!requestId){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">لم يتم تحديد الطلب.</p>'; return; }
 
-  const { data: req } = await supabase.from('service_requests').select('client_id, clients(profiles(full_name))').eq('id', requestId).single();
-  if(req) document.getElementById('clientNameLine').textContent = 'العميل: ' + (req.clients?.profiles?.full_name || '—');
-  document.getElementById('finalizeLink').href = 'finalize-incorporation.html?request_id=' + requestId;
+    const { data: req, error: reqErr } = await supabase.from('service_requests').select('client_id, clients(profiles(full_name))').eq('id', requestId).single();
+    if(reqErr) throw new Error('فشل جلب بيانات الطلب: ' + reqErr.message);
+    if(req) document.getElementById('clientNameLine').textContent = 'العميل: ' + (req.clients?.profiles?.full_name || '—');
+    document.getElementById('finalizeLink').href = 'finalize-incorporation.html?request_id=' + requestId;
 
-  loadStages();
+    await loadStages();
+  } catch(err){
+    document.getElementById('stagesContainer').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${err.message || err}</div>`;
+    console.error(err);
+  }
 }
 
 async function loadStages(){
-  const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
-  const container = document.getElementById('stagesContainer');
-  if(error){ container.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
-  if(!stages || !stages.length){ container.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لم تُنشأ مراحل التنفيذ بعد — تأكد العميل وقّع العقد أولاً.</p>'; return; }
+  try{
+    const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
+    const container = document.getElementById('stagesContainer');
+    if(error) throw new Error('فشل جلب المراحل: ' + error.message);
+    if(!stages || !stages.length){ container.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لم تُنشأ مراحل التنفيذ بعد.</p>'; return; }
 
   let html = '';
   for(const s of stages){
@@ -123,6 +130,10 @@ async function loadStages(){
 
   const allDone = stages.every(s => s.status === 'completed');
   document.getElementById('finalizeBox').style.display = allDone ? 'block' : 'none';
+  } catch(err){
+    document.getElementById('stagesContainer').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${err.message || err}</div>`;
+    console.error(err);
+  }
 }
 
 async function toggleProcedure(procId, isDone, stageId){
