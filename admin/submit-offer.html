@@ -5,6 +5,7 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="إتقان">
@@ -47,6 +48,14 @@
       <div class="app-main-inner" style="max-width:680px;">
         <a href="requests.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع لطلبات العروض</a>
         <h1 class="page-title" style="margin-top:10px;">تقديم عرض تفصيلي</h1>
+
+        <div class="card" id="templateBox">
+          <h3 style="margin-bottom:10px;">⚡ تسريع العمل — استخدم قالب محفوظ</h3>
+          <select id="templateSelect" style="margin-bottom:10px;">
+            <option value="">-- ابدأ من الصفر --</option>
+          </select>
+          <button class="btn ghost" style="margin:0;padding:8px 16px;font-size:12.5px;" onclick="applyTemplate()">تعبئة الفورم من القالب</button>
+        </div>
 
         <div class="card">
           <h3 style="margin-bottom:10px;">أولاً: نطاق الخدمات</h3>
@@ -109,6 +118,7 @@
         </div>
 
         <button class="btn gold" onclick="submitOffer()">إرسال العرض</button>
+        <button class="btn ghost" onclick="saveAsTemplate()">💾 حفظ الإعدادات الحالية كقالب جديد</button>
         <div id="msg"></div>
       </div>
     </main>
@@ -176,6 +186,8 @@ async function init(){
       <input type="checkbox" id="doc-${i}" value="${d}">
     </div>`).join('');
 
+  loadTemplates();
+
   const { data: existing } = await supabase.from('offers').select('*').eq('request_id', requestId).neq('status', 'accepted').maybeSingle();
 
   if(existing){
@@ -219,6 +231,54 @@ function addFeeRow(name, fee){
     <button onclick="this.parentElement.remove()">✕</button>
   `;
   list.appendChild(row);
+}
+
+let templatesCache = [];
+async function loadTemplates(){
+  const { data } = await supabase.from('offer_templates').select('*').order('name');
+  templatesCache = data || [];
+  const sel = document.getElementById('templateSelect');
+  sel.innerHTML = '<option value="">-- ابدأ من الصفر --</option>' + templatesCache.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+}
+
+function applyTemplate(){
+  const id = document.getElementById('templateSelect').value;
+  if(!id) return;
+  const tpl = templatesCache.find(t => t.id === id);
+  if(!tpl) return;
+  document.getElementById('feesList').innerHTML = '';
+  prefillFromExisting(tpl);
+}
+
+async function saveAsTemplate(){
+  const name = prompt('اسم القالب (مثال: عرض قياسي - ترخيص خدمي):');
+  if(!name) return;
+
+  const scope_items = scopeOptions.filter(o => document.getElementById(`scope-${o.key}`).checked).map(o => o.label);
+  const required_documents_list = docOptions.filter((d,i) => document.getElementById(`doc-${i}`).checked);
+  const required_documents = document.getElementById('required_documents').value.trim();
+  const government_fees = [...document.querySelectorAll('#feesList .fee-row')]
+    .filter(row => row.querySelector('input[type="checkbox"]').checked)
+    .map(row => {
+      const inputs = row.querySelectorAll('input');
+      return { service: inputs[1].value.trim(), fee: parseFloat(inputs[2].value) || 0 };
+    })
+    .filter(f => f.service);
+
+  const { error } = await supabase.from('offer_templates').insert({
+    name,
+    price: parseFloat(document.getElementById('price').value) || null,
+    duration_days: parseInt(document.getElementById('duration_days').value) || null,
+    scope_items, required_documents_list, required_documents, government_fees,
+    payment_schedule: document.getElementById('payment_schedule').value.trim(),
+    exclusions_notes: document.getElementById('exclusions_notes').value.trim(),
+    additional_services_discount: parseFloat(document.getElementById('additional_services_discount').value) || null,
+  });
+
+  const msg = document.getElementById('msg');
+  msg.className = error ? 'msg err' : 'msg ok';
+  msg.textContent = error ? error.message : 'تم حفظ القالب — بيظهر بالقائمة أعلى الصفحة من الآن.';
+  if(!error) loadTemplates();
 }
 
 async function submitOffer(){
