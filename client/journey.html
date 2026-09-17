@@ -13,12 +13,28 @@
 <link rel="stylesheet" href="../assets/css/itqan.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  .stage-card{border:1px solid var(--line-soft); border-radius:var(--radius); padding:18px 20px; margin-bottom:14px; background:var(--white);}
+  .journey-summary{background:linear-gradient(135deg,var(--green-dark),var(--green)); border-radius:16px; padding:22px 24px; margin-bottom:24px; color:#fff;}
+  .journey-summary .pct{font-size:32px; font-weight:800; margin-bottom:2px;}
+  .journey-summary .sub{font-size:13px; opacity:.85; margin-bottom:14px;}
+  .journey-progress-track{background:rgba(255,255,255,.22); height:8px; border-radius:99px; overflow:hidden;}
+  .journey-progress-fill{background:#fff; height:100%; border-radius:99px; transition:width .5s ease;}
+
+  .timeline{position:relative; padding-right:26px;}  .timeline::before{content:'';position:absolute; right:19px; top:6px; bottom:6px; width:2px; background:var(--line-soft); z-index:0;}
+  .timeline-fill{position:absolute; right:19px; top:6px; width:2px; background:linear-gradient(var(--green-dark),var(--green)); z-index:0; transition:height .5s ease;}
+
+  .stage-row{position:relative; margin-bottom:18px;}
+  .stage-icon{position:absolute; right:-26px; top:0; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; background:#fff; border:2.5px solid var(--line-soft); z-index:1; transition:all .3s;}
+  .stage-row.completed .stage-icon{background:var(--green-dark); border-color:var(--green-dark); color:#fff;}
+  .stage-row.active .stage-icon{background:#fff; border-color:var(--gold-deep); box-shadow:0 0 0 4px var(--gold-soft); animation:pulseIcon 2s infinite;}
+  .stage-row.waiting .stage-icon{background:#fff; border-color:#E8C77A; box-shadow:0 0 0 4px rgba(232,199,122,.3);}
+  @keyframes pulseIcon{0%,100%{box-shadow:0 0 0 4px var(--gold-soft);}50%{box-shadow:0 0 0 7px var(--gold-soft);}}
+
+  .stage-card{margin-right:34px; border:1px solid var(--line-soft); border-radius:var(--radius); padding:16px 18px; background:var(--white); transition:all .3s;}
   .stage-card.completed{background:var(--green-tint); border-color:var(--green-tint2);}
   .stage-card.waiting{background:#FFF8EC; border-color:#E8C77A; box-shadow:0 0 0 3px rgba(232,199,122,.25);}
-  .stage-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .stage-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;}
   .stage-head strong{font-size:14.5px;}
-  .stage-status{font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px;}
+  .stage-status{font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px; white-space:nowrap;}
   .stage-status.pending{background:var(--line-soft); color:var(--ink-soft);}
   .stage-status.in_progress{background:var(--gold-soft); color:var(--gold-deep);}
   .stage-status.waiting_client{background:#F5D98A; color:#7A5A0A;}
@@ -103,14 +119,30 @@ async function init(){
  }
 }
 
+const STAGE_ICONS = ['🤝','📦','📜','🏢'];
+
 async function loadStages(requestId, area){
   const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
   if(error){ area.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
   if(!stages || !stages.length){ area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">مراحل التنفيذ بتظهر هنا قريباً.</p>'; return; }
 
-  let html = '';
+  const completedCount = stages.filter(s => s.status === 'completed').length;
+  const pct = Math.round((completedCount / stages.length) * 100);
+  const fillHeightPct = stages.length > 1 ? (completedCount / (stages.length - 1)) * 100 : 0;
+
+  let summaryHtml = `
+    <div class="journey-summary">
+      <div class="pct">${pct}%</div>
+      <div class="sub">${completedCount} من ${stages.length} مراحل مكتملة${pct===100?' — تهانينا، رحلتك اكتملت! 🎉':''}</div>
+      <div class="journey-progress-track"><div class="journey-progress-fill" style="width:${pct}%"></div></div>
+    </div>
+  `;
+
+  let html = `<div class="timeline"><div class="timeline-fill" style="height:${Math.min(fillHeightPct,100)}%"></div>`;
   for(const s of stages){
-    const cls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : '');
+    const rowCls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : (s.status === 'in_progress' ? 'active' : ''));
+    const cardCls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : '');
+    const icon = s.status === 'completed' ? '✓' : (STAGE_ICONS[s.stage_order-1] || s.stage_order);
     const { data: docs } = await supabase.from('stage_documents').select('*').eq('stage_id', s.id).order('uploaded_at', {ascending:false});
     const { data: procs } = await supabase.from('stage_procedures').select('*').eq('stage_id', s.id).order('procedure_order');
 
@@ -120,26 +152,30 @@ async function loadStages(requestId, area){
         <span style="${p.is_done ? 'color:var(--ink-soft);' : 'color:var(--ink);'}">${p.procedure_name}</span>
       </div>`).join('');
 
-    html += `<div class="stage-card ${cls}">
-      <div class="stage-head">
-        <strong>${s.stage_order}. ${s.stage_name}</strong>
-        <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
+    html += `<div class="stage-row ${rowCls}">
+      <div class="stage-icon">${icon}</div>
+      <div class="stage-card ${cardCls}">
+        <div class="stage-head">
+          <strong>${s.stage_name}</strong>
+          <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
+        </div>
+        ${procsHtml ? `<div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin:8px 0;">${procsHtml}</div>` : ''}
+        ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${s.admin_note}</div>` : ''}
+        ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>ردّك السابق:</strong><br>${s.client_reply_text}</div>` : ''}
+        ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
+        ${s.status === 'waiting_client' ? `
+          <div class="upload-row">
+            <textarea id="reply-${s.id}" rows="2" placeholder="اكتب ردّك هنا (لو مو محتاج ترفع ملف)..." style="margin-bottom:8px;"></textarea>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn gold" style="padding:8px 16px;font-size:12.5px;" onclick="sendReply('${s.id}')">📝 إرسال الرد المكتوب</button>
+              <label class="btn ghost" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع ملف بدل ذلك<input type="file" style="display:none;" onchange="uploadDoc('${s.id}', this, '${requestId}')"></label>
+            </div>
+          </div>` : ''}
       </div>
-      ${procsHtml ? `<div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin:8px 0;">${procsHtml}</div>` : ''}
-      ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${s.admin_note}</div>` : ''}
-      ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>ردّك السابق:</strong><br>${s.client_reply_text}</div>` : ''}
-      ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
-      ${s.status === 'waiting_client' ? `
-        <div class="upload-row">
-          <textarea id="reply-${s.id}" rows="2" placeholder="اكتب ردّك هنا (لو مو محتاج ترفع ملف)..." style="margin-bottom:8px;"></textarea>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn gold" style="padding:8px 16px;font-size:12.5px;" onclick="sendReply('${s.id}')">📝 إرسال الرد المكتوب</button>
-            <label class="btn ghost" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع ملف بدل ذلك<input type="file" style="display:none;" onchange="uploadDoc('${s.id}', this, '${requestId}')"></label>
-          </div>
-        </div>` : ''}
     </div>`;
   }
-  area.innerHTML = html;
+  html += `</div>`;
+  area.innerHTML = summaryHtml + html;
 }
 
 async function sendReply(stageId){
