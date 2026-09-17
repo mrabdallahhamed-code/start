@@ -104,15 +104,15 @@ async function init(){
     return;
   }
 
-  const { data: offers } = await supabase.from('offers').select('id, status').eq('request_id', requests[0].id);
-  const accepted = offers && offers.some(o => o.status === 'accepted');
+  const { data: offers } = await supabase.from('offers').select('id, status, duration_days').eq('request_id', requests[0].id);
+  const acceptedOffer = offers && offers.find(o => o.status === 'accepted');
 
-  if(!accepted){
+  if(!acceptedOffer){
     area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">رحلة الطلب تبدأ بعد ما توافق على عرض من العروض الواردة. <a href="offers.html">شوف العروض</a></p>';
     return;
   }
 
-  await loadStages(requests[0].id, area);
+  await loadStages(requests[0].id, area, acceptedOffer.duration_days);
  } catch(err){
   document.getElementById('journeyArea').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${err.message || err}</div>`;
   console.error(err);
@@ -121,7 +121,7 @@ async function init(){
 
 const STAGE_ICONS = ['🤝','📦','📜','🏢'];
 
-async function loadStages(requestId, area){
+async function loadStages(requestId, area, contractDurationDays){
   const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
   if(error){ area.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
   if(!stages || !stages.length){ area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">مراحل التنفيذ بتظهر هنا قريباً.</p>'; return; }
@@ -130,11 +130,28 @@ async function loadStages(requestId, area){
   const pct = Math.round((completedCount / stages.length) * 100);
   const fillHeightPct = stages.length > 1 ? (completedCount / (stages.length - 1)) * 100 : 0;
 
+  const firstStarted = stages.find(s => s.started_at)?.started_at;
+  let durationLine = '';
+  if(firstStarted){
+    const allDone = stages.every(s => s.status === 'completed');
+    const endPoint = allDone ? new Date(stages[stages.length-1].completed_at) : new Date();
+    const elapsedDays = Math.max(0, Math.ceil((endPoint - new Date(firstStarted)) / 86400000));
+    if(contractDurationDays){
+      const deviation = elapsedDays - contractDurationDays;
+      durationLine = deviation > 0
+        ? `⏱️ ${elapsedDays} يوم منذ البدء — تجاوزنا المدة المتوقعة (${contractDurationDays} يوم) بـ${deviation} يوم، وفريقنا يعمل على إنهائها بأسرع وقت`
+        : `⏱️ ${elapsedDays} يوم منذ البدء — ضمن المدة المتوقعة بعقدك (${contractDurationDays} يوم)`;
+    } else {
+      durationLine = `⏱️ ${elapsedDays} يوم منذ بدء رحلتك`;
+    }
+  }
+
   let summaryHtml = `
     <div class="journey-summary">
       <div class="pct">${pct}%</div>
       <div class="sub">${completedCount} من ${stages.length} مراحل مكتملة${pct===100?' — تهانينا، رحلتك اكتملت! 🎉':''}</div>
       <div class="journey-progress-track"><div class="journey-progress-fill" style="width:${pct}%"></div></div>
+      ${durationLine ? `<div style="margin-top:12px;font-size:12.5px;opacity:.95;">${durationLine}</div>` : ''}
     </div>
   `;
 

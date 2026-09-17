@@ -82,11 +82,44 @@ async function init(){
     if(req) document.getElementById('clientNameLine').textContent = 'العميل: ' + (req.clients?.profiles?.full_name || '—');
     document.getElementById('finalizeLink').href = 'finalize-incorporation.html?request_id=' + requestId;
 
+    const { data: acceptedOffer } = await supabase.from('offers').select('duration_days').eq('request_id', requestId).eq('status','accepted').maybeSingle();
+    contractDurationDays = acceptedOffer?.duration_days || null;
+
     await loadStages();
   } catch(err){
     document.getElementById('stagesContainer').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${err.message || err}</div>`;
     console.error(err);
   }
+}
+let contractDurationDays = null;
+
+function renderDurationCard(stages){
+  const firstStarted = stages.find(s => s.started_at)?.started_at;
+  if(!firstStarted) return '';
+
+  const allDone = stages.every(s => s.status === 'completed');
+  const lastCompletedAt = allDone ? stages[stages.length-1].completed_at : null;
+  const endPoint = lastCompletedAt ? new Date(lastCompletedAt) : new Date();
+  const elapsedDays = Math.max(0, Math.ceil((endPoint - new Date(firstStarted)) / 86400000));
+
+  let deviationHtml = '';
+  if(contractDurationDays){
+    const deviation = elapsedDays - contractDurationDays;
+    if(deviation > 0){
+      deviationHtml = `<span style="color:#B5442E;font-weight:800;">⚠ متأخر ${deviation} يوم عن المدة التعاقدية (${contractDurationDays} يوم)</span>`;
+    } else {
+      deviationHtml = `<span style="color:var(--green-dark);font-weight:800;">✓ ضمن المدة التعاقدية (${contractDurationDays} يوم)</span>`;
+    }
+  } else {
+    deviationHtml = `<span style="color:var(--ink-soft);">لا توجد مدة تعاقدية محددة بالعرض</span>`;
+  }
+
+  return `<div class="card" style="margin-bottom:16px;background:${contractDurationDays && (elapsedDays > contractDurationDays) ? '#FCECEA' : 'var(--paper)'};">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div><strong style="font-size:15px;">⏱️ ${elapsedDays} يوم</strong> <span style="font-size:12px;color:var(--ink-soft);">${allDone ? '(من البدء للاكتمال)' : '(منذ بدء أول مرحلة، مستمر)'}</span></div>
+      <div style="font-size:12.5px;">${deviationHtml}</div>
+    </div>
+  </div>`;
 }
 
 async function loadStages(){
@@ -96,7 +129,7 @@ async function loadStages(){
     if(error) throw new Error('فشل جلب المراحل: ' + error.message);
     if(!stages || !stages.length){ container.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لم تُنشأ مراحل التنفيذ بعد.</p>'; return; }
 
-  let html = '';
+  let html = renderDurationCard(stages);
   for(const s of stages){
     const cls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : '');
     const { data: docs } = await supabase.from('stage_documents').select('*').eq('stage_id', s.id).order('uploaded_at', {ascending:false});
@@ -150,6 +183,18 @@ async function toggleProcedure(procId, isDone, stageId){
 }
 
 async function updateStage(stageId, newStatus){
+  if(newStatus === 'completed'){
+    const { data: stageRow } = await supabase.from('request_stages').select('stage_order').eq('id', stageId).single();
+    const requiresDocs = stageRow && stageRow.stage_order !== 2; // كل المراحل إجبارية إلا مرحلة الشحن (رقم 2)
+    if(requiresDocs){
+      const { data: docs } = await supabase.from('stage_documents').select('id').eq('stage_id', stageId).limit(1);
+      if(!docs || !docs.length){
+        alert('لازم ترفع مستند واحد على الأقل لهذي المرحلة قبل إنهائها.');
+        return;
+      }
+    }
+  }
+
   const payload = { status: newStatus, waiting_on_client: false };
   if(newStatus === 'in_progress') payload.started_at = new Date().toISOString();
   if(newStatus === 'completed') payload.completed_at = new Date().toISOString();
