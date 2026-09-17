@@ -90,6 +90,8 @@ const I18N = {
     // ---------- تسجيل الدخول / إنشاء حساب ----------
     login_title: 'تسجيل الدخول', login_email: 'البريد الإلكتروني', login_password: 'كلمة المرور',
     login_btn: 'دخول', login_no_account: 'ليس لديك حساب؟', login_register_link: 'إنشاء حساب جديد',
+    login_forgot_link: 'نسيت كلمة المرور؟',
+    forgot_title: 'استعادة كلمة المرور', forgot_sub: 'اكتب بريدك الإلكتروني، بنرسل لك رابط تعيين كلمة مرور جديدة.', forgot_send_btn: 'إرسال رابط الاستعادة', forgot_back: '← رجوع لتسجيل الدخول',
     register_title: 'إنشاء حساب', register_role: 'نوع الحساب', register_role_client: 'عميل (مستثمر)', register_role_provider: 'مقدّم خدمة',
     register_fullname: 'الاسم الكامل', register_email: 'البريد الإلكتروني', register_phone: 'رقم الجوال (مع رمز الدولة)',
     register_preferred_contact: 'الوسيلة المفضلة للتواصل', register_contact_email: 'البريد الإلكتروني', register_contact_whatsapp: 'واتساب',
@@ -167,6 +169,8 @@ const I18N = {
 
     login_title: 'Log In', login_email: 'Email', login_password: 'Password',
     login_btn: 'Log In', login_no_account: "Don't have an account?", login_register_link: 'Create a new account',
+    login_forgot_link: 'Forgot your password?',
+    forgot_title: 'Reset Password', forgot_sub: "Enter your email and we'll send you a password reset link.", forgot_send_btn: 'Send Reset Link', forgot_back: '← Back to Login',
     register_title: 'Sign Up', register_role: 'Account Type', register_role_client: 'Client (Investor)', register_role_provider: 'Service Provider',
     register_fullname: 'Full Name', register_email: 'Email', register_phone: 'Phone Number (with country code)',
     register_preferred_contact: 'Preferred Contact Method', register_contact_email: 'Email', register_contact_whatsapp: 'WhatsApp',

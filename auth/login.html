@@ -33,7 +33,18 @@
     <input id="password" type="password">
     <button class="btn" onclick="login()" data-i18n="login_btn">دخول</button>
     <div id="msg"></div>
-    <p style="margin-top:16px;font-size:13px;"><span data-i18n="login_no_account">ليس لديك حساب؟</span> <a href="register.html" data-i18n="login_register_link">إنشاء حساب جديد</a></p>
+    <p style="margin-top:10px;font-size:13px;"><a href="#" onclick="showForgotPassword();return false;" data-i18n="login_forgot_link">نسيت كلمة المرور؟</a></p>
+    <p style="margin-top:6px;font-size:13px;"><span data-i18n="login_no_account">ليس لديك حساب؟</span> <a href="register.html" data-i18n="login_register_link">إنشاء حساب جديد</a></p>
+  </div>
+
+  <div class="card" id="forgotCard" style="display:none;">
+    <h3 style="margin-bottom:10px;" data-i18n="forgot_title">استعادة كلمة المرور</h3>
+    <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;" data-i18n="forgot_sub">اكتب بريدك الإلكتروني، بنرسل لك رابط تعيين كلمة مرور جديدة.</p>
+    <label data-i18n="login_email">البريد الإلكتروني</label>
+    <input id="forgotEmail" type="email">
+    <button class="btn" onclick="sendResetLink()" data-i18n="forgot_send_btn">إرسال رابط الاستعادة</button>
+    <div id="forgotMsg"></div>
+    <p style="margin-top:10px;font-size:13px;"><a href="#" onclick="hideForgotPassword();return false;" data-i18n="forgot_back">← رجوع لتسجيل الدخول</a></p>
   </div>
 </main>
 <script src="../assets/js/supabaseClient.js"></script>
@@ -52,6 +63,28 @@ async function login(){
   if(profile.role === 'admin') window.location.href = '../admin/dashboard.html';
   else if(profile.role === 'provider') window.location.href = '../provider/dashboard.html';
   else window.location.href = '../client/dashboard.html';
+}
+
+function showForgotPassword(){
+  document.querySelector('main > .card').style.display = 'none';
+  document.getElementById('forgotCard').style.display = 'block';
+}
+function hideForgotPassword(){
+  document.getElementById('forgotCard').style.display = 'none';
+  document.querySelector('main > .card').style.display = 'block';
+}
+
+async function sendResetLink(){
+  const email = document.getElementById('forgotEmail').value.trim();
+  const msg = document.getElementById('forgotMsg');
+  if(!email){ msg.className='msg err'; msg.textContent='أدخل بريدك الإلكتروني'; return; }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/auth/reset-password.html'
+  });
+
+  msg.className = 'msg ok';
+  msg.textContent = 'لو البريد مسجّل عندنا، وصلك رابط تعيين كلمة مرور جديدة — تأكد تشوف مجلد الرسائل غير المرغوبة (Spam) كمان.';
 }
 </script>
 </body>
