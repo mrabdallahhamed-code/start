@@ -125,9 +125,9 @@ async function reviewDoc(id, status){
 async function loadMsgs(){
   const { data, error } = await supabase.from('admin_messages').select('*').eq('recipient_id', providerId).order('created_at');
   const list = document.getElementById('msgsList');
-  if(error){ list.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(error){ list.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
   if(!data || !data.length){ list.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد رسائل بعد.</p>'; return; }
-  list.innerHTML = data.map(m => `<div style="font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:${m.sender_id===admin.id?'var(--green-tint)':'var(--cream)'};border:1px solid var(--line);">${m.message}</div>`).join('');
+  list.innerHTML = data.map(m => `<div style="font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:${m.sender_id===admin.id?'var(--green-tint)':'var(--cream)'};border:1px solid var(--line);">${escapeHtml(m.message)}</div>`).join('');
 }
 
 async function sendMsg(){

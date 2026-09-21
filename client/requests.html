@@ -80,7 +80,7 @@ async function loadRequests(){
     .eq('client_id', profile.id)
     .order('created_at', {ascending:false});
 
-  if(error){ list.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(error){ list.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
   if(!requests || !requests.length){ list.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">ما عندك أي طلب تأسيس حالياً.</p>'; return; }
 
   const statusMap = {

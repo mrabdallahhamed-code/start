@@ -123,7 +123,7 @@ const STAGE_ICONS = ['🤝','📦','📜','🏢'];
 
 async function loadStages(requestId, area, contractDurationDays){
   const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
-  if(error){ area.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(error){ area.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
   if(!stages || !stages.length){ area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">مراحل التنفيذ بتظهر هنا قريباً.</p>'; return; }
 
   const completedCount = stages.filter(s => s.status === 'completed').length;
@@ -177,8 +177,8 @@ async function loadStages(requestId, area, contractDurationDays){
           <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
         </div>
         ${procsHtml ? `<div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin:8px 0;">${procsHtml}</div>` : ''}
-        ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${s.admin_note}</div>` : ''}
-        ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>ردّك السابق:</strong><br>${s.client_reply_text}</div>` : ''}
+        ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${escapeHtml(s.admin_note)}</div>` : ''}
+        ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>ردّك السابق:</strong><br>${escapeHtml(s.client_reply_text)}</div>` : ''}
         ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
         ${s.status === 'waiting_client' ? `
           <div class="upload-row">

@@ -78,12 +78,12 @@ async function init(){
 async function loadAdmins(){
   const { data, error } = await supabase.from('profiles').select('id, full_name, email').eq('role', 'admin').order('full_name');
   const list = document.getElementById('adminsList');
-  if(error){ list.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(error){ list.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
   if(!data || !data.length){ list.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا يوجد أعضاء أدمن.</p>'; return; }
 
   list.innerHTML = data.map(a => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);">
-      <div><strong style="font-size:13.5px;">${a.full_name}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${a.email || 'بريد غير مسجّل (حساب قديم)'}</span></div>
+      <div><strong style="font-size:13.5px;">${escapeHtml(a.full_name)}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${a.email || 'بريد غير مسجّل (حساب قديم)'}</span></div>
       ${a.id !== myProfile.id ? `<button class="btn ghost" style="padding:6px 14px;font-size:12px;margin-top:0;" onclick="demote('${a.id}')">تنزيل لعميل</button>` : `<span class="badge ready">أنت</span>`}
     </div>`).join('');
 }
@@ -94,12 +94,12 @@ async function searchAccounts(){
   if(!q){ results.innerHTML = ''; return; }
 
   const { data, error } = await supabase.from('profiles').select('id, full_name, email, role').ilike('email', `%${q}%`).limit(10);
-  if(error){ results.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(error){ results.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
   if(!data || !data.length){ results.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد نتائج — تأكد الحساب مسجّل حديثاً (الحسابات القديمة قبل هذا التحديث ما تحتوي بريدها هنا، دوّر عنها بـ Supabase Table Editor بدلاً من ذلك).</p>'; return; }
 
   results.innerHTML = data.map(p => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);">
-      <div><strong style="font-size:13.5px;">${p.full_name}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${p.email} — ${p.role === 'admin' ? 'أدمن حالياً' : 'حساب عميل'}</span></div>
+      <div><strong style="font-size:13.5px;">${escapeHtml(p.full_name)}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${p.email} — ${p.role === 'admin' ? 'أدمن حالياً' : 'حساب عميل'}</span></div>
       ${p.role !== 'admin' ? `<button class="btn gold" style="padding:6px 14px;font-size:12px;margin-top:0;" onclick="promote('${p.id}')">ترقية لأدمن</button>` : '<span class="badge ready">أدمن ✓</span>'}
     </div>`).join('');
 }
@@ -108,6 +108,12 @@ async function promote(id){
   if(!confirm('تأكيد ترقية هذا الحساب لصلاحية أدمن كاملة؟')) return;
   const { error } = await supabase.from('profiles').update({ role: 'admin' }).eq('id', id);
   if(error){ alert(error.message); return; }
+
+  await supabase.from('audit_log').insert({
+    entity_type: 'profiles', entity_id: id, action: 'promoted_to_admin',
+    actor_id: myProfile.id, actor_role: 'admin', details: {}
+  });
+
   searchAccounts();
   loadAdmins();
 }

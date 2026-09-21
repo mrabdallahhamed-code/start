@@ -65,7 +65,7 @@ async function loadAllRequests(){
     .select('id, status, activity_type, created_at, client_id, incorporation_completed_at, clients(profiles(full_name))')
     .order('created_at', {ascending:false});
 
-  if(error){ body.innerHTML = `<tr><td colspan="5">${error.message}</td></tr>`; return; }
+  if(error){ body.innerHTML = `<tr><td colspan="5">${escapeHtml(error.message)}</td></tr>`; return; }
   if(!requests || !requests.length){ body.innerHTML = '<tr><td colspan="5">لا توجد طلبات بعد</td></tr>'; return; }
 
   const { data: offers } = await supabase.from('offers').select('id, request_id, status');

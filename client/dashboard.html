@@ -166,9 +166,9 @@ async function showMainContent(){
 async function loadRecentMsgs(){
   const { data, error } = await supabase.from('admin_messages').select('*').eq('recipient_id', profile.id).order('created_at', {ascending:false}).limit(3);
   const box = document.getElementById('recentMsgs');
-  if(error){ box.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(error){ box.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
   if(!data || !data.length){ box.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد رسائل حتى الآن.</p>'; return; }
-  box.innerHTML = data.map(m => `<div style="font-size:13px;padding:9px 12px;border-radius:10px;margin-bottom:6px;background:${m.sender_id===profile.id?'var(--green-tint)':'var(--paper)'};border:1px solid var(--line-soft);">${m.message}</div>`).join('');
+  box.innerHTML = data.map(m => `<div style="font-size:13px;padding:9px 12px;border-radius:10px;margin-bottom:6px;background:${m.sender_id===profile.id?'var(--green-tint)':'var(--paper)'};border:1px solid var(--line-soft);">${escapeHtml(m.message)}</div>`).join('');
 }
 
 init();

@@ -86,7 +86,7 @@ async function init(){
       <ul class="service-list">${needs.map(n => `<li>${n}</li>`).join('')}</ul>
     </div>
   `).join('');
-  document.getElementById('clientNeeds').innerHTML = needsHtml + (data.client_notes ? `<p style="font-size:12.5px;color:var(--ink-soft);margin-top:10px;"><strong>ملاحظات العميل:</strong> ${data.client_notes}</p>` : '');
+  document.getElementById('clientNeeds').innerHTML = needsHtml + (data.client_notes ? `<p style="font-size:12.5px;color:var(--ink-soft);margin-top:10px;"><strong>ملاحظات العميل:</strong> ${escapeHtml(data.client_notes)}</p>` : '');
 }
 
 function addFeeRow(name, fee){

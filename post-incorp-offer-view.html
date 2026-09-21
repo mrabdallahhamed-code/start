@@ -113,8 +113,8 @@ async function init(){
       <span class="amount">${money(req.quoted_price)} ر.س</span>
     </div>
 
-    ${req.payment_schedule ? `<div class="sec-title">آلية السداد</div><div class="notes-list"><p>${req.payment_schedule}</p></div>` : ''}
-    ${req.exclusions_notes ? `<div class="sec-title">ملاحظات مالية</div><div class="notes-list"><p>${req.exclusions_notes}</p></div>` : ''}
+    ${req.payment_schedule ? `<div class="sec-title">آلية السداد</div><div class="notes-list"><p>${escapeHtml(req.payment_schedule)}</p></div>` : ''}
+    ${req.exclusions_notes ? `<div class="sec-title">ملاحظات مالية</div><div class="notes-list"><p>${escapeHtml(req.exclusions_notes)}</p></div>` : ''}
 
     <div class="sign-section">
       <div class="sign-box">

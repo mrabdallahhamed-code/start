@@ -87,7 +87,7 @@ async function loadPostIncorp(){
   const area = document.getElementById('postIncorpArea');
   const { data, error } = await supabase.from('post_incorp_requests').select('*').eq('client_id', profile.id).order('created_at', {ascending:false}).limit(1);
 
-  if(error){ area.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(error){ area.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
 
   if(!data || !data.length){
     area.innerHTML = `

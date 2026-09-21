@@ -1,7 +1,44 @@
 const SUPABASE_URL = "https://fpjaupjwikaaxehcqprk.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_b_EiVWdAwTJDk-IGufOEBw_AzUMObDT";
 
-window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// تخزين مخصّص: يحترم اختيار العميل بـ"تذكرني" — لو ما فعّلها، الجلسة تنتهي بإغلاق المتصفح (sessionStorage)
+const itqanAuthStorage = {
+  getItem: (key) => {
+    const remember = localStorage.getItem('itqan_remember_me') !== 'false';
+    return remember ? window.localStorage.getItem(key) : window.sessionStorage.getItem(key);
+  },
+  setItem: (key, value) => {
+    const remember = localStorage.getItem('itqan_remember_me') !== 'false';
+    if (remember) window.localStorage.setItem(key, value);
+    else window.sessionStorage.setItem(key, value);
+  },
+  removeItem: (key) => {
+    window.localStorage.removeItem(key);
+    window.sessionStorage.removeItem(key);
+  }
+};
+
+window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storage: itqanAuthStorage, persistSession: true, autoRefreshToken: true }
+});
+
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  btn.textContent = showing ? '👁️' : '🙈';
+}
+
+// تنقية أي نص حر (كتبه مستخدم) قبل عرضه بالصفحة — يمنع حقن أكواد (XSS)
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 async function getCurrentProfile() {
   const { data: { user } } = await supabase.auth.getUser();

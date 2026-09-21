@@ -81,7 +81,7 @@ async function init(){
 async function loadDocs(){
   const { data, error } = await supabase.from('documents').select('*').eq('client_id', profile.id).order('uploaded_at', {ascending:false});
   const body = document.getElementById('docsBody');
-  if(error){ body.innerHTML = `<tr><td colspan="3">${error.message}</td></tr>`; return; }
+  if(error){ body.innerHTML = `<tr><td colspan="3">${escapeHtml(error.message)}</td></tr>`; return; }
   if(!data || !data.length){ body.innerHTML = '<tr><td colspan="3">لا توجد مستندات مرفوعة بعد</td></tr>'; return; }
 
   const statusMap = {pending:'<span class="badge pending">قيد المراجعة</span>', verified:'<span class="badge ready">تم التحقق</span>', rejected:'<span class="badge notready">مرفوض</span>'};

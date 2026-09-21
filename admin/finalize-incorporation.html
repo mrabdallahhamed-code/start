@@ -108,6 +108,12 @@ async function finalizeIncorporation(){
 
   if(error){ msg.className = 'msg err'; msg.textContent = error.message; return; }
 
+  await supabase.from('audit_log').insert({
+    entity_type: 'service_requests', entity_id: requestId, action: 'incorporation_finalized',
+    actor_id: profile.id, actor_role: 'admin',
+    details: { company_name, cr_number }
+  });
+
   msg.className = 'msg ok';
   msg.textContent = 'تم تسجيل بيانات التأسيس. جارٍ تفعيل ملف الشركة على منصة صمام...';
 

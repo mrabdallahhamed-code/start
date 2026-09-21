@@ -55,6 +55,17 @@
 
         <div id="stagesContainer"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
 
+        <div class="section-title" style="margin-top:24px;">💰 الدفعات</div>
+        <div id="paymentsContainer"><p style="font-size:13px;color:var(--ink-soft);">لا يوجد عرض مقبول بعد.</p></div>
+        <div class="card" id="addPaymentCard" style="display:none;">
+          <label>وصف الدفعة</label>
+          <input id="new-payment-label" placeholder="مثال: الدفعة الأولى 50%">
+          <label>المبلغ (ر.س)</label>
+          <input id="new-payment-amount" type="number">
+          <button class="btn gold" style="width:100%;" onclick="addPayment()">إضافة دفعة جديدة</button>
+          <div id="payment-msg"></div>
+        </div>
+
         <div id="finalizeBox" style="display:none;" class="card">
           <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">✅ كل المراحل اكتملت — الخطوة الأخيرة: سجّل بيانات الشركة النهائية.</p>
           <a id="finalizeLink" href="#" class="btn gold" style="width:100%;">تسجيل التأسيس النهائي ←</a>
@@ -82,8 +93,10 @@ async function init(){
     if(req) document.getElementById('clientNameLine').textContent = 'العميل: ' + (req.clients?.profiles?.full_name || '—');
     document.getElementById('finalizeLink').href = 'finalize-incorporation.html?request_id=' + requestId;
 
-    const { data: acceptedOffer } = await supabase.from('offers').select('duration_days').eq('request_id', requestId).eq('status','accepted').maybeSingle();
+    const { data: acceptedOffer } = await supabase.from('offers').select('id, duration_days').eq('request_id', requestId).eq('status','accepted').maybeSingle();
     contractDurationDays = acceptedOffer?.duration_days || null;
+    acceptedOfferId = acceptedOffer?.id || null;
+    if(acceptedOfferId) await loadPayments();
 
     await loadStages();
   } catch(err){
@@ -92,6 +105,61 @@ async function init(){
   }
 }
 let contractDurationDays = null;
+let acceptedOfferId = null;
+
+async function loadPayments(){
+  const { data: payments, error } = await supabase.from('offer_payments').select('*').eq('offer_id', acceptedOfferId).order('created_at');
+  const container = document.getElementById('paymentsContainer');
+  document.getElementById('addPaymentCard').style.display = 'block';
+
+  if(error){ container.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(!payments || !payments.length){ container.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد دفعات مسجّلة بعد.</p>'; return; }
+
+  container.innerHTML = payments.map(p => `
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div><strong>${escapeHtml(p.label)}</strong><div style="font-size:12px;color:var(--ink-soft);">${p.amount ? p.amount.toLocaleString('ar-SA') + ' ر.س' : ''}</div></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="badge ${p.client_confirmed ? 'b-active' : 'b-pending'}">${p.client_confirmed ? '✓ العميل أكّد الدفع' : '⏳ بانتظار تأكيد العميل'}</span>
+          <span class="badge ${p.provider_confirmed ? 'b-active' : 'b-pending'}">${p.provider_confirmed ? '✓ تمت مراجعتها وتأكيدها' : '⚠ بانتظار مراجعة الأدمن'}</span>
+        </div>
+      </div>
+      ${p.client_confirmed && !p.provider_confirmed ? `<button class="btn gold" style="margin-top:10px;padding:8px 16px;font-size:12.5px;" onclick="confirmPaymentAdmin('${p.id}','${escapeHtml(p.label).replace(/'/g,"")}')">✅ تأكيد استلام هذي الدفعة فعلياً</button>` : ''}
+    </div>
+  `).join('');
+}
+
+async function addPayment(){
+  const label = document.getElementById('new-payment-label').value.trim();
+  const amount = parseFloat(document.getElementById('new-payment-amount').value) || null;
+  const msg = document.getElementById('payment-msg');
+  if(!label){ msg.className='msg err'; msg.textContent='أدخل وصف الدفعة'; return; }
+
+  const { error } = await supabase.from('offer_payments').insert({ offer_id: acceptedOfferId, label, amount });
+  msg.className = error ? 'msg err' : 'msg ok';
+  msg.textContent = error ? error.message : 'تمت الإضافة.';
+  if(!error){
+    document.getElementById('new-payment-label').value = '';
+    document.getElementById('new-payment-amount').value = '';
+    loadPayments();
+  }
+}
+
+async function confirmPaymentAdmin(paymentId, label){
+  if(!confirm('تأكّد إنك فعلاً استلمت/تحققت من هذي الدفعة قبل التأكيد؟')) return;
+
+  const { error } = await supabase.from('offer_payments').update({
+    provider_confirmed: true, provider_confirmed_at: new Date().toISOString()
+  }).eq('id', paymentId);
+  if(error){ alert(error.message); return; }
+
+  await supabase.from('audit_log').insert({
+    entity_type: 'offer_payments', entity_id: paymentId, action: 'payment_verified',
+    actor_id: profile.id, actor_role: 'admin', details: { label }
+  });
+
+  loadPayments();
+}
 
 function renderDurationCard(stages){
   const firstStarted = stages.find(s => s.started_at)?.started_at;
@@ -161,8 +229,8 @@ async function loadStages(){
         <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
       </div>
       ${totalCount ? `<p style="font-size:11px;color:var(--ink-soft);margin-bottom:6px;">الإجراءات: ${doneCount}/${totalCount}</p><div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin-bottom:8px;">${procsHtml}</div>` : ''}
-      ${s.admin_note ? `<div class="note-box">📝 ${s.admin_note}</div>` : ''}
-      ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>💬 ردّ العميل:</strong><br>${s.client_reply_text}${s.client_replied_at ? `<br><span style="font-size:10.5px;color:var(--ink-soft);">${new Date(s.client_replied_at).toLocaleString('ar-SA')}</span>` : ''}</div>` : ''}
+      ${s.admin_note ? `<div class="note-box">📝 ${escapeHtml(s.admin_note)}</div>` : ''}
+      ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>💬 ردّ العميل:</strong><br>${escapeHtml(s.client_reply_text)}${s.client_replied_at ? `<br><span style="font-size:10.5px;color:var(--ink-soft);">${new Date(s.client_replied_at).toLocaleString('ar-SA')}</span>` : ''}</div>` : ''}
       ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
       <div class="stage-actions">${actions}</div>
     </div>`;

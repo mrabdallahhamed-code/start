@@ -79,10 +79,10 @@ async function init(){
 async function loadThread(){
   const { data, error } = await supabase.from('admin_messages').select('*').eq('recipient_id', profile.id).order('created_at');
   const thread = document.getElementById('msgThread');
-  if(error){ thread.innerHTML = `<p class="msg err">${error.message}</p>`; return; }
+  if(error){ thread.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
   if(!data || !data.length){ thread.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);text-align:center;padding:20px;">لا توجد رسائل بعد — ابدأ المحادثة بكتابة رسالة بالأسفل.</p>'; return; }
 
-  thread.innerHTML = data.map(m => `<div class="msg-bubble ${m.sender_id === profile.id ? 'mine' : 'theirs'}">${m.message}</div>`).join('');
+  thread.innerHTML = data.map(m => `<div class="msg-bubble ${m.sender_id === profile.id ? 'mine' : 'theirs'}">${escapeHtml(m.message)}</div>`).join('');
   thread.scrollTop = thread.scrollHeight;
 }
 

@@ -34,7 +34,14 @@
     <label>رقم الجوال (بالصيغة الدولية)</label>
     <input id="contact_phone" type="tel" dir="ltr" style="text-align:left;" placeholder="+966501234567">
     <label data-i18n="register_password">كلمة المرور</label>
-    <input id="password" type="password" placeholder="8 أحرف على الأقل">
+    <div style="position:relative;">
+      <input id="password" type="password" placeholder="8 أحرف على الأقل" style="padding-left:40px;">
+      <button type="button" onclick="togglePasswordVisibility('password', this)" aria-label="إظهار كلمة المرور" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;">👁️</button>
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;font-size:12.5px;font-weight:normal;line-height:1.6;">
+      <input type="checkbox" id="termsAgree" style="width:auto;margin:3px 0 0;flex-shrink:0;">
+      <span data-i18n="register_terms_text">بإنشاء الحساب، أنت توافق على <a href="https://www.itqanbs.sa/terms/" target="_blank" data-i18n="register_terms_link">الشروط والأحكام</a> و<a href="https://www.itqanbs.sa/privacy/" target="_blank" data-i18n="register_privacy_link">سياسة الخصوصية</a></span>
+    </label>
     <button class="btn" onclick="register()" data-i18n="register_btn">إنشاء الحساب</button>
     <div id="msg"></div>
     <p style="margin-top:16px;font-size:13px;"><span data-i18n="register_have_account">لديك حساب؟</span> <a href="login.html" data-i18n="register_login_link">تسجيل الدخول</a></p>
@@ -51,6 +58,11 @@ async function register(){
   const preferred_language = getLang();
   const msg = document.getElementById('msg');
   msg.className = 'msg'; msg.textContent = '';
+
+  if(!document.getElementById('termsAgree').checked){
+    msg.className='msg err'; msg.textContent='لازم توافق على الشروط والأحكام وسياسة الخصوصية أول';
+    return;
+  }
 
   if(!email || !password || !full_name || !contact_phone){
     msg.className='msg err'; msg.textContent='الرجاء تعبئة كل الحقول'; return;
