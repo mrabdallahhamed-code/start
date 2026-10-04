@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7D5B">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
+
+<title>نوع التأسيس — مبتدأ من إتقان</title>
+<link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .path-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+  @media(max-width:560px){.path-grid{grid-template-columns:1fr;}}
+  .path-card{border:1.5px solid var(--line);border-radius:14px;padding:22px;text-align:center;cursor:pointer;background:var(--white);transition:all .15s;}
+  .path-card:hover{border-color:var(--green-dark);box-shadow:var(--shadow);}
+  .path-ico{font-size:30px;margin-bottom:10px;}
+  .path-name{font-weight:700;font-size:15px;color:var(--ink);margin-bottom:6px;}
+  .path-desc{font-size:12px;color:var(--ink-soft);line-height:1.7;}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div></header>
+<main style="max-width:560px;">
+  <h1 class="page-title" style="text-align:center;">ما نوع التأسيس الذي تحتاجه؟</h1>
+  <p style="font-size:13.5px;color:var(--ink-soft);text-align:center;margin-top:6px;">يمكنك تغيير هذا الاختيار لاحقاً من صفحة «بياناتي».</p>
+  <div class="path-grid">
+    <div class="path-card" id="cardForeign">
+      <div class="path-ico">🌍</div>
+      <div class="path-name">استثمار أجنبي</div>
+      <div class="path-desc">أنت مستثمر غير سعودي، وتريد تأسيس شركة في السعودية بملكية أجنبية.</div>
+    </div>
+    <div class="path-card" id="cardSaudi">
+      <div class="path-ico">🇸🇦</div>
+      <div class="path-name">مواطن سعودي</div>
+      <div class="path-desc">أنت مواطن سعودي، وتريد تأسيس شركة محلية لك.</div>
+    </div>
+  </div>
+  <div id="msg" role="alert" style="margin-top:14px;"></div>
+  <p style="text-align:center;font-size:13px;margin-top:18px;"><a href="country-select.html">← تغيير الدولة</a></p>
+</main>
+<script src="../assets/js/supabaseClient.js"></script>
+<script>
+let profile;
+document.getElementById('cardForeign').addEventListener('click', () => choosePath('foreign_investment'));
+document.getElementById('cardSaudi').addEventListener('click', () => choosePath('saudi_national'));
+
+async function choosePath(path){
+  const msg = document.getElementById('msg');
+  const { error } = await supabase.from('clients').update({ incorporation_path: path }).eq('id', profile.id);
+  if(error){ msg.className = 'msg err'; msg.textContent = error.message; return; }
+  window.location.replace('dashboard.html');
+}
+
+async function init(){
+  profile = await requireRole(['client']);
+  if(!profile) return;
+  // إن اختار دولة غير السعودية بالخطأ ثم رجع هنا، نعيده لصفحة الدولة
+  if(window.__clientMeta && window.__clientMeta.country !== 'SA'){ window.location.replace('country-select.html'); }
+}
+init();
+</script>
+</body>
+</html>

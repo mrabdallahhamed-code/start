@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -12,6 +16,7 @@
 
 <title>اتفاقية تقديم خدمات تجارية — إتقان</title>
 <link rel="stylesheet" href="assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .contract-doc{max-width:760px;margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:44px;line-height:2;position:relative;overflow:hidden;}
@@ -81,6 +86,7 @@ async function init(){
 
   let { data: contract } = await supabase.from('post_incorp_contracts').select('*').eq('post_incorp_request_id', requestId).maybeSingle();
   if(!contract){
+    if(viewerRole !== 'admin'){ document.getElementById('contractDoc').innerHTML = '<p>العقد غير جاهز بعد، يرجى التواصل مع إتقان.</p>'; return; }
     const { data: newContract } = await supabase.from('post_incorp_contracts').insert({ post_incorp_request_id: requestId, client_id: request.client_id }).select().single();
     contract = newContract;
   }
@@ -106,7 +112,7 @@ function render(){
   const clientPhone = clientProfile?.profiles?.contact_phone || '';
 
   const purposeHtml = Object.entries(request.service_needs || {}).map(([cat, needs]) => `
-    <li><strong>${cat}:</strong> ${needs.join('، ')}</li>
+    <li><strong>${esc(cat)}:</strong> ${esc(needs.join('، '))}</li>
   `).join('') || '<li>حسب ما هو محدد بالعرض المرفق.</li>';
 
   const doc = document.getElementById('contractDoc');
@@ -115,9 +121,9 @@ function render(){
     const val = ef[key] ?? defaultVal ?? '';
     const canEdit = (editableByClient && isClientViewer && !contractRow.client_signed_at) || (!editableByClient && isAdminViewer && !contractRow.itqan_signed_at);
     if(canEdit){
-      return `<div class="field-row"><label>${labelText}</label><input value="${val}" onchange="saveExtraField('${key}', this.value)"></div>`;
+      return `<div class="field-row"><label>${esc(labelText)}</label><input value="${esc(val)}" onchange="saveExtraField('${esc(key)}', this.value)"></div>`;
     }
-    return `<div class="field-row"><label>${labelText}</label><span>${val || '—'}</span></div>`;
+    return `<div class="field-row"><label>${esc(labelText)}</label><span>${esc(val || '—')}</span></div>`;
   };
 
   doc.innerHTML = `
@@ -125,37 +131,37 @@ function render(){
     <div class="letterhead">
       <img src="assets/images/logo.jpeg">
       <div class="lh-text">
-        <div class="lh-name-ar">${companySettings.company_name_ar || 'إتقان لخدمات الأعمال'}</div>
-        <div class="lh-name-en">${companySettings.company_name_en || 'Itqan Business Services'}</div>
+        <div class="lh-name-ar">${esc(companySettings.company_name_ar || 'إتقان لخدمات الأعمال')}</div>
+        <div class="lh-name-en">${esc(companySettings.company_name_en || 'Itqan Business Services')}</div>
       </div>
       <div class="lh-meta">
-        ${companySettings.cr_number ? `س.ت: ${companySettings.cr_number}<br>` : ''}
-        ${companySettings.address || 'الرياض، السعودية'}<br>
-        ${companySettings.phone || ''}
+        ${companySettings.cr_number ? `س.ت: ${esc(companySettings.cr_number)}<br>` : ''}
+        ${esc(companySettings.address || 'الرياض، السعودية')}<br>
+        ${esc(companySettings.phone || '')}
       </div>
     </div>
 
     <h2>اتفاقية تقديم خدمات تجارية</h2>
-    <p class="doc-date">تم تحرير هذه الاتفاقية بتاريخ: ${new Date(contractRow.created_at).toLocaleDateString('ar-SA')} — بمدينة الرياض</p>
+    <p class="doc-date">تم تحرير هذه الاتفاقية بتاريخ: ${esc(new Date(contractRow.created_at).toLocaleDateString('ar-SA'))} — بمدينة الرياض</p>
 
     <h3>الطرف الأول — مقدّم الخدمة</h3>
     <div class="party-box">
-      <div class="field-row"><label>اسم الشركة</label><span>${companySettings.company_name_ar || 'إتقان لخدمات الأعمال'}</span></div>
-      <div class="field-row"><label>رقم السجل التجاري</label><span>${companySettings.cr_number || '—'}</span></div>
-      <div class="field-row"><label>العنوان</label><span>${companySettings.address || 'الرياض، المملكة العربية السعودية'}</span></div>
+      <div class="field-row"><label>اسم الشركة</label><span>${esc(companySettings.company_name_ar || 'إتقان لخدمات الأعمال')}</span></div>
+      <div class="field-row"><label>رقم السجل التجاري</label><span>${esc(companySettings.cr_number || '—')}</span></div>
+      <div class="field-row"><label>العنوان</label><span>${esc(companySettings.address || 'الرياض، المملكة العربية السعودية')}</span></div>
       ${editableField('يمثلها في هذا العقد', 'itqan_rep_name', '', false)}
       ${editableField('الصفة', 'itqan_rep_title', '', false)}
-      <div class="field-row"><label>البريد الإلكتروني</label><span>${companySettings.email || 'info@itqanbs.sa'}</span></div>
-      <div class="field-row"><label>رقم الهاتف</label><span>${companySettings.phone || '966569051686+'}</span></div>
+      <div class="field-row"><label>البريد الإلكتروني</label><span>${esc(companySettings.email || 'info@itqanbs.sa')}</span></div>
+      <div class="field-row"><label>رقم الهاتف</label><span>${esc(companySettings.phone || '966569051686+')}</span></div>
     </div>
     <p style="font-size:12px;color:var(--ink-soft);">ويشار إليها فيما بعد لأغراض هذا العقد بـ "الطرف الأول".</p>
 
     <h3>الطرف الثاني — العميل</h3>
     <div class="party-box">
-      <div class="field-row"><label>الاسم / اسم الشركة</label><span>${clientName}</span></div>
+      <div class="field-row"><label>الاسم / اسم الشركة</label><span>${esc(clientName)}</span></div>
       ${editableField('رقم السجل التجاري / الهوية', 'client_id_number', '', true)}
       ${editableField('العنوان', 'client_address', '', true)}
-      <div class="field-row"><label>رقم الهاتف</label><span>${clientPhone || '—'}</span></div>
+      <div class="field-row"><label>رقم الهاتف</label><span>${esc(clientPhone || '—')}</span></div>
       ${editableField('يمثله في هذا العقد', 'client_rep_name', clientName, true)}
       ${editableField('الصفة', 'client_rep_title', '', true)}
     </div>
@@ -192,10 +198,10 @@ function render(){
     <h3>خامساً: مستحقات الطرفين</h3>
     <div class="fee-box" style="background:var(--green-tint);border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <span style="font-size:13.5px;color:var(--ink);">مقابل الخدمات محل هذه الاتفاقية</span>
-      <span style="font-family:'Amiri',serif;font-size:22px;color:var(--green-dark);font-weight:700;">${money(request.quoted_price)} ريال</span>
+      <span style="font-family:'Amiri',serif;font-size:22px;color:var(--green-dark);font-weight:700;">${esc(money(request.quoted_price))} ريال</span>
     </div>
-    <p><strong>آلية السداد:</strong> ${request.payment_schedule || 'حسب ما هو متفق عليه، عبر فاتورة شهرية أو دفعات يحددها الطرفان كتابةً.'}</p>
-    <p>${request.exclusions_notes || 'المبلغ المذكور لا يشمل ضريبة القيمة المضافة ولا أي رسوم إضافية تفرضها الجهات المختصة، وفي حال تفعيل أي ضريبة أو رسم جديد يُضاف على المطالبة.'}</p>
+    <p><strong>آلية السداد:</strong> ${esc(request.payment_schedule || 'حسب ما هو متفق عليه، عبر فاتورة شهرية أو دفعات يحددها الطرفان كتابةً.')}</p>
+    <p>${esc(request.exclusions_notes || 'المبلغ المذكور لا يشمل ضريبة القيمة المضافة ولا أي رسوم إضافية تفرضها الجهات المختصة، وفي حال تفعيل أي ضريبة أو رسم جديد يُضاف على المطالبة.')}</p>
 
     <h3>سادساً: مدة الاتفاقية</h3>
     ${editableField('تاريخ بداية الاتفاقية', 'agreement_start_date', '', true)}
@@ -241,30 +247,30 @@ function renderSignatureBlock(title, side, canSignNow){
   if(signedAt){
     return `
       <div class="sig-block signed">
-        <p style="font-weight:700;font-size:13px;margin-bottom:6px;">${title}</p>
-        <div class="signed-block" id="signedImg-${side}"></div>
-        <p style="font-size:12.5px;margin-top:6px;">${signName}</p>
-        <p style="font-size:11px;color:var(--ink-soft);">وُقِّع بتاريخ ${new Date(signedAt).toLocaleDateString('ar-SA')}</p>
+        <p style="font-weight:700;font-size:13px;margin-bottom:6px;">${esc(title)}</p>
+        <div class="signed-block" id="signedImg-${esc(side)}"></div>
+        <p style="font-size:12.5px;margin-top:6px;">${esc(signName)}</p>
+        <p style="font-size:11px;color:var(--ink-soft);">وُقِّع بتاريخ ${esc(new Date(signedAt).toLocaleDateString('ar-SA'))}</p>
       </div>`;
   }
 
   if(canSignNow){
     return `
       <div class="sig-block">
-        <p style="font-weight:700;font-size:13px;margin-bottom:6px;">${title}</p>
-        <input id="sigName-${side}" placeholder="الاسم الكامل" style="margin-bottom:6px;">
-        <canvas class="sig-canvas-small" id="sigCanvas-${side}"></canvas>
+        <p style="font-weight:700;font-size:13px;margin-bottom:6px;">${esc(title)}</p>
+        <input id="sigName-${esc(side)}" placeholder="الاسم الكامل" style="margin-bottom:6px;">
+        <canvas class="sig-canvas-small" id="sigCanvas-${esc(side)}"></canvas>
         <div style="display:flex;gap:8px;">
-          <button class="btn ghost" style="padding:8px 12px;font-size:11.5px;margin:0;" onclick="clearSigPad('${side}')">مسح</button>
-          <button class="btn gold" style="padding:8px 12px;font-size:11.5px;margin:0;" onclick="confirmSign('${side}')">تأكيد التوقيع</button>
+          <button class="btn ghost" style="padding:8px 12px;font-size:11.5px;margin:0;" onclick="clearSigPad('${esc(side)}')">مسح</button>
+          <button class="btn gold" style="padding:8px 12px;font-size:11.5px;margin:0;" onclick="confirmSign('${esc(side)}')">تأكيد التوقيع</button>
         </div>
-        <div id="sigMsg-${side}"></div>
+        <div id="sigMsg-${esc(side)}"></div>
       </div>`;
   }
 
   return `
     <div class="sig-block">
-      <p style="font-weight:700;font-size:13px;margin-bottom:6px;">${title}</p>
+      <p style="font-weight:700;font-size:13px;margin-bottom:6px;">${esc(title)}</p>
       <p style="font-size:12px;color:var(--ink-soft);">بانتظار توقيع هذا الطرف.</p>
     </div>`;
 }
@@ -275,7 +281,7 @@ async function loadSignatureImages(){
     const el = document.getElementById(`signedImg-${side}`);
     if(path && el){
       const { data } = await supabase.storage.from('offer-attachments').createSignedUrl(path, 3600);
-      if(data?.signedUrl) el.innerHTML = `<img src="${data.signedUrl}">`;
+      if(data?.signedUrl) el.innerHTML = `<img src="${esc(data.signedUrl)}">`;
     }
   }
 }
@@ -322,22 +328,12 @@ async function confirmSign(side){
   const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, blob);
   if(upErr){ msg.className = 'msg err'; msg.textContent = upErr.message; return; }
 
-  const updateData = side === 'client'
-    ? { client_signature_name: name, client_signature_path: filePath, client_signed_at: new Date().toISOString() }
-    : { itqan_signature_name: name, itqan_signature_path: filePath, itqan_signed_at: new Date().toISOString() };
-
-  const { error } = await supabase.from('post_incorp_contracts').update(updateData).eq('id', contractRow.id);
+  const snapshot = document.getElementById('contractDoc').innerText + '\n\n' + JSON.stringify(contractRow.extra_fields || {});
+  const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(snapshot));
+  const hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  const { error } = await supabase.rpc('sign_contract', { p_kind: 'post_incorp', p_contract: contractRow.id, p_name: name, p_path: filePath, p_hash: hash, p_snapshot: snapshot });
   if(error){ msg.className = 'msg err'; msg.textContent = error.message; return; }
-
-  Object.assign(contractRow, updateData);
-
-  if(side === 'client'){
-    const { data: admins } = await supabase.from('profiles').select('id').eq('role','admin').limit(3);
-    (admins||[]).forEach(a => createNotification(a.id, 'العميل وقّع اتفاقية ما بعد التأسيس', 'بانتظار توقيع إتقان لإتمام الاتفاقية', 'admin/post-incorp.html'));
-  } else {
-    createNotification(request.client_id, 'إتقان وقّعت الاتفاقية ✓', 'اتفاقية خدمات ما بعد التأسيس أصبحت موقّعة من الطرفين', 'client/post-incorp.html');
-  }
-
+  contractRow[side + '_signature_name'] = name; contractRow[side + '_signature_path'] = filePath; contractRow[side + '_signed_at'] = new Date().toISOString();
   render();
 }
 

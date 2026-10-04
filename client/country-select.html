@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7D5B">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
+
+<title>اختر دولة التأسيس — مبتدأ من إتقان</title>
+<link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .country-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+  @media(max-width:520px){.country-grid{grid-template-columns:1fr;}}
+  .country-card{border:1.5px solid var(--line);border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:var(--white);transition:all .15s;}
+  .country-card:hover{border-color:var(--green-dark);box-shadow:var(--shadow);}
+  .country-card.disabled{opacity:.55;}
+  .country-flag{font-size:34px;margin-bottom:8px;}
+  .country-name{font-weight:700;font-size:15px;color:var(--ink);}
+  .country-note{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div></header>
+<main style="max-width:560px;">
+  <h1 class="page-title" style="text-align:center;">في أي دولة ترغب بتأسيس شركتك؟</h1>
+  <p style="font-size:13.5px;color:var(--ink-soft);text-align:center;margin-top:6px;">يمكنك تغيير هذا الاختيار لاحقاً من صفحة «بياناتي».</p>
+  <div class="country-grid" id="grid"></div>
+  <div id="msg" role="alert" style="margin-top:14px;"></div>
+  <p style="text-align:center;font-size:13px;margin-top:18px;"><a href="#" id="logout">تسجيل الخروج</a></p>
+</main>
+<script src="../assets/js/supabaseClient.js"></script>
+<script>
+const COUNTRIES = [
+  { code:'SA', flag:'🇸🇦', name:'السعودية' },
+  { code:'AE', flag:'🇦🇪', name:'الإمارات' },
+  { code:'BH', flag:'🇧🇭', name:'البحرين' },
+  { code:'QA', flag:'🇶🇦', name:'قطر' },
+];
+let profile;
+document.getElementById('logout').addEventListener('click', e => { e.preventDefault(); signOut(); });
+
+document.getElementById('grid').innerHTML = COUNTRIES.map(c => `
+  <div class="country-card" data-code="${esc(c.code)}">
+    <div class="country-flag">${c.flag}</div>
+    <div class="country-name">${esc(c.name)}</div>
+  </div>`).join('');
+
+document.querySelectorAll('.country-card').forEach(el => el.addEventListener('click', () => chooseCountry(el.dataset.code)));
+
+async function chooseCountry(code){
+  const msg = document.getElementById('msg');
+  const { error } = await supabase.from('clients').update({ country: code }).eq('id', profile.id);
+  if(error){ msg.className = 'msg err'; msg.textContent = error.message; return; }
+  if(code === 'SA'){ window.location.replace('path-select.html'); }
+  else { window.location.replace('coming-soon.html'); }
+}
+
+async function init(){
+  profile = await requireRole(['client']);
+}
+init();
+</script>
+</body>
+</html>

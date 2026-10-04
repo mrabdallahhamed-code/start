@@ -2,101 +2,112 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول — مبتدأ من إتقان</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
+<link rel="icon" type="image/png" href="/assets/icons/favicon-48.png">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
-
-<title>تسجيل الدخول — إتقان</title>
-<link rel="canonical" href="https://start.itqanbs.sa/auth/login.html">
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="../assets/js/i18n.js"></script>
+<script src="../assets/js/supabaseClient.js"></script>
+<script src="/assets/js/auth-common.js"></script>
 <style>
   #langToggleBtn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:var(--white);font-size:11px;font-weight:800;cursor:pointer;color:var(--green-dark);letter-spacing:.5px;}
-  #langToggleBtn:hover{border-color:var(--gold);color:var(--gold-deep);}
+  .auth-logo{display:block;margin:0 auto 18px;width:150px;height:auto;}
+  .auth-note{font-size:12.5px;color:var(--ink-soft);margin-top:14px;text-align:center;}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
-  <button id="langToggleBtn" onclick="toggleLang()">EN</button>
-</header>
+<header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div><button id="langToggleBtn" onclick="toggleLang()">EN</button></header>
 <main style="max-width:480px;">
-  <h1 class="page-title" data-i18n="login_title">تسجيل الدخول</h1>
-  <div class="card">
-    <label data-i18n="login_email">البريد الإلكتروني</label>
-    <input id="email" type="email">
-    <label data-i18n="login_password">كلمة المرور</label>
-    <div style="position:relative;">
-      <input id="password" type="password" style="padding-left:40px;">
-      <button type="button" onclick="togglePasswordVisibility('password', this)" aria-label="إظهار كلمة المرور" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;">👁️</button>
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:normal;">
-      <input type="checkbox" id="rememberMe" checked style="width:auto;margin:0;">
-      <span data-i18n="login_remember">تذكرني على هذا الجهاز</span>
-    </label>
-    <button class="btn" onclick="login()" data-i18n="login_btn">دخول</button>
-    <div id="msg"></div>
-    <p style="margin-top:10px;font-size:13px;"><a href="#" onclick="showForgotPassword();return false;" data-i18n="login_forgot_link">نسيت كلمة المرور؟</a></p>
+  <img class="auth-logo" src="../assets/images/mubtada-logo.png" alt="مبتدأ — منصة الاستثمار من إتقان" width="150" height="174">
+  <h1 class="page-title" data-i18n="login_title" style="text-align:center;">تسجيل الدخول</h1>
+  <div class="card" id="loginCard">
+    <form id="loginForm" autocomplete="on" novalidate>
+      <label for="email" data-i18n="login_email">البريد الإلكتروني</label>
+      <input id="email" name="email" type="email" autocomplete="username" inputmode="email" maxlength="254" required>
+      <label for="password" data-i18n="login_password">كلمة المرور</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;cursor:pointer;"><input id="remember" type="checkbox" style="width:auto;"><span data-i18n="login_remember">تذكّرني على هذا الجهاز</span></label>
+      <div id="captchaBox" style="margin-top:12px;"></div>
+      <button class="btn" type="submit" id="loginBtn" data-i18n="login_btn">دخول</button>
+      <div id="msg" role="alert"></div>
+    </form>
+    <p style="margin-top:10px;font-size:13px;"><a href="#" id="forgotLink" data-i18n="login_forgot_link">نسيت كلمة المرور؟</a></p>
     <p style="margin-top:6px;font-size:13px;"><span data-i18n="login_no_account">ليس لديك حساب؟</span> <a href="register.html" data-i18n="login_register_link">إنشاء حساب جديد</a></p>
   </div>
-
   <div class="card" id="forgotCard" style="display:none;">
     <h3 style="margin-bottom:10px;" data-i18n="forgot_title">استعادة كلمة المرور</h3>
-    <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;" data-i18n="forgot_sub">اكتب بريدك الإلكتروني، بنرسل لك رابط تعيين كلمة مرور جديدة.</p>
-    <label data-i18n="login_email">البريد الإلكتروني</label>
-    <input id="forgotEmail" type="email">
-    <button class="btn" onclick="sendResetLink()" data-i18n="forgot_send_btn">إرسال رابط الاستعادة</button>
-    <div id="forgotMsg"></div>
-    <p style="margin-top:10px;font-size:13px;"><a href="#" onclick="hideForgotPassword();return false;" data-i18n="forgot_back">← رجوع لتسجيل الدخول</a></p>
+    <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;" data-i18n="forgot_sub">اكتب بريدك الإلكتروني وسنرسل لك رابط تعيين كلمة مرور جديدة.</p>
+    <label for="forgotEmail" data-i18n="login_email">البريد الإلكتروني</label>
+    <input id="forgotEmail" type="email" autocomplete="email" maxlength="254">
+    <button class="btn" type="button" id="forgotBtn" data-i18n="forgot_send_btn">إرسال رابط الاستعادة</button>
+    <div id="forgotMsg" role="alert"></div>
+    <p style="margin-top:10px;font-size:13px;"><a href="#" id="forgotBack" data-i18n="forgot_back">← رجوع لتسجيل الدخول</a></p>
   </div>
+  <p class="auth-note"><a href="/privacy.html" data-i18n="link_privacy">سياسة الخصوصية</a> · <a href="/terms.html" data-i18n="link_terms">شروط الاستخدام</a> · <a href="https://invest.itqanbs.sa" rel="noopener" data-i18n="link_about">تعرّف على الخدمة</a></p>
 </main>
-<script src="../assets/js/supabaseClient.js"></script>
-<script src="../assets/js/i18n.js"></script>
 <script>
-async function login(){
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const msg = document.getElementById('msg');
+const params = new URLSearchParams(location.search);
+if(params.get('e') === 'disabled') showMsg('msg','err', L('هذا النوع من الحسابات غير مفعّل حالياً.','This account type is not enabled.'));
+initCaptcha('captchaBox');
+// تعبئة البريد المحفوظ (بريد فقط، لا كلمة مرور)
+try{ const e = localStorage.getItem('mub_email'); if(e){ document.getElementById('email').value = e; document.getElementById('remember').checked = true; } }catch(x){}
 
-  const remember = document.getElementById('rememberMe').checked;
-  localStorage.setItem('itqan_remember_me', remember ? 'true' : 'false');
-
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if(error){ msg.className='msg err'; msg.textContent = error.message; return; }
-
+async function afterLogin(){
   const profile = await getCurrentProfile();
-  if(!profile){ msg.className='msg err'; msg.textContent='تعذر جلب بيانات الحساب'; return; }
-
-  if(profile.role === 'admin') window.location.href = '../admin/dashboard.html';
-  else if(profile.role === 'provider') window.location.href = '../provider/dashboard.html';
-  else window.location.href = '../client/dashboard.html';
+  if(!profile){ showMsg('msg','err', L('تعذر تحميل بيانات الحساب. حاول مرة أخرى.','Could not load your account. Please try again.')); await supabase.auth.signOut(); return; }
+  if(profile.role === 'provider'){ await supabase.auth.signOut(); showMsg('msg','err', L('هذا النوع من الحسابات غير مفعّل حالياً.','This account type is not enabled.')); return; }
+  const next = safeInternalPath(params.get('next') || '');
+  if(profile.role === 'admin'){
+    if(!(await adminMfaOk())){ window.location.replace('/auth/mfa.html?next=' + encodeURIComponent(next || '/admin/dashboard.html')); return; }
+    window.location.replace(next && next.startsWith('/admin/') ? next : '/admin/dashboard.html'); return;
+  }
+  window.location.replace(next && next.startsWith('/client/') ? next : '/client/dashboard.html');
 }
 
-function showForgotPassword(){
-  document.querySelector('main > .card').style.display = 'none';
-  document.getElementById('forgotCard').style.display = 'block';
-}
-function hideForgotPassword(){
-  document.getElementById('forgotCard').style.display = 'none';
-  document.querySelector('main > .card').style.display = 'block';
-}
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const password = document.getElementById('password').value;
+  const st = lockState();
+  if(st.locked){ showMsg('msg','err', L('محاولات كثيرة. انتظر ' + st.seconds + ' ثانية.','Too many attempts. Wait ' + st.seconds + ' seconds.')); return; }
+  if(!email || !password){ showMsg('msg','err', L('أدخل البريد وكلمة المرور.','Enter your email and password.')); return; }
+  if(captchaRequired() && !window.__captchaToken){ showMsg('msg','err', L('أكمل التحقق الأمني.','Complete the security check.')); return; }
+  const remember = document.getElementById('remember').checked;
+  setRememberMe(remember);
+  try{ if(remember) localStorage.setItem('mub_email', email); else localStorage.removeItem('mub_email'); }catch(x){}
+  const btn = document.getElementById('loginBtn'); btn.disabled = true;
+  const opts = captchaRequired() ? { captchaToken: window.__captchaToken } : undefined;
+  const { error } = await supabase.auth.signInWithPassword({ email, password, options: opts });
+  btn.disabled = false;
+  if(error){
+    registerFailure();
+    if(window.turnstile){ try{ window.turnstile.reset(); window.__captchaToken = null; }catch(x){} }
+    // رسالة موحّدة: لا نكشف هل البريد مسجّل أم لا
+    showMsg('msg','err', L('بيانات الدخول غير صحيحة أو الحساب غير مؤكَّد.','Incorrect credentials, or the account is not confirmed.'));
+    return;
+  }
+  clearFailures();
+  await afterLogin();
+});
 
-async function sendResetLink(){
-  const email = document.getElementById('forgotEmail').value.trim();
-  const msg = document.getElementById('forgotMsg');
-  if(!email){ msg.className='msg err'; msg.textContent='أدخل بريدك الإلكتروني'; return; }
+document.getElementById('forgotLink').addEventListener('click', e => { e.preventDefault(); document.getElementById('loginCard').style.display='none'; document.getElementById('forgotCard').style.display='block'; });
+document.getElementById('forgotBack').addEventListener('click', e => { e.preventDefault(); document.getElementById('forgotCard').style.display='none'; document.getElementById('loginCard').style.display='block'; });
+document.getElementById('forgotBtn').addEventListener('click', async () => {
+  const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+  if(!email){ showMsg('forgotMsg','err', L('أدخل بريدك الإلكتروني','Enter your email')); return; }
+  await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/auth/reset-password.html' });
+  showMsg('forgotMsg','ok', L('إن كان البريد مسجّلاً لدينا فقد وصلك رابط تعيين كلمة مرور جديدة (تحقق من مجلد الرسائل غير المرغوبة أيضاً).','If the email is registered, a reset link has been sent (check spam too).'));
+});
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/auth/reset-password.html'
-  });
-
-  msg.className = 'msg ok';
-  msg.textContent = 'لو البريد مسجّل عندنا، وصلك رابط تعيين كلمة مرور جديدة — تأكد تشوف مجلد الرسائل غير المرغوبة (Spam) كمان.';
-}
+// إن كان مسجّلاً أصلاً
+(async () => { const { data: { session } } = await supabase.auth.getSession(); if(session) afterLogin(); })();
 </script>
 </body>
 </html>

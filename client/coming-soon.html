@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7D5B">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
+
+<title>قريباً — مبتدأ من إتقان</title>
+<link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div></header>
+<main style="max-width:520px;text-align:center;">
+  <div style="font-size:48px;margin-bottom:10px;">🚀</div>
+  <h1 class="page-title">ننطلق قريباً في <span id="countryName">هذه الدولة</span></h1>
+  <p style="font-size:14px;color:var(--ink-soft);line-height:2;margin-top:10px;">
+    نعمل حالياً على إتاحة خدمات تأسيس الشركات في <strong id="countryName2">هذه الدولة</strong> عبر منصة مبتدأ.
+    سجّلنا طلبك، وسنُعلمك فور الإطلاق. يمكنك بالتواصل مع فريقنا الآن إن كان لديك استفسار عاجل.
+  </p>
+  <div class="card" style="text-align:right;margin-top:24px;">
+    <a class="btn gold" href="https://wa.me/966569051686" target="_blank" rel="noopener">تواصل معنا على واتساب ←</a>
+    <a class="btn ghost" href="country-select.html" style="margin-top:10px;">← تغيير الدولة</a>
+  </div>
+  <p style="text-align:center;font-size:13px;margin-top:18px;"><a href="#" id="logout">تسجيل الخروج</a></p>
+</main>
+<script src="../assets/js/supabaseClient.js"></script>
+<script>
+const NAMES = { AE:'الإمارات', BH:'البحرين', QA:'قطر' };
+document.getElementById('logout').addEventListener('click', e => { e.preventDefault(); signOut(); });
+
+async function init(){
+  const profile = await requireRole(['client']);
+  if(!profile) return;
+  const country = window.__clientMeta?.country;
+  if(country === 'SA'){ window.location.replace('path-select.html'); return; }
+  if(!country){ window.location.replace('country-select.html'); return; }
+  const name = NAMES[country] || 'هذه الدولة';
+  document.getElementById('countryName').textContent = name;
+  document.getElementById('countryName2').textContent = name;
+}
+init();
+</script>
+</body>
+</html>

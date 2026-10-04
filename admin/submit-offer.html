@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,10 +12,11 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>تقديم عرض — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .check-item{display:grid;grid-template-columns:1fr 26px;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);}
@@ -28,7 +33,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -65,6 +70,7 @@
 
         <div class="card">
           <h3 style="margin-bottom:10px;">ثانياً: المستندات المطلوبة من العميل</h3>
+<p style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">القائمة أدناه مبنية تلقائياً على نتيجة تقييم جاهزية العميل.</p>
           <div id="docsList"></div>
           <label>مستندات إضافية (اختياري)</label>
           <textarea id="required_documents" rows="2" placeholder="أي مستندات أخرى غير مذكورة أعلاه"></textarea>
@@ -130,21 +136,42 @@
 let profile;
 const requestId = new URLSearchParams(window.location.search).get('request_id');
 
-const scopeOptions = [
+const scopeOptionsForeign = [
   { key: 'acquisition', label: 'إجراءات الاستحواذ على شركة قائمة ومستوفية للاشتراطات النظامية' },
   { key: 'license', label: 'إعداد وتقديم ومتابعة إصدار الترخيص الاستثماري' },
   { key: 'incorporation', label: 'تأسيس الشركة داخل المملكة (حجز الاسم التجاري، عقد التأسيس، السجل التجاري)' },
   { key: 'gov_registration', label: 'التسجيل لدى الجهات والمنصات الحكومية (الموارد البشرية، التأمينات، الزكاة والضريبة، الغرفة التجارية، العنوان الوطني، قوى، مقيم، مدد)' },
   { key: 'support', label: 'الخدمات المساندة (تأشيرة المدير العام، فتح الحساب البنكي، شهادة ضريبة القيمة المضافة، المتابعة حتى الاكتمال)' },
 ];
+// طلبات مسار "مواطن سعودي": نطاق مختلف تماماً، بلا ترخيص استثماري ولا استحواذ على شركة أجنبية
+const scopeOptionsSaudi = [
+  { key: 'consulting', label: 'استشارات تأسيس وتحديد الكيان النظامي الأنسب' },
+  { key: 'name_reservation', label: 'مساعدة في حجز الاسم التجاري' },
+  { key: 'incorporation', label: 'تأسيس الشركة وإصدار السجل التجاري' },
+  { key: 'gov_platforms', label: 'التسجيل في المنصات الحكومية' },
+  { key: 'zakat', label: 'التسجيل في هيئة الزكاة والضريبة والجمارك' },
+  { key: 'national_address', label: 'التسجيل في العنوان الوطني' },
+];
+let scopeOptions = scopeOptionsForeign; // تُحدَّد فعلياً في init() بحسب مسار الطلب
 
-const docOptions = [
+// قائمتان منفصلتان بحسب نتيجة تقييم جاهزية العميل: لا معنى لطلب مستندات شركة أجنبية
+// من عميل لا يملك شركة أجنبية مؤهلة أصلاً (سيُستحوذ على شركة له ضمن عرض منفصل).
+const docOptionsReady = [
   'صورة من السجل التجاري للشركة الأجنبية مصدقة حسب الأصول',
   'صورة من عقد تأسيس الشركة الأجنبية مصدقة حسب الأصول',
   'القوائم المالية لآخر سنة مالية مصدقة',
   'صورة جواز سفر المدير أو الممثل النظامي',
   'وكالة قانونية صادرة من الممثل النظامي ومصدقة',
 ];
+const docOptionsNotReady = [
+  'صورة جواز سفر المدير أو الممثل النظامي',
+  'وكالة قانونية صادرة من الممثل النظامي ومصدقة لتفويض إتقان بإجراءات الاستحواذ',
+];
+const docOptionsSaudi = [
+  'صورة الهوية الوطنية لصاحب/أصحاب الشركة',
+  'وكالة قانونية مصدقة (عند الحاجة لتفويض إتقان بالإجراءات)',
+];
+let docOptions = docOptionsReady; // تُحدَّد فعلياً في init() بحسب مسار الطلب وحالة جاهزية العميل
 
 const defaultFees = [
   ['توثيق المستندات من وزارة الخارجية (لكل وثيقة)', 35],
@@ -163,6 +190,7 @@ const defaultFees = [
 
 let existingOffer = null;
 let itqanProviderId = null;
+let needsAcquisitionFee = false;
 
 async function init(){
   profile = await requireRole(['admin']);
@@ -174,21 +202,53 @@ async function init(){
   if(itqanErr || !itqan){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">تعذر إيجاد حساب إتقان كمقدّم خدمة. تأكد من عمود is_itqan بجدول service_providers.</p>'; return; }
   itqanProviderId = itqan.id;
 
+  // نحدد نطاق الخدمات والمستندات المطلوبة بحسب مسار الطلب (سعودي / استثمار أجنبي)، وداخل الأخير بحسب حالة الجاهزية
+  const ENTITY_LABELS = { sole_proprietorship:'مؤسسة فردية', llc_single:'ذات مسؤولية محدودة (شخص واحد)', llc:'ذات مسؤولية محدودة',
+    closed_jsc_single:'مساهمة مغلقة (شخص واحد)', closed_jsc:'مساهمة مغلقة', simplified_jsc:'مساهمة مبسطة', professional_company:'شركة مهنية' };
+  let preCheckedScopeKeys = [];
+  const { data: reqRow } = await supabase.from('service_requests').select('client_id, path, entity_type_known, saudi_entity_type, trade_name_chosen').eq('id', requestId).single();
+  let readinessBanner = '';
+  if(reqRow && reqRow.path === 'saudi_national'){
+    scopeOptions = scopeOptionsSaudi;
+    docOptions = docOptionsSaudi;
+    const entityKnown = reqRow.entity_type_known;
+    const nameChosen = reqRow.trade_name_chosen;
+    preCheckedScopeKeys = ['incorporation', 'gov_platforms', 'zakat', 'national_address'];
+    if(entityKnown !== true) preCheckedScopeKeys.push('consulting');
+    if(entityKnown !== true || nameChosen !== true) preCheckedScopeKeys.push('name_reservation');
+    const entityText = entityKnown === true ? `نوع الكيان: ${esc(ENTITY_LABELS[reqRow.saudi_entity_type] || reqRow.saudi_entity_type || '—')}` : 'نوع الكيان: غير محدد';
+    const nameText = entityKnown === true ? (nameChosen === true ? 'الاسم التجاري: مختار' : 'الاسم التجاري: غير مختار') : '';
+    readinessBanner = `<div class="msg ok" style="margin-bottom:18px;">🇸🇦 طلب تأسيس سعودي — ${entityText}${nameText ? ' — ' + esc(nameText) : ''}. نطاق الخدمات والمستندات أدناه مبنيان تلقائياً على هذا التقييم، وتقدر تعدّلهما حسب الحاجة.</div>`;
+  } else if(reqRow){
+    scopeOptions = scopeOptionsForeign;
+    const { data: clientRow } = await supabase.from('clients').select('readiness_status, has_foreign_company, foreign_company_name, foreign_company_country').eq('id', reqRow.client_id).maybeSingle();
+    const isReady = clientRow?.readiness_status === 'ready';
+    docOptions = isReady ? docOptionsReady : docOptionsNotReady;
+    needsAcquisitionFee = !isReady;
+    readinessBanner = isReady
+      ? `<div class="msg ok" style="margin-bottom:18px;">🟢 عميل جاهز — يملك شركة أجنبية مؤهلة${clientRow?.foreign_company_name ? ` (${esc(clientRow.foreign_company_name)}${clientRow.foreign_company_country ? ' — ' + esc(clientRow.foreign_company_country) : ''})` : ''}.</div>`
+      : `<div class="msg" style="margin-bottom:18px;background:#FFF6DA;color:#8A6A1E;border:1px solid #E8D9A8;">🔵 عميل غير جاهز — لا يملك شركة أجنبية مؤهلة حالياً. أضف رسوم الاستحواذ على شركة أجنبية مؤهلة ضمن «الرسوم الحكومية التقديرية» أدناه (أضفنا لك سطراً جاهزاً لتعبئة المبلغ)، والمستندات المطلوبة معدّلة تلقائياً لهذه الحالة.</div>`;
+  }
+  const templateBox = document.getElementById('templateBox');
+  if(templateBox) templateBox.insertAdjacentHTML('beforebegin', readinessBanner);
+
+  // نجلب العرض الحالي (إن وُجد) قبل رسم نطاق الخدمات، حتى لا يطغى التحديد التلقائي على عرض محفوظ فعلياً أثناء التعديل
+  const { data: existing } = await supabase.from('offers').select('*').eq('request_id', requestId).neq('status', 'accepted').maybeSingle();
+  const effectivePreChecked = existing ? [] : preCheckedScopeKeys;
+
   document.getElementById('scopeList').innerHTML = scopeOptions.map(o => `
     <div class="check-item">
-      <label for="scope-${o.key}">${o.label}</label>
-      <input type="checkbox" id="scope-${o.key}" value="${o.label}">
+      <label for="scope-${esc(o.key)}">${esc(o.label)}</label>
+      <input type="checkbox" id="scope-${esc(o.key)}" value="${esc(o.label)}" ${effectivePreChecked.includes(o.key) ? 'checked' : ''}>
     </div>`).join('');
 
   document.getElementById('docsList').innerHTML = docOptions.map((d,i) => `
     <div class="check-item">
-      <label for="doc-${i}">${d}</label>
-      <input type="checkbox" id="doc-${i}" value="${d}">
+      <label for="doc-${esc(i)}">${esc(d)}</label>
+      <input type="checkbox" id="doc-${esc(i)}" value="${esc(d)}">
     </div>`).join('');
 
   loadTemplates();
-
-  const { data: existing } = await supabase.from('offers').select('*').eq('request_id', requestId).neq('status', 'accepted').maybeSingle();
 
   if(existing){
     existingOffer = existing;
@@ -196,6 +256,7 @@ async function init(){
     document.querySelector('button.btn.gold[onclick="submitOffer()"]').textContent = 'حفظ التعديلات وإعادة الإرسال';
     prefillFromExisting(existing);
   } else {
+    if(needsAcquisitionFee) addFeeRow('رسوم الاستحواذ على شركة أجنبية مؤهلة', '');
     defaultFees.forEach(([name, fee]) => addFeeRow(name, fee));
   }
 }
@@ -225,8 +286,8 @@ function addFeeRow(name, fee){
   row.className = 'fee-row';
   row.innerHTML = `
     <input type="checkbox" checked>
-    <input type="text" placeholder="اسم الخدمة" value="${name}">
-    <input type="number" placeholder="الرسم" value="${fee}">
+    <input type="text" placeholder="اسم الخدمة" value="${esc(name)}">
+    <input type="number" placeholder="الرسم" value="${esc(fee)}">
     <span class="unit">ر.س</span>
     <button onclick="this.parentElement.remove()">✕</button>
   `;
@@ -238,7 +299,7 @@ async function loadTemplates(){
   const { data } = await supabase.from('offer_templates').select('*').order('name');
   templatesCache = data || [];
   const sel = document.getElementById('templateSelect');
-  sel.innerHTML = '<option value="">-- ابدأ من الصفر --</option>' + templatesCache.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  sel.innerHTML = '<option value="">-- ابدأ من الصفر --</option>' + templatesCache.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
 }
 
 function applyTemplate(){
@@ -326,7 +387,7 @@ async function submitOffer(){
   const signatureInput = document.getElementById('signature_file');
   if(signatureInput.files.length){
     const file = signatureInput.files[0];
-    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const _v = validateUpload(file); if(!_v.ok){ alert(_v.reason); return; } const safeName = safeFileName(file.name);
     const filePath = `${profile.id}/signature_${offerRow.id}_${safeName}`;
     const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
     if(!upErr) await supabase.from('offers').update({ provider_signature_path: filePath }).eq('id', offerRow.id);
@@ -335,7 +396,7 @@ async function submitOffer(){
   const stampInput = document.getElementById('stamp_file');
   if(stampInput.files.length){
     const file = stampInput.files[0];
-    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const _v = validateUpload(file); if(!_v.ok){ alert(_v.reason); return; } const safeName = safeFileName(file.name);
     const filePath = `${profile.id}/stamp_${offerRow.id}_${safeName}`;
     const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
     if(!upErr) await supabase.from('offers').update({ provider_stamp_path: filePath }).eq('id', offerRow.id);
@@ -344,7 +405,7 @@ async function submitOffer(){
   const pdfInput = document.getElementById('pdf_file');
   if(pdfInput.files.length){
     const file = pdfInput.files[0];
-    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const _v = validateUpload(file); if(!_v.ok){ alert(_v.reason); return; } const safeName = safeFileName(file.name);
     const filePath = `${profile.id}/${offerRow.id}_${safeName}`;
     const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
     if(!upErr) await supabase.from('offers').update({ pdf_file_path: filePath }).eq('id', offerRow.id);

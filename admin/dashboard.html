@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,10 +12,11 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>لوحة الإدارة — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   body{background:var(--paper);}
@@ -30,7 +35,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link active"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -128,8 +133,8 @@ async function loadStalled(requests, acceptedOffers){
 
   area.innerHTML = stalled.map(s => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);">
-      <span style="font-size:13px;">${nameMap[s.clientId] || s.clientId}</span>
-      <span class="badge notready">⚠ ${s.days} يوم بدون تحديث</span>
+      <span style="font-size:13px;">${esc(nameMap[s.clientId] || s.clientId)}</span>
+      <span class="badge notready">⚠ ${esc(s.days)} يوم بدون تحديث</span>
     </div>
   `).join('');
 }

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,16 +12,17 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>خدمات ما بعد التأسيس — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -62,23 +67,23 @@ async function loadPostIncorpAdmin(){
     .select('id, service_needs, service_categories, client_notes, status, quoted_price, client_id, clients(profiles(full_name))')
     .order('created_at', {ascending:false});
 
-  if(error){ body.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ body.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ body.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">لا توجد طلبات خدمات ما بعد التأسيس بعد.</p>'; return; }
 
   const statusLabels = { pending_review:'قيد المراجعة من إتقان', quoted:'تم إرسال عرض', accepted:'مقبول ✓', rejected:'مرفوض' };
 
   body.innerHTML = data.map(r => {
-    const needsHtml = Object.entries(r.service_needs || {}).map(([cat, needs]) => `<strong>${cat}:</strong> ${needs.join('، ')}`).join('<br>');
+    const needsHtml = Object.entries(r.service_needs || {}).map(([cat, needs]) => `<strong>${esc(cat)}:</strong> ${esc(needs.join('، '))}`).join('<br>');
     const actionHtml = r.status === 'pending_review'
-      ? `<a href="submit-postincorp-offer.html?id=${r.id}" class="btn gold" style="padding:8px 18px;font-size:13px;">تجهيز عرض تفصيلي</a>`
-      : `<p style="font-size:13px;font-weight:700;color:var(--green-dark);">${r.quoted_price || ''} ر.س</p>
-           <a href="../post-incorp-offer-view.html?id=${r.id}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">عرض التفاصيل</a>
-           ${r.status === 'accepted' ? `<a href="../post-incorp-contract-view.html?request_id=${r.id}" class="btn gold" style="padding:7px 14px;font-size:12.5px;margin-top:0;">الاتفاقية والتوقيع</a>` : ''}`;
+      ? `<a href="submit-postincorp-offer.html?id=${esc(r.id)}" class="btn gold" style="padding:8px 18px;font-size:13px;">تجهيز عرض تفصيلي</a>`
+      : `<p style="font-size:13px;font-weight:700;color:var(--green-dark);">${esc(r.quoted_price || '')} ر.س</p>
+           <a href="../post-incorp-offer-view.html?id=${esc(r.id)}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">عرض التفاصيل</a>
+           ${r.status === 'accepted' ? `<a href="../post-incorp-contract-view.html?request_id=${esc(r.id)}" class="btn gold" style="padding:7px 14px;font-size:12.5px;margin-top:0;">الاتفاقية والتوقيع</a>` : ''}`;
     return `
     <div class="list-item-card">
-      <p style="font-size:14px;margin-bottom:4px;"><strong>${r.clients?.profiles?.full_name || r.client_id}</strong> — ${statusLabels[r.status]}</p>
-      <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;">${needsHtml || (r.service_categories||[]).join('، ')}</p>
-      ${r.client_notes ? `<p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">ملاحظات العميل: ${escapeHtml(r.client_notes)}</p>` : ''}
+      <p style="font-size:14px;margin-bottom:4px;"><strong>${esc(r.clients?.profiles?.full_name || r.client_id)}</strong> — ${esc(statusLabels[r.status])}</p>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;">${needsHtml || esc((r.service_categories||[]).join('، '))}</p>
+      ${r.client_notes ? `<p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">ملاحظات العميل: ${esc(r.client_notes)}</p>` : ''}
       ${actionHtml}
     </div>`;
   }).join('');

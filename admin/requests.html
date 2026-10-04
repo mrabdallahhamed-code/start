@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,16 +12,17 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>طلبات العروض — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -40,7 +45,7 @@
         <h1 class="page-title">طلبات العروض</h1>
         <div class="card">
           <table>
-            <thead><tr><th>العميل</th><th>النشاط</th><th>العروض</th><th>حالة الطلب</th><th>إجراء</th></tr></thead>
+            <thead><tr><th>العميل</th><th>المسار / النشاط</th><th>العروض</th><th>حالة الطلب</th><th>إجراء</th></tr></thead>
             <tbody id="allRequestsBody"><tr><td colspan="5">جارٍ التحميل...</td></tr></tbody>
           </table>
         </div>
@@ -62,10 +67,10 @@ async function loadAllRequests(){
   const body = document.getElementById('allRequestsBody');
   const { data: requests, error } = await supabase
     .from('service_requests')
-    .select('id, status, activity_type, created_at, client_id, incorporation_completed_at, clients(profiles(full_name))')
+    .select('id, status, activity_type, path, entity_type_known, saudi_entity_type, created_at, client_id, incorporation_completed_at, clients(profiles(full_name))')
     .order('created_at', {ascending:false});
 
-  if(error){ body.innerHTML = `<tr><td colspan="5">${escapeHtml(error.message)}</td></tr>`; return; }
+  if(error){ body.innerHTML = `<tr><td colspan="5">${esc(error.message)}</td></tr>`; return; }
   if(!requests || !requests.length){ body.innerHTML = '<tr><td colspan="5">لا توجد طلبات بعد</td></tr>'; return; }
 
   const { data: offers } = await supabase.from('offers').select('id, request_id, status');
@@ -108,30 +113,36 @@ async function loadAllRequests(){
       const refDate = lastActivity ? new Date(lastActivity) : new Date(r.created_at);
       const daysSince = Math.floor((now - refDate) / (1000*60*60*24));
       if(daysSince >= STALL_DAYS){
-        stallBadge = ` <span class="badge notready" title="لا تحديث منذ ${daysSince} يوم">⚠ متأخر (${daysSince} يوم)</span>`;
+        stallBadge = ` <span class="badge notready" title="لا تحديث منذ ${esc(daysSince)} يوم">⚠ متأخر (${esc(daysSince)} يوم)</span>`;
       }
     }
 
     let actionCell = '—';
     if(isCompleted){
-      actionCell = `<a href="journey-tracker.html?request_id=${r.id}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تم التأسيس ✓ — مراجعة المراحل</a>`;
+      actionCell = `<a href="journey-tracker.html?request_id=${esc(r.id)}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تم التأسيس ✓ — مراجعة المراحل</a>`;
     } else if(offerCount === 0){
-      actionCell = `<a href="submit-offer.html?request_id=${r.id}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">تقديم عرض</a>`;
+      actionCell = `<a href="submit-offer.html?request_id=${esc(r.id)}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">تقديم عرض</a>`;
     } else if(offerCount > 0 && !acceptedSet.has(r.id)){
-      actionCell = `<a href="submit-offer.html?request_id=${r.id}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تعديل العرض</a>`;
+      actionCell = `<a href="submit-offer.html?request_id=${esc(r.id)}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">تعديل العرض</a>`;
     } else if(acceptedSet.has(r.id)){
       const offerId = acceptedOfferIdMap[r.id];
       if(contractSignedMap[offerId] && !r.incorporation_completed_at){
-        actionCell = `<a href="journey-tracker.html?request_id=${r.id}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">متابعة المراحل</a>`;
+        actionCell = `<a href="journey-tracker.html?request_id=${esc(r.id)}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">متابعة المراحل</a>`;
       } else if(!contractSignedMap[offerId]){
-        actionCell = `<a href="../contract-view.html?offer_id=${offerId}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">العقد والتوقيع</a>`;
+        actionCell = `<a href="../contract-view.html?offer_id=${esc(offerId)}" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">العقد والتوقيع</a>`;
       }
     }
 
+    const ENTITY_LABELS = { sole_proprietorship:'مؤسسة فردية', llc_single:'ذات مسؤولية محدودة (شخص واحد)', llc:'ذات مسؤولية محدودة',
+      closed_jsc_single:'مساهمة مغلقة (شخص واحد)', closed_jsc:'مساهمة مغلقة', simplified_jsc:'مساهمة مبسطة', professional_company:'شركة مهنية' };
+    const pathCell = r.path === 'saudi_national'
+      ? `🇸🇦 سعودي<br><span style="font-size:11px;color:var(--ink-soft);">${r.entity_type_known ? esc(ENTITY_LABELS[r.saudi_entity_type] || r.saudi_entity_type || '—') : 'كيان غير محدد'}</span>`
+      : `🌍 استثمار أجنبي<br><span style="font-size:11px;color:var(--ink-soft);">${esc(r.activity_type || '—')}</span>`;
+
     return `<tr>
-      <td>${r.clients?.profiles?.full_name || r.client_id}</td>
-      <td>${r.activity_type || '—'}</td>
-      <td>${offerCount} عرض</td>
+      <td>${esc(r.clients?.profiles?.full_name || r.client_id)}</td>
+      <td>${pathCell}</td>
+      <td>${esc(offerCount)} عرض</td>
       <td>${statusLabel}${stallBadge}</td>
       <td>${actionCell}</td>
     </tr>`;

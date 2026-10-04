@@ -187,3 +187,6 @@ tbody tr:not(:last-child) td{border-bottom:1px solid var(--line-soft);}
   .side-link{padding:8px 9px;font-size:11px;}
   .side-link .ic{display:none;}
 }
+
+.brand-name{font-family:'Amiri',serif;font-weight:700;font-size:20px;color:var(--green-dark);line-height:1;}
+.brand-name small{font-family:'Tajawal',sans-serif;font-size:11px;color:var(--ink-soft);font-weight:500;margin-inline-start:4px;}

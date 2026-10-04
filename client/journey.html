@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,9 +12,10 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 <title>رحلة الطلب — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .journey-summary{background:linear-gradient(135deg,var(--green-dark),var(--green)); border-radius:16px; padding:22px 24px; margin-bottom:24px; color:#fff;}
@@ -47,7 +52,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -114,7 +119,7 @@ async function init(){
 
   await loadStages(requests[0].id, area, acceptedOffer.duration_days);
  } catch(err){
-  document.getElementById('journeyArea').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${err.message || err}</div>`;
+  document.getElementById('journeyArea').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${esc(err.message || err)}</div>`;
   console.error(err);
  }
 }
@@ -123,7 +128,7 @@ const STAGE_ICONS = ['🤝','📦','📜','🏢'];
 
 async function loadStages(requestId, area, contractDurationDays){
   const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
-  if(error){ area.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ area.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!stages || !stages.length){ area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">مراحل التنفيذ بتظهر هنا قريباً.</p>'; return; }
 
   const completedCount = stages.filter(s => s.status === 'completed').length;
@@ -148,14 +153,14 @@ async function loadStages(requestId, area, contractDurationDays){
 
   let summaryHtml = `
     <div class="journey-summary">
-      <div class="pct">${pct}%</div>
-      <div class="sub">${completedCount} من ${stages.length} مراحل مكتملة${pct===100?' — تهانينا، رحلتك اكتملت! 🎉':''}</div>
-      <div class="journey-progress-track"><div class="journey-progress-fill" style="width:${pct}%"></div></div>
-      ${durationLine ? `<div style="margin-top:12px;font-size:12.5px;opacity:.95;">${durationLine}</div>` : ''}
+      <div class="pct">${esc(pct)}%</div>
+      <div class="sub">${esc(completedCount)} من ${esc(stages.length)} مراحل مكتملة${pct===100?' — تهانينا، رحلتك اكتملت! 🎉':''}</div>
+      <div class="journey-progress-track"><div class="journey-progress-fill" style="width:${esc(pct)}%"></div></div>
+      ${durationLine ? `<div style="margin-top:12px;font-size:12.5px;opacity:.95;">${esc(durationLine)}</div>` : ''}
     </div>
   `;
 
-  let html = `<div class="timeline"><div class="timeline-fill" style="height:${Math.min(fillHeightPct,100)}%"></div>`;
+  let html = `<div class="timeline"><div class="timeline-fill" style="height:${esc(Math.min(fillHeightPct,100))}%"></div>`;
   for(const s of stages){
     const rowCls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : (s.status === 'in_progress' ? 'active' : ''));
     const cardCls = s.status === 'completed' ? 'completed' : (s.status === 'waiting_client' ? 'waiting' : '');
@@ -166,26 +171,26 @@ async function loadStages(requestId, area, contractDurationDays){
     const procsHtml = (procs || []).map(p => `
       <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0;">
         <span style="color:${p.is_done ? 'var(--green-dark)' : 'var(--ink-faint)'};">${p.is_done ? '✅' : '⬜'}</span>
-        <span style="${p.is_done ? 'color:var(--ink-soft);' : 'color:var(--ink);'}">${p.procedure_name}</span>
+        <span style="${p.is_done ? 'color:var(--ink-soft);' : 'color:var(--ink);'}">${esc(p.procedure_name)}</span>
       </div>`).join('');
 
-    html += `<div class="stage-row ${rowCls}">
-      <div class="stage-icon">${icon}</div>
-      <div class="stage-card ${cardCls}">
+    html += `<div class="stage-row ${esc(rowCls)}">
+      <div class="stage-icon">${esc(icon)}</div>
+      <div class="stage-card ${esc(cardCls)}">
         <div class="stage-head">
-          <strong>${s.stage_name}</strong>
-          <span class="stage-status ${s.status}">${statusLabels[s.status] || s.status}</span>
+          <strong>${esc(s.stage_name)}</strong>
+          <span class="stage-status ${esc(s.status)}">${esc(statusLabels[s.status] || s.status)}</span>
         </div>
         ${procsHtml ? `<div style="background:var(--paper);border-radius:8px;padding:8px 12px;margin:8px 0;">${procsHtml}</div>` : ''}
-        ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${escapeHtml(s.admin_note)}</div>` : ''}
-        ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>ردّك السابق:</strong><br>${escapeHtml(s.client_reply_text)}</div>` : ''}
-        ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${d.file_name || 'ملف'}</span><a href="#" onclick="downloadDoc('${d.file_path}');return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
+        ${s.status === 'waiting_client' && s.admin_note ? `<div class="note-box">⚠️ <strong>فريق إتقان محتاج ردّك:</strong><br>${esc(s.admin_note)}</div>` : ''}
+        ${s.client_reply_text ? `<div class="note-box" style="border-color:var(--green-tint2);background:var(--green-tint);"><strong>ردّك السابق:</strong><br>${esc(s.client_reply_text)}</div>` : ''}
+        ${docs && docs.length ? docs.map(d => `<div class="doc-row"><span>📎 ${esc(d.file_name || 'ملف')}</span><a href="#" data-p="${esc(d.file_path)}" onclick="downloadDoc(this.dataset.p);return false;" style="color:var(--green-dark);">تحميل</a></div>`).join('') : ''}
         ${s.status === 'waiting_client' ? `
           <div class="upload-row">
-            <textarea id="reply-${s.id}" rows="2" placeholder="اكتب ردّك هنا (لو مو محتاج ترفع ملف)..." style="margin-bottom:8px;"></textarea>
+            <textarea id="reply-${esc(s.id)}" rows="2" placeholder="اكتب ردّك هنا (لو مو محتاج ترفع ملف)..." style="margin-bottom:8px;"></textarea>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn gold" style="padding:8px 16px;font-size:12.5px;" onclick="sendReply('${s.id}')">📝 إرسال الرد المكتوب</button>
-              <label class="btn ghost" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع ملف بدل ذلك<input type="file" style="display:none;" onchange="uploadDoc('${s.id}', this, '${requestId}')"></label>
+              <button class="btn gold" style="padding:8px 16px;font-size:12.5px;" onclick="sendReply('${esc(s.id)}')">📝 إرسال الرد المكتوب</button>
+              <label class="btn ghost" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع ملف بدل ذلك<input type="file" style="display:none;" onchange="uploadDoc('${esc(s.id)}', this, '${esc(requestId)}')"></label>
             </div>
           </div>` : ''}
       </div>
@@ -200,13 +205,10 @@ async function sendReply(stageId){
   const text = textarea.value.trim();
   if(!text){ alert('اكتب ردّك أولاً'); return; }
 
-  const { error } = await supabase.from('request_stages').update({
-    client_reply_text: text, client_replied_at: new Date().toISOString()
-  }).eq('id', stageId);
+  const { error } = await supabase.rpc('client_reply_stage', { p_stage: stageId, p_text: text });
   if(error){ alert(error.message); return; }
 
-  const { data: admins } = await supabase.from('profiles').select('id').eq('role','admin').limit(3);
-  (admins||[]).forEach(a => createNotification(a.id, 'العميل ردّ على طلبك', text.slice(0,60), '../admin/requests.html'));
+  notifyAdmins('العميل ردّ على طلبك', text.slice(0,60), '../admin/requests.html');
 
   init();
 }
@@ -214,22 +216,21 @@ async function sendReply(stageId){
 async function uploadDoc(stageId, input, requestId){
   if(!input.files.length) return;
   const file = input.files[0];
-  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  const _v = validateUpload(file); if(!_v.ok){ alert(_v.reason); return; } const safeName = safeFileName(file.name);
   const filePath = `${profile.id}/stage_${stageId}_${Date.now()}_${safeName}`;
   const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
   if(upErr){ alert(upErr.message); return; }
   await supabase.from('stage_documents').insert({ stage_id: stageId, file_path: filePath, file_name: file.name, uploaded_by_role: 'client' });
 
   // إشعار الأدمن بوصول الرد
-  const { data: admins } = await supabase.from('profiles').select('id').eq('role','admin').limit(3);
-  (admins||[]).forEach(a => createNotification(a.id, 'العميل رفع ملف مطلوب', 'بانتظار مراجعتك', '../admin/requests.html'));
+  notifyAdmins('العميل رفع ملف مطلوب', 'بانتظار مراجعتك', '../admin/requests.html');
 
   init();
 }
 
 async function downloadDoc(filePath){
   const { data } = await supabase.storage.from('offer-attachments').createSignedUrl(filePath, 3600);
-  if(data?.signedUrl) window.open(data.signedUrl, '_blank');
+  if(data?.signedUrl) openSignedUrl(data.signedUrl);
 }
 
 init();

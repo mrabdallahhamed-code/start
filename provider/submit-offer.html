@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,10 +12,11 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>تقديم عرض — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .check-item{display:grid;grid-template-columns:1fr 26px;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);}
@@ -26,7 +31,7 @@
 </style>
 </head>
 <body>
-<header class="top"><div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div></header>
+<header class="top"><div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div></header>
 <main style="max-width:680px;">
   <a href="dashboard.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع للوحة الرئيسية</a>
   <h1 class="page-title" style="margin-top:10px;">تقديم عرض تفصيلي</h1>
@@ -138,14 +143,14 @@ async function init(){
 
   document.getElementById('scopeList').innerHTML = scopeOptions.map(o => `
     <div class="check-item">
-      <label for="scope-${o.key}">${o.label}</label>
-      <input type="checkbox" id="scope-${o.key}" value="${o.label}">
+      <label for="scope-${esc(o.key)}">${esc(o.label)}</label>
+      <input type="checkbox" id="scope-${esc(o.key)}" value="${esc(o.label)}">
     </div>`).join('');
 
   document.getElementById('docsList').innerHTML = docOptions.map((d,i) => `
     <div class="check-item">
-      <label for="doc-${i}">${d}</label>
-      <input type="checkbox" id="doc-${i}" value="${d}">
+      <label for="doc-${esc(i)}">${esc(d)}</label>
+      <input type="checkbox" id="doc-${esc(i)}" value="${esc(d)}">
     </div>`).join('');
 
   defaultFees.forEach(([name, fee]) => addFeeRow(name, fee));
@@ -157,8 +162,8 @@ function addFeeRow(name, fee){
   row.className = 'fee-row';
   row.innerHTML = `
     <input type="checkbox" checked>
-    <input type="text" placeholder="اسم الخدمة" value="${name}">
-    <input type="number" placeholder="الرسم" value="${fee}">
+    <input type="text" placeholder="اسم الخدمة" value="${esc(name)}">
+    <input type="number" placeholder="الرسم" value="${esc(fee)}">
     <span class="unit">ر.س</span>
     <button onclick="this.parentElement.remove()">✕</button>
   `;
@@ -204,7 +209,7 @@ async function submitOffer(){
   const signatureInput = document.getElementById('signature_file');
   if(signatureInput.files.length){
     const file = signatureInput.files[0];
-    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const _v = validateUpload(file); if(!_v.ok){ alert(_v.reason); return; } const safeName = safeFileName(file.name);
     const filePath = `${profile.id}/signature_${offerRow.id}_${safeName}`;
     const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
     if(!upErr) await supabase.from('offers').update({ provider_signature_path: filePath }).eq('id', offerRow.id);
@@ -213,7 +218,7 @@ async function submitOffer(){
   const stampInput = document.getElementById('stamp_file');
   if(stampInput.files.length){
     const file = stampInput.files[0];
-    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const _v = validateUpload(file); if(!_v.ok){ alert(_v.reason); return; } const safeName = safeFileName(file.name);
     const filePath = `${profile.id}/stamp_${offerRow.id}_${safeName}`;
     const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
     if(!upErr) await supabase.from('offers').update({ provider_stamp_path: filePath }).eq('id', offerRow.id);
@@ -222,7 +227,7 @@ async function submitOffer(){
   const pdfInput = document.getElementById('pdf_file');
   if(pdfInput.files.length){
     const file = pdfInput.files[0];
-    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const _v = validateUpload(file); if(!_v.ok){ alert(_v.reason); return; } const safeName = safeFileName(file.name);
     const filePath = `${profile.id}/${offerRow.id}_${safeName}`;
     const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, file);
     if(!upErr) await supabase.from('offers').update({ pdf_file_path: filePath }).eq('id', offerRow.id);

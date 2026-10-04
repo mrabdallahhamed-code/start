@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,10 +12,11 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>لوحة العميل — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   body{background:var(--paper);}
@@ -59,7 +64,7 @@
 
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link active"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -145,14 +150,23 @@ async function showMainContent(){
   }
   document.getElementById('statOffers').textContent = totalOffers;
 
-  // مرحلة العميل الحالية
-  let stageText = 'قبل التقييم';
-  if(!clientRow?.assessment_completed_at) stageText = 'قبل التقييم';
-  else if(!latestRequest) stageText = 'بانتظار طلب عروض';
-  else if(latestRequest.status === 'pending_admin_review') stageText = 'قيد المراجعة';
-  else if(latestRequest.status === 'open' && !hasAccepted) stageText = 'بانتظار عروض';
-  else if(hasAccepted && latestRequest.status !== 'completed') stageText = 'قيد التنفيذ';
-  else if(latestRequest.status === 'completed') stageText = 'مكتمل ✓';
+  // مرحلة العميل الحالية (مسار الاستثمار الأجنبي يمر ببوصلة الجاهزية أولاً، والمسار السعودي يبدأ مباشرة بطلب التأسيس)
+  const isSaudiPath = clientRow?.incorporation_path === 'saudi_national';
+  let stageText = isSaudiPath ? 'بانتظار طلب تأسيس' : 'قبل التقييم';
+  if(isSaudiPath){
+    if(!latestRequest) stageText = 'بانتظار طلب تأسيس';
+    else if(latestRequest.status === 'pending_admin_review') stageText = 'قيد المراجعة';
+    else if(latestRequest.status === 'open' && !hasAccepted) stageText = 'بانتظار عروض';
+    else if(hasAccepted && latestRequest.status !== 'completed') stageText = 'قيد التنفيذ';
+    else if(latestRequest.status === 'completed') stageText = 'مكتمل ✓';
+  } else {
+    if(!clientRow?.assessment_completed_at) stageText = 'قبل التقييم';
+    else if(!latestRequest) stageText = 'بانتظار طلب عروض';
+    else if(latestRequest.status === 'pending_admin_review') stageText = 'قيد المراجعة';
+    else if(latestRequest.status === 'open' && !hasAccepted) stageText = 'بانتظار عروض';
+    else if(hasAccepted && latestRequest.status !== 'completed') stageText = 'قيد التنفيذ';
+    else if(latestRequest.status === 'completed') stageText = 'مكتمل ✓';
+  }
   document.getElementById('statStage').textContent = stageText;
 
   // عدد الأيام منذ بداية الطلب (أو منذ التسجيل لو ما فيه طلب)
@@ -166,9 +180,9 @@ async function showMainContent(){
 async function loadRecentMsgs(){
   const { data, error } = await supabase.from('admin_messages').select('*').eq('recipient_id', profile.id).order('created_at', {ascending:false}).limit(3);
   const box = document.getElementById('recentMsgs');
-  if(error){ box.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ box.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ box.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد رسائل حتى الآن.</p>'; return; }
-  box.innerHTML = data.map(m => `<div style="font-size:13px;padding:9px 12px;border-radius:10px;margin-bottom:6px;background:${m.sender_id===profile.id?'var(--green-tint)':'var(--paper)'};border:1px solid var(--line-soft);">${escapeHtml(m.message)}</div>`).join('');
+  box.innerHTML = data.map(m => `<div style="font-size:13px;padding:9px 12px;border-radius:10px;margin-bottom:6px;background:${m.sender_id===profile.id?'var(--green-tint)':'var(--paper)'};border:1px solid var(--line-soft);">${esc(m.message)}</div>`).join('');
 }
 
 init();

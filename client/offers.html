@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,10 +12,11 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>العروض — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .chat-box{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px;background:var(--paper);}
@@ -51,7 +56,7 @@
 
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -115,25 +120,25 @@ async function loadOffers(){
     .eq('request_id', activeRequest.id)
     .order('price');
 
-  if(error){ area.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ area.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!offers || !offers.length){ area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">لا توجد عروض بعد — سيتواصل معك مقدمو الخدمة قريباً.</p>'; return; }
 
   let html = `<table><thead><tr><th>مقدّم الخدمة</th><th>السعر</th><th>مدة التنفيذ</th><th>إجراء</th></tr></thead><tbody>`;
   offers.forEach(o => {
     const isAccepted = o.status === 'accepted';
     html += `<tr>
-      <td>${o.service_providers?.company_name || '—'}</td>
-      <td>${o.price} ر.س</td>
-      <td>${o.duration_days} يوم</td>
+      <td>${esc(o.service_providers?.company_name || '—')}</td>
+      <td>${esc(o.price)} ر.س</td>
+      <td>${esc(o.duration_days)} يوم</td>
       <td>
-        ${isAccepted ? '<span class="badge ready">تم القبول ✓</span> <a href="../contract-view.html?offer_id=' + o.id + '" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">عرض العقد والتوقيع</a>' : (activeRequest.status === 'open' ? `<button class="btn" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="acceptOffer('${o.id}','${activeRequest.id}')">قبول العرض</button>` : '—')}
-        <a href="../offer-view.html?id=${o.id}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">عرض التفاصيل</a>
-        <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="toggleChat('${o.id}')">محادثة</button>
-        ${isAccepted ? `<button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="togglePayments('${o.id}')">الدفعات</button>` : ''}
+        ${isAccepted ? '<span class="badge ready">تم القبول ✓</span> <a href="../contract-view.html?offer_id=' + esc(o.id) + '" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">عرض العقد والتوقيع</a>' : (activeRequest.status === 'open' ? `<button class="btn" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="acceptOffer('${esc(o.id)}','${esc(activeRequest.id)}')">قبول العرض</button>` : '—')}
+        <a href="../offer-view.html?id=${esc(o.id)}" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">عرض التفاصيل</a>
+        <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="toggleChat('${esc(o.id)}')">محادثة</button>
+        ${isAccepted ? `<button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="togglePayments('${esc(o.id)}')">الدفعات</button>` : ''}
       </td>
     </tr>
-    <tr id="chat-row-${o.id}" style="display:none;"><td colspan="4"><div id="chat-${o.id}"></div></td></tr>
-    ${isAccepted ? `<tr id="payments-row-${o.id}" style="display:none;"><td colspan="4"><div id="payments-${o.id}"></div></td></tr>` : ''}`;
+    <tr id="chat-row-${esc(o.id)}" style="display:none;"><td colspan="4"><div id="chat-${esc(o.id)}"></div></td></tr>
+    ${isAccepted ? `<tr id="payments-row-${esc(o.id)}" style="display:none;"><td colspan="4"><div id="payments-${esc(o.id)}"></div></td></tr>` : ''}`;
   });
   html += `</tbody></table>`;
   area.innerHTML = html;
@@ -148,17 +153,17 @@ function toggleChat(offerId){
 
 async function renderChat(offerId){
   const el = document.getElementById(`chat-${offerId}`);
-  el.innerHTML = `<div class="chat-box"><div class="chat-msgs" id="msgs-${offerId}">جارٍ التحميل...</div>
-    <div class="chat-input-row"><input id="input-${offerId}" placeholder="اكتب رسالة..."><button class="btn" style="margin:0;padding:8px 16px;" onclick="sendMessage('${offerId}')">إرسال</button></div></div>`;
+  el.innerHTML = `<div class="chat-box"><div class="chat-msgs" id="msgs-${esc(offerId)}">جارٍ التحميل...</div>
+    <div class="chat-input-row"><input id="input-${esc(offerId)}" placeholder="اكتب رسالة..."><button class="btn" style="margin:0;padding:8px 16px;" onclick="sendMessage('${esc(offerId)}')">إرسال</button></div></div>`;
   loadMessages(offerId);
 }
 
 async function loadMessages(offerId){
   const { data, error } = await supabase.from('messages').select('*').eq('offer_id', offerId).order('created_at');
   const box = document.getElementById(`msgs-${offerId}`);
-  if(error){ box.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ box.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ box.innerHTML = '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد رسائل بعد.</p>'; return; }
-  box.innerHTML = data.map(m => `<div class="chat-msg ${m.sender_id === profile.id ? 'mine' : 'theirs'}">${escapeHtml(m.message)}</div>`).join('');
+  box.innerHTML = data.map(m => `<div class="chat-msg ${m.sender_id === profile.id ? 'mine' : 'theirs'}">${esc(m.message)}</div>`).join('');
   box.scrollTop = box.scrollHeight;
 }
 
@@ -171,8 +176,7 @@ async function sendMessage(offerId){
   input.value = '';
   loadMessages(offerId);
 
-  const { data: offerRow } = await supabase.from('offers').select('provider_id').eq('id', offerId).single();
-  if(offerRow) createNotification(offerRow.provider_id, 'رسالة جديدة من العميل', text.slice(0,60), '../provider/dashboard.html');
+  notifyAdmins('رسالة جديدة من العميل', text.slice(0,60), 'admin/requests.html');
 }
 
 function togglePayments(offerId){
@@ -186,29 +190,26 @@ async function loadPayments(offerId){
   const el = document.getElementById(`payments-${offerId}`);
   const { data, error } = await supabase.from('offer_payments').select('*').eq('offer_id', offerId).order('created_at');
 
-  if(error){ el.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
-  if(!data || !data.length){ el.innerHTML = '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد دفعات مسجّلة بعد من مقدّم الخدمة.</p>'; return; }
+  if(error){ el.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد دفعات مسجّلة بعد من إتقان.</p>'; return; }
 
   el.innerHTML = data.map(p => {
     let statusText, statusColor;
-    if(p.client_confirmed && p.provider_confirmed){ statusText = '✅ مؤكد من الطرفين'; statusColor = 'var(--green)'; }
-    else if(p.client_confirmed){ statusText = 'بانتظار تأكيد مقدّم الخدمة'; statusColor = 'var(--gold-deep)'; }
-    else { statusText = 'بانتظار تأكيدك للسداد'; statusColor = 'var(--ink-soft)'; }
+    if(p.provider_confirmed){ statusText = '✅ مؤكَّدة من إتقان'; statusColor = 'var(--green)'; }
+    else if(p.client_confirmed){ statusText = 'أبلغتَ بالسداد — بانتظار مطابقة إتقان'; statusColor = 'var(--gold-deep)'; }
+    else { statusText = 'بانتظار سدادك'; statusColor = 'var(--ink-soft)'; }
 
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);">
-      <div><strong style="font-size:13px;">${p.label}</strong> — <span style="font-size:12.5px;">${p.amount} ر.س</span><br><span style="font-size:11.5px;color:${statusColor};">${statusText}</span></div>
-      ${!p.client_confirmed ? `<button class="btn" style="padding:6px 12px;font-size:11px;margin-top:0;" onclick="confirmPaymentClient('${p.id}','${offerId}')">أكّد أنني سدّدت</button>` : ''}
+      <div><strong style="font-size:13px;">${esc(p.label)}</strong> — <span style="font-size:12.5px;">${esc(p.amount)} ر.س</span><br><span style="font-size:11.5px;color:${esc(statusColor)};">${esc(statusText)}</span></div>
+      ${!p.client_confirmed ? `<button class="btn" style="padding:6px 12px;font-size:11px;margin-top:0;" onclick="confirmPaymentClient('${esc(p.id)}','${esc(offerId)}')">أبلغنا بالسداد</button>` : ''}
     </div>`;
   }).join('');
 }
 
 async function confirmPaymentClient(paymentId, offerId){
-  const { error } = await supabase.from('offer_payments').update({ client_confirmed: true, client_confirmed_at: new Date().toISOString() }).eq('id', paymentId);
+  const { error } = await supabase.rpc('client_report_payment', { p_payment: paymentId });
   if(error){ alert(error.message); return; }
   loadPayments(offerId);
-
-  const { data: offerRow } = await supabase.from('offers').select('provider_id').eq('id', offerId).single();
-  if(offerRow) createNotification(offerRow.provider_id, 'العميل أكّد السداد', 'يرجى تأكيد استلام الدفعة من لوحتك', '../provider/dashboard.html');
 }
 
 async function acceptOffer(offerId, requestId){
@@ -273,62 +274,12 @@ async function confirmAcceptWithSignature(){
   const { error: upErr } = await supabase.storage.from('offer-attachments').upload(filePath, blob);
   if(upErr){ msg.className = 'msg err'; msg.textContent = upErr.message; return; }
 
-  const { error: offErr } = await supabase.from('offers').update({
-    status: 'accepted', client_approved_at: new Date().toISOString(),
-    client_signature_name: name, client_signature_path: filePath, client_signed_at: new Date().toISOString()
-  }).eq('id', offerId);
-  if(offErr){ msg.className = 'msg err'; msg.textContent = offErr.message; return; }
-
-  const { error: reqErr } = await supabase.from('service_requests').update({ status: 'offer_selected' }).eq('id', requestId);
-  if(reqErr){ msg.className = 'msg err'; msg.textContent = reqErr.message; return; }
-
-  await createStagesIfNeeded(requestId);
-
-  await supabase.from('contracts').insert({ request_id: requestId, offer_id: offerId, client_id: profile.id });
+  const { error: rpcErr } = await supabase.rpc('accept_offer', { p_offer: offerId, p_signature_name: name, p_signature_path: filePath });
+  if(rpcErr){ msg.className = 'msg err'; msg.textContent = rpcErr.message; return; }
 
   closeSignatureModal();
   loadOffers();
 
-  const { data: offerRow } = await supabase.from('offers').select('provider_id').eq('id', offerId).single();
-  if(offerRow) createNotification(offerRow.provider_id, 'تم قبول عرضك ✓', 'العميل قبل عرضك ووقّعه، تابع مراحل التنفيذ من لوحتك', '../provider/dashboard.html');
-}
-
-async function createStagesIfNeeded(requestId){
-  const { data: existing } = await supabase.from('request_stages').select('id').eq('request_id', requestId).limit(1);
-  if(existing && existing.length) return;
-
-  const { data: clientRow } = await supabase.from('clients').select('has_foreign_company').eq('id', profile.id).single();
-  const hasCompany = clientRow?.has_foreign_company === true;
-
-  const phases = [
-    { name: 'مرحلة الاستحواذ على شركة أجنبية', skip: hasCompany,
-      procedures: ['بدء إجراءات الاستحواذ', 'بدء إجراءات نقل الملكية للشركة الخارجية', 'تصديق المستندات'] },
-    { name: 'مرحلة شحن المستندات', skip: false,
-      procedures: ['شحن المستندات'] },
-    { name: 'مرحلة ترخيص الاستثمار', skip: false,
-      procedures: ['التقديم على رخصة الاستثمار', 'صدور رخصة الاستثمار'] },
-    { name: 'مرحلة التأسيس', skip: false,
-      procedures: ['حجز الاسم التجاري', 'التقديم على عقد التأسيس والسجل التجاري', 'صدور عقد التأسيس والسجل التجاري'] },
-  ];
-
-  for(let i = 0; i < phases.length; i++){
-    const p = phases[i];
-    const { data: stageRow } = await supabase.from('request_stages').insert({
-      request_id: requestId,
-      stage_order: i + 1,
-      stage_name: p.name,
-      status: p.skip ? 'completed' : 'pending',
-      completed_at: p.skip ? new Date().toISOString() : null,
-      admin_note: p.skip ? 'العميل يملك شركة أجنبية قائمة بالفعل — هذي المرحلة غير مطلوبة.' : null,
-    }).select().single();
-
-    if(stageRow){
-      const procRows = p.procedures.map((name, idx) => ({
-        stage_id: stageRow.id, procedure_order: idx + 1, procedure_name: name, is_done: p.skip
-      }));
-      await supabase.from('stage_procedures').insert(procRows);
-    }
-  }
 }
 
 init();

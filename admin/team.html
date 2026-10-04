@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,16 +12,17 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>الفريق — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -78,13 +83,13 @@ async function init(){
 async function loadAdmins(){
   const { data, error } = await supabase.from('profiles').select('id, full_name, email').eq('role', 'admin').order('full_name');
   const list = document.getElementById('adminsList');
-  if(error){ list.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ list.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ list.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا يوجد أعضاء أدمن.</p>'; return; }
 
   list.innerHTML = data.map(a => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);">
-      <div><strong style="font-size:13.5px;">${escapeHtml(a.full_name)}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${a.email || 'بريد غير مسجّل (حساب قديم)'}</span></div>
-      ${a.id !== myProfile.id ? `<button class="btn ghost" style="padding:6px 14px;font-size:12px;margin-top:0;" onclick="demote('${a.id}')">تنزيل لعميل</button>` : `<span class="badge ready">أنت</span>`}
+      <div><strong style="font-size:13.5px;">${esc(a.full_name)}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${esc(a.email || 'بريد غير مسجّل (حساب قديم)')}</span></div>
+      ${a.id !== myProfile.id ? `<button class="btn ghost" style="padding:6px 14px;font-size:12px;margin-top:0;" onclick="demote('${esc(a.id)}')">تنزيل لعميل</button>` : `<span class="badge ready">أنت</span>`}
     </div>`).join('');
 }
 
@@ -94,33 +99,27 @@ async function searchAccounts(){
   if(!q){ results.innerHTML = ''; return; }
 
   const { data, error } = await supabase.from('profiles').select('id, full_name, email, role').ilike('email', `%${q}%`).limit(10);
-  if(error){ results.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ results.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ results.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد نتائج — تأكد الحساب مسجّل حديثاً (الحسابات القديمة قبل هذا التحديث ما تحتوي بريدها هنا، دوّر عنها بـ Supabase Table Editor بدلاً من ذلك).</p>'; return; }
 
   results.innerHTML = data.map(p => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);">
-      <div><strong style="font-size:13.5px;">${escapeHtml(p.full_name)}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${p.email} — ${p.role === 'admin' ? 'أدمن حالياً' : 'حساب عميل'}</span></div>
-      ${p.role !== 'admin' ? `<button class="btn gold" style="padding:6px 14px;font-size:12px;margin-top:0;" onclick="promote('${p.id}')">ترقية لأدمن</button>` : '<span class="badge ready">أدمن ✓</span>'}
+      <div><strong style="font-size:13.5px;">${esc(p.full_name)}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${esc(p.email)} — ${p.role === 'admin' ? 'أدمن حالياً' : 'حساب عميل'}</span></div>
+      ${p.role !== 'admin' ? `<button class="btn gold" style="padding:6px 14px;font-size:12px;margin-top:0;" onclick="promote('${esc(p.id)}')">ترقية لأدمن</button>` : '<span class="badge ready">أدمن ✓</span>'}
     </div>`).join('');
 }
 
 async function promote(id){
   if(!confirm('تأكيد ترقية هذا الحساب لصلاحية أدمن كاملة؟')) return;
-  const { error } = await supabase.from('profiles').update({ role: 'admin' }).eq('id', id);
+  const { error } = await supabase.rpc('admin_set_role', { p_user: id, p_role: 'admin' });
   if(error){ alert(error.message); return; }
-
-  await supabase.from('audit_log').insert({
-    entity_type: 'profiles', entity_id: id, action: 'promoted_to_admin',
-    actor_id: myProfile.id, actor_role: 'admin', details: {}
-  });
-
   searchAccounts();
   loadAdmins();
 }
 
 async function demote(id){
   if(!confirm('تأكيد تنزيل هذا الحساب لعميل عادي؟')) return;
-  const { error } = await supabase.from('profiles').update({ role: 'client' }).eq('id', id);
+  const { error } = await supabase.rpc('admin_set_role', { p_user: id, p_role: 'client' });
   if(error){ alert(error.message); return; }
   loadAdmins();
 }

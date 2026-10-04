@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,16 +12,17 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>بياناتي — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -59,6 +64,27 @@
           <button class="btn gold" onclick="saveProfile()">حفظ التغييرات</button>
           <div id="msg"></div>
         </div>
+
+        <h2 class="page-title" style="font-size:17px;margin-top:28px;">الدولة ونوع التأسيس</h2>
+        <div class="card">
+          <label>دولة التأسيس</label>
+          <select id="country">
+            <option value="SA">السعودية</option>
+            <option value="AE">الإمارات</option>
+            <option value="BH">البحرين</option>
+            <option value="QA">قطر</option>
+          </select>
+          <div id="pathWrap" style="display:none;">
+            <label style="margin-top:14px;">نوع التأسيس</label>
+            <select id="incorporation_path">
+              <option value="foreign_investment">استثمار أجنبي</option>
+              <option value="saudi_national">مواطن سعودي</option>
+            </select>
+          </div>
+          <p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">تغيير هذا الاختيار لا يؤثر على طلباتك الحالية، ويُستخدم فقط للطلبات الجديدة.</p>
+          <button class="btn ghost" onclick="saveCountryPath()">حفظ</button>
+          <div id="cpMsg"></div>
+        </div>
       </div>
     </main>
   </div>
@@ -78,6 +104,26 @@ async function init(){
   document.getElementById('full_name').value = profile.full_name || '';
   document.getElementById('contact_phone').value = profile.contact_phone || '';
   document.getElementById('preferred_contact').value = profile.preferred_contact || 'email';
+
+  const { data: clientRow } = await supabase.from('clients').select('country, incorporation_path').eq('id', profile.id).maybeSingle();
+  const country = clientRow?.country || 'SA';
+  document.getElementById('country').value = country;
+  document.getElementById('pathWrap').style.display = country === 'SA' ? 'block' : 'none';
+  if(clientRow?.incorporation_path) document.getElementById('incorporation_path').value = clientRow.incorporation_path;
+  document.getElementById('country').addEventListener('change', e => {
+    document.getElementById('pathWrap').style.display = e.target.value === 'SA' ? 'block' : 'none';
+  });
+}
+
+async function saveCountryPath(){
+  const country = document.getElementById('country').value;
+  const incorporation_path = country === 'SA' ? document.getElementById('incorporation_path').value : null;
+  const cpMsg = document.getElementById('cpMsg');
+  const { error } = await supabase.from('clients').update({ country, incorporation_path }).eq('id', profile.id);
+  if(error){ cpMsg.className = 'msg err'; cpMsg.textContent = error.message; return; }
+  cpMsg.className = 'msg ok';
+  cpMsg.textContent = country === 'SA' ? 'تم الحفظ — يطبَّق على طلباتك الجديدة.' : 'تم الحفظ — سيتم تحويلك لصفحة الانتظار.';
+  if(country !== 'SA'){ setTimeout(() => window.location.href = 'coming-soon.html', 900); }
 }
 
 async function saveProfile(){

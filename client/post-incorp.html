@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,10 +12,11 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>خدمات ما بعد التأسيس — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .hero-card{background:linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%); border-radius:var(--radius); padding:34px; margin-bottom:24px; color:var(--white); text-align:center; box-shadow:var(--shadow-lg);}
@@ -22,7 +27,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -87,7 +92,7 @@ async function loadPostIncorp(){
   const area = document.getElementById('postIncorpArea');
   const { data, error } = await supabase.from('post_incorp_requests').select('*').eq('client_id', profile.id).order('created_at', {ascending:false}).limit(1);
 
-  if(error){ area.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ area.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
 
   if(!data || !data.length){
     area.innerHTML = `
@@ -98,15 +103,15 @@ async function loadPostIncorp(){
           <div class="service-card" style="margin-bottom:10px;">
             <div class="service-head" style="cursor:default;">
               <div class="check-item" style="display:grid;grid-template-columns:1fr 26px;align-items:center;gap:10px;width:100%;">
-                <label for="pi-${i}" style="margin:0;font-weight:700;font-size:14px;">${c}</label>
-                <input type="checkbox" id="pi-${i}" value="${c}" style="margin:0;width:18px;height:18px;justify-self:start;" onchange="togglePiNeeds(${i})">
+                <label for="pi-${esc(i)}" style="margin:0;font-weight:700;font-size:14px;">${esc(c)}</label>
+                <input type="checkbox" id="pi-${esc(i)}" value="${esc(c)}" style="margin:0;width:18px;height:18px;justify-self:start;" onchange="togglePiNeeds(${esc(i)})">
               </div>
             </div>
-            <div id="piNeeds-${i}" style="display:none;padding:0 22px 16px;">
+            <div id="piNeeds-${esc(i)}" style="display:none;padding:0 22px 16px;">
               ${postIncorpNeeds[c].map((n,j) => `
                 <div class="check-item" style="display:grid;grid-template-columns:1fr 26px;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-soft);">
-                  <label for="pi-${i}-${j}" style="margin:0;font-weight:400;font-size:13px;">${n}</label>
-                  <input type="checkbox" id="pi-${i}-${j}" value="${n}" style="margin:0;width:16px;height:16px;justify-self:start;">
+                  <label for="pi-${esc(i)}-${esc(j)}" style="margin:0;font-weight:400;font-size:13px;">${esc(n)}</label>
+                  <input type="checkbox" id="pi-${esc(i)}-${esc(j)}" value="${esc(n)}" style="margin:0;width:16px;height:16px;justify-self:start;">
                 </div>
               `).join('')}
             </div>
@@ -125,21 +130,21 @@ async function loadPostIncorp(){
   const statusLabels = { pending_review:'قيد المراجعة — بانتظار عرض من إتقان', quoted:'وصلك عرض سعر', accepted:'تم القبول ✓', rejected:'تم الرفض' };
 
   let html = `<h3 style="margin-bottom:10px;">طلبك الحالي</h3>`;
-  html += `<p style="font-size:13.5px;margin-bottom:10px;">حالة الطلب: <strong>${statusLabels[req.status]}</strong></p>`;
-  const needsHtml = Object.entries(req.service_needs || {}).map(([cat, needs]) => `<strong>${cat}:</strong> ${needs.join('، ')}`).join('<br>');
+  html += `<p style="font-size:13.5px;margin-bottom:10px;">حالة الطلب: <strong>${esc(statusLabels[req.status])}</strong></p>`;
+  const needsHtml = Object.entries(req.service_needs || {}).map(([cat, needs]) => `<strong>${esc(cat)}:</strong> ${esc(needs.join('، '))}`).join('<br>');
   html += `<p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;">${needsHtml}</p>`;
 
   if(req.status === 'quoted'){
     html += `
       <div class="card" style="background:var(--green-tint);">
-        <p style="font-size:15px;font-weight:700;color:var(--green-dark);margin-bottom:8px;">${req.quoted_price} ر.س</p>
-        <a href="../post-incorp-offer-view.html?id=${req.id}" class="btn ghost" style="padding:8px 16px;font-size:12.5px;margin-top:0;">عرض التفاصيل الكاملة</a><br>
-        <button class="btn" style="margin-left:8px;" onclick="respondPostIncorp('${req.id}','accepted')">قبول العرض</button>
-        <button class="btn ghost" onclick="respondPostIncorp('${req.id}','rejected')">رفض</button>
+        <p style="font-size:15px;font-weight:700;color:var(--green-dark);margin-bottom:8px;">${esc(req.quoted_price)} ر.س</p>
+        <a href="../post-incorp-offer-view.html?id=${esc(req.id)}" class="btn ghost" style="padding:8px 16px;font-size:12.5px;margin-top:0;">عرض التفاصيل الكاملة</a><br>
+        <button class="btn" style="margin-left:8px;" onclick="respondPostIncorp('${esc(req.id)}','accepted')">قبول العرض</button>
+        <button class="btn ghost" onclick="respondPostIncorp('${esc(req.id)}','rejected')">رفض</button>
       </div>`;
   } else if(req.status === 'accepted'){
-    html += `<a href="../post-incorp-offer-view.html?id=${req.id}" class="btn ghost" style="padding:8px 16px;font-size:12.5px;">عرض التفاصيل الكاملة</a>
-      <a href="../post-incorp-contract-view.html?request_id=${req.id}" class="btn gold" style="padding:8px 16px;font-size:12.5px;">عرض الاتفاقية والتوقيع</a>
+    html += `<a href="../post-incorp-offer-view.html?id=${esc(req.id)}" class="btn ghost" style="padding:8px 16px;font-size:12.5px;">عرض التفاصيل الكاملة</a>
+      <a href="../post-incorp-contract-view.html?request_id=${esc(req.id)}" class="btn gold" style="padding:8px 16px;font-size:12.5px;">عرض الاتفاقية والتوقيع</a>
       <button onclick="goToSimamFromClient()" class="btn gold" style="padding:8px 16px;font-size:12.5px;">🎉 الانتقال إلى صمام لمتابعة خدماتك ←</button>`;
   } else if(req.status === 'rejected'){
     html += `<button class="btn gold" onclick="resetPostIncorp()">طلب جديد</button>`;
@@ -182,33 +187,25 @@ async function submitPostIncorp(){
 }
 
 async function respondPostIncorp(id, decision){
-  const { error } = await supabase.from('post_incorp_requests').update({ status: decision, client_responded_at: new Date().toISOString() }).eq('id', id);
+  const { error } = await supabase.rpc('respond_post_incorp', { p_request: id, p_decision: decision });
   if(error){ alert(error.message); return; }
-  if(decision === 'accepted'){
-    await supabase.from('post_incorp_contracts').insert({ post_incorp_request_id: id, client_id: profile.id });
-  }
   loadPostIncorp();
-  notifyAdmins(decision === 'accepted' ? 'العميل قبل عرض خدمات ما بعد التأسيس' : 'العميل رفض عرض خدمات ما بعد التأسيس', profile.full_name, '../admin/post-incorp.html');
 }
 
 async function goToSimamFromClient(){
   const btn = event.target;
   btn.disabled = true; btn.textContent = 'جارٍ تجهيز الدخول...';
   try{
-    const res = await fetch('https://fpjaupjwikaaxehcqprk.supabase.co/functions/v1/simam-login-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: profile.id })
-    });
-    const data = await res.json();
+    const { data, error: fnErr } = await supabase.functions.invoke('simam-login-link', { body: {} });
+    if(fnErr) throw fnErr;
     if(data.loginUrl){
-      window.open(data.loginUrl, '_blank');
+      openSignedUrl(data.loginUrl);
     } else {
       alert('تعذر تجهيز الدخول التلقائي — تأكد إن شركتك اكتمل تأسيسها أولاً، أو جرّب تسجّل دخول يدوياً على simam.itqanbs.sa');
-      window.open('https://simam.itqanbs.sa', '_blank');
+      window.open('https://simam.itqanbs.sa', '_blank', 'noopener,noreferrer');
     }
   } catch(e){
-    window.open('https://simam.itqanbs.sa', '_blank');
+    window.open('https://simam.itqanbs.sa', '_blank', 'noopener,noreferrer');
   }
   btn.disabled = false; btn.textContent = '🎉 الانتقال إلى صمام لمتابعة خدماتك ←';
 }

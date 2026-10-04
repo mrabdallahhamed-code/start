@@ -2,91 +2,96 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إنشاء حساب — مبتدأ من إتقان</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
+<link rel="icon" type="image/png" href="/assets/icons/favicon-48.png">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
-
-<title>إنشاء حساب — إتقان</title>
-<link rel="canonical" href="https://start.itqanbs.sa/auth/register.html">
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="../assets/js/i18n.js"></script>
+<script src="../assets/js/supabaseClient.js"></script>
+<script src="/assets/js/auth-common.js"></script>
 <style>
   #langToggleBtn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:var(--white);font-size:11px;font-weight:800;cursor:pointer;color:var(--green-dark);letter-spacing:.5px;}
-  #langToggleBtn:hover{border-color:var(--gold);color:var(--gold-deep);}
+  .auth-logo{display:block;margin:0 auto 18px;width:130px;height:auto;}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13px;line-height:1.7;}
+  .consent input{width:auto;margin-top:5px;}
+  .pw-hint{font-size:12px;color:var(--ink-soft);margin-top:6px;}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
-  <button id="langToggleBtn" onclick="toggleLang()">EN</button>
-</header>
+<header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div><button id="langToggleBtn" onclick="toggleLang()">EN</button></header>
 <main style="max-width:480px;">
-  <h1 class="page-title" data-i18n="register_title">إنشاء حساب جديد</h1>
+  <img class="auth-logo" src="../assets/images/mubtada-logo.png" alt="مبتدأ — منصة الاستثمار من إتقان" width="130" height="151">
+  <h1 class="page-title" data-i18n="register_title" style="text-align:center;">إنشاء حساب جديد</h1>
   <div class="card">
-    <label data-i18n="register_fullname">الاسم الكامل</label>
-    <input id="full_name" type="text" placeholder="اسمك الثلاثي">
-    <label data-i18n="register_email">البريد الإلكتروني</label>
-    <input id="email" type="email" placeholder="you@example.com">
-    <label>رقم الجوال (بالصيغة الدولية)</label>
-    <input id="contact_phone" type="tel" dir="ltr" style="text-align:left;" placeholder="+966501234567">
-    <label data-i18n="register_password">كلمة المرور</label>
-    <div style="position:relative;">
-      <input id="password" type="password" placeholder="8 أحرف على الأقل" style="padding-left:40px;">
-      <button type="button" onclick="togglePasswordVisibility('password', this)" aria-label="إظهار كلمة المرور" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;">👁️</button>
-    </div>
-    <label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;font-size:12.5px;font-weight:normal;line-height:1.6;">
-      <input type="checkbox" id="termsAgree" style="width:auto;margin:3px 0 0;flex-shrink:0;">
-      <span data-i18n="register_terms_text">بإنشاء الحساب، أنت توافق على <a href="https://www.itqanbs.sa/terms/" target="_blank" data-i18n="register_terms_link">الشروط والأحكام</a> و<a href="https://www.itqanbs.sa/privacy/" target="_blank" data-i18n="register_privacy_link">سياسة الخصوصية</a></span>
-    </label>
-    <button class="btn" onclick="register()" data-i18n="register_btn">إنشاء الحساب</button>
-    <div id="msg"></div>
+    <form id="regForm" autocomplete="on" novalidate>
+      <label for="full_name" data-i18n="register_fullname">الاسم الكامل</label>
+      <input id="full_name" type="text" autocomplete="name" maxlength="120" required>
+      <label for="email" data-i18n="register_email">البريد الإلكتروني</label>
+      <input id="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required>
+      <label for="contact_phone" data-i18n="register_phone">رقم الجوال (بالصيغة الدولية)</label>
+      <input id="contact_phone" type="tel" dir="ltr" style="text-align:left;" autocomplete="tel" maxlength="20" placeholder="+966501234567" required>
+      <label for="password" data-i18n="register_password">كلمة المرور</label>
+      <input id="password" type="password" autocomplete="new-password" maxlength="128" required>
+      <label for="password2" data-i18n="register_confirm">تأكيد كلمة المرور</label>
+      <input id="password2" type="password" autocomplete="new-password" maxlength="128" required>
+      <p class="pw-hint" data-i18n="register_pw_hint">10 أحرف على الأقل، وتشمل حرفاً كبيراً وصغيراً ورقماً ورمزاً.</p>
+      <label class="consent"><input id="consent" type="checkbox"><span data-i18n-html="register_consent">أوافق على <a href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام</a> و<a href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>.</span></label>
+      <div id="captchaBox" style="margin-top:12px;"></div>
+      <button class="btn" type="submit" id="regBtn" data-i18n="register_btn">إنشاء الحساب</button>
+      <div id="msg" role="alert"></div>
+    </form>
     <p style="margin-top:16px;font-size:13px;"><span data-i18n="register_have_account">لديك حساب؟</span> <a href="login.html" data-i18n="register_login_link">تسجيل الدخول</a></p>
   </div>
 </main>
-<script src="../assets/js/supabaseClient.js"></script>
-<script src="../assets/js/i18n.js"></script>
 <script>
-async function register(){
-  const email = document.getElementById('email').value.trim();
+initCaptcha('captchaBox');
+document.getElementById('regForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const full_name = document.getElementById('full_name').value.trim().replace(/\s+/g,' ');
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const phone = document.getElementById('contact_phone').value.trim().replace(/[\s-]/g,'');
   const password = document.getElementById('password').value;
-  const full_name = document.getElementById('full_name').value.trim();
-  const contact_phone = document.getElementById('contact_phone').value.trim().replace(/\s|-/g, '');
-  const preferred_language = getLang();
-  const msg = document.getElementById('msg');
-  msg.className = 'msg'; msg.textContent = '';
+  const password2 = document.getElementById('password2').value;
+  const consent = document.getElementById('consent').checked;
+  if(!full_name || full_name.length < 3){ showMsg('msg','err', L('اكتب اسمك الكامل.','Enter your full name.')); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showMsg('msg','err', L('بريد إلكتروني غير صالح.','Invalid email.')); return; }
+  if(!/^\+[1-9]\d{7,14}$/.test(phone)){ showMsg('msg','err', L('رقم الجوال يجب أن يبدأ برمز الدولة، مثال: +966501234567','Phone must start with the country code, e.g. +966501234567')); return; }
+  const probs = passwordProblems(password);
+  if(probs.length){ showMsg('msg','err', L('كلمة المرور ضعيفة: ','Weak password: ') + probs.join(L('، ',', '))); return; }
+  if(password !== password2){ showMsg('msg','err', L('كلمتا المرور غير متطابقتين.','Passwords do not match.')); return; }
+  if(!consent){ showMsg('msg','err', L('يلزم الموافقة على الشروط وسياسة الخصوصية.','You must accept the terms and privacy policy.')); return; }
+  if(captchaRequired() && !window.__captchaToken){ showMsg('msg','err', L('أكمل التحقق الأمني.','Complete the security check.')); return; }
 
-  if(!document.getElementById('termsAgree').checked){
-    msg.className='msg err'; msg.textContent='لازم توافق على الشروط والأحكام وسياسة الخصوصية أول';
+  const btn = document.getElementById('regBtn'); btn.disabled = true;
+  const { data: suData, error } = await supabase.auth.signUp({
+    email, password,
+    options: {
+      emailRedirectTo: window.location.origin + '/auth/login.html',
+      captchaToken: captchaRequired() ? window.__captchaToken : undefined,
+      // الملف الشخصي يُنشأ في قاعدة البيانات بالدور client دائماً — لا نرسل دوراً من المتصفح
+      data: { full_name, contact_phone: phone, preferred_language: getLang(), consent_at: new Date().toISOString(), consent_version: '2026-09' }
+    }
+  });
+  btn.disabled = false;
+  if(window.turnstile){ try{ window.turnstile.reset(); window.__captchaToken = null; }catch(x){} }
+  if(error){
+    // رسالة عامة: لا نكشف إن كان البريد مسجّلاً
+    showMsg('msg','err', L('تعذّر إنشاء الحساب. تحقق من البيانات أو جرّب لاحقاً.','Could not create the account. Check your details or try later.'));
     return;
   }
-
-  if(!email || !password || !full_name || !contact_phone){
-    msg.className='msg err'; msg.textContent='الرجاء تعبئة كل الحقول'; return;
+  if(suData && suData.session){   // تأكيد البريد غير مفعّل (مرحلة التجربة): دخول مباشر
+    window.location.replace('/client/dashboard.html'); return;
   }
-
-  const phoneRegex = /^\+[1-9]\d{7,14}$/;
-  if(!phoneRegex.test(contact_phone)){
-    msg.className='msg err';
-    msg.textContent='رقم الجوال غير صحيح — لازم يبدأ برمز الدولة، مثال: 966501234567+';
-    return;
-  }
-
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if(error){ msg.className='msg err'; msg.textContent = error.message; return; }
-
-  const userId = data.user.id;
-  const { error: profErr } = await supabase.from('profiles').insert({ id: userId, full_name, role: 'client', preferred_language, email, contact_phone });
-  if(profErr){ msg.className='msg err'; msg.textContent = profErr.message; return; }
-
-  await supabase.from('clients').insert({ id: userId });
-
-  msg.className='msg ok';
-  msg.textContent='تم إنشاء الحساب! تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.';
-}
+  showMsg('msg','ok', L('تم إنشاء الحساب! تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.','Account created! Check your email to confirm it, then log in.'));
+  document.getElementById('regForm').reset();
+});
 </script>
 </body>
 </html>

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,15 +12,16 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>ملف مقدّم الخدمة — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="top">
-  <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+  <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
   <button class="btn ghost" onclick="signOut()">تسجيل الخروج</button>
 </header>
 <main>
@@ -96,14 +101,14 @@ async function loadDocs(){
   const statusMap = {pending:'<span class="badge pending">قيد المراجعة</span>', verified:'<span class="badge ready">تم التحقق</span>', rejected:'<span class="badge notready">مرفوض</span>'};
   body.innerHTML = data.map(d => `
     <tr>
-      <td>${d.doc_type}</td>
-      <td>${new Date(d.uploaded_at).toLocaleDateString('ar-SA')}</td>
+      <td>${esc(d.doc_type)}</td>
+      <td>${esc(new Date(d.uploaded_at).toLocaleDateString('ar-SA'))}</td>
       <td>${statusMap[d.status]}</td>
       <td>
-        <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="viewDoc('${d.file_path}')">عرض الملف</button>
+        <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" data-p="${esc(d.file_path)}" onclick="viewDoc(this.dataset.p)">عرض الملف</button>
         ${d.status==='pending' ? `
-          <button class="btn" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="reviewDoc('${d.id}','verified')">اعتماد</button>
-          <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="reviewDoc('${d.id}','rejected')">رفض</button>
+          <button class="btn" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="reviewDoc('${esc(d.id)}','verified')">اعتماد</button>
+          <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="reviewDoc('${esc(d.id)}','rejected')">رفض</button>
         ` : ''}
       </td>
     </tr>`).join('');
@@ -112,7 +117,7 @@ async function loadDocs(){
 async function viewDoc(filePath){
   const { data, error } = await supabase.storage.from('provider-documents').createSignedUrl(filePath, 60);
   if(error){ alert(error.message); return; }
-  window.open(data.signedUrl, '_blank');
+  openSignedUrl(data.signedUrl);
 }
 
 async function reviewDoc(id, status){
@@ -125,9 +130,9 @@ async function reviewDoc(id, status){
 async function loadMsgs(){
   const { data, error } = await supabase.from('admin_messages').select('*').eq('recipient_id', providerId).order('created_at');
   const list = document.getElementById('msgsList');
-  if(error){ list.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ list.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ list.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد رسائل بعد.</p>'; return; }
-  list.innerHTML = data.map(m => `<div style="font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:${m.sender_id===admin.id?'var(--green-tint)':'var(--cream)'};border:1px solid var(--line);">${escapeHtml(m.message)}</div>`).join('');
+  list.innerHTML = data.map(m => `<div style="font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:${m.sender_id===admin.id?'var(--green-tint)':'var(--cream)'};border:1px solid var(--line);">${esc(m.message)}</div>`).join('');
 }
 
 async function sendMsg(){

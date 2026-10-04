@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -8,10 +12,11 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="إتقان">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
 
 <title>لوحة مقدّم الخدمة — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .chat-box{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px;background:var(--cream);}
@@ -25,7 +30,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><img src="../assets/images/mubtada-logo.png" alt="مبتدأ"></div>
+  <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
   <div style="display:flex;align-items:center;gap:10px;">
     <div id="notifBellContainer"></div>
     <button class="btn ghost" onclick="signOut()">تسجيل الخروج</button>
@@ -121,22 +126,22 @@ async function loadProviderPostIncorp(){
     .eq('assigned_provider_id', profile.id)
     .order('created_at', {ascending:false});
 
-  if(error){ area.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ area.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">لا توجد طلبات موجّهة لك حالياً.</p>'; return; }
 
   const statusLabels = { pending_review:'بانتظار عرضك', quoted:'تم إرسال عرض', accepted:'مقبول ✓', rejected:'مرفوض' };
 
   area.innerHTML = data.map(r => {
-    const needsHtml = Object.entries(r.service_needs || {}).map(([cat, needs]) => `<strong>${cat}:</strong> ${needs.join('، ')}`).join('<br>');
+    const needsHtml = Object.entries(r.service_needs || {}).map(([cat, needs]) => `<strong>${esc(cat)}:</strong> ${esc(needs.join('، '))}`).join('<br>');
     return `
     <div class="card">
-      <p style="font-size:14px;font-weight:700;margin-bottom:4px;">طلب #${r.id.slice(0,8)} — ${statusLabels[r.status]}</p>
-      <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;">${needsHtml || (r.service_categories||[]).join('، ')}</p>
-      ${r.client_notes ? `<p style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">ملاحظات العميل: ${escapeHtml(r.client_notes)}</p>` : ''}
+      <p style="font-size:14px;font-weight:700;margin-bottom:4px;">طلب #${esc(r.id.slice(0,8))} — ${esc(statusLabels[r.status])}</p>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;">${needsHtml || esc((r.service_categories||[]).join('، '))}</p>
+      ${r.client_notes ? `<p style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">ملاحظات العميل: ${esc(r.client_notes)}</p>` : ''}
       ${r.status === 'pending_review'
-        ? `<a href="submit-postincorp-offer.html?id=${r.id}" class="btn gold" style="padding:8px 18px;font-size:13px;">تجهيز عرض تفصيلي</a>`
-        : `<p style="font-size:13px;font-weight:700;color:var(--green-dark);">${r.quoted_price || ''} ر.س</p>
-           <a href="../post-incorp-offer-view.html?id=${r.id}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">عرض التفاصيل</a>`
+        ? `<a href="submit-postincorp-offer.html?id=${esc(r.id)}" class="btn gold" style="padding:8px 18px;font-size:13px;">تجهيز عرض تفصيلي</a>`
+        : `<p style="font-size:13px;font-weight:700;color:var(--green-dark);">${esc(r.quoted_price || '')} ر.س</p>
+           <a href="../post-incorp-offer-view.html?id=${esc(r.id)}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">عرض التفاصيل</a>`
       }
     </div>`;
   }).join('');
@@ -145,9 +150,9 @@ async function loadProviderPostIncorp(){
 async function loadAdminMsgs(){
   const { data, error } = await supabase.from('admin_messages').select('*').eq('recipient_id', profile.id).order('created_at');
   const list = document.getElementById('adminMsgsList');
-  if(error){ list.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ list.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ list.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد رسائل حتى الآن.</p>'; return; }
-  list.innerHTML = data.map(m => `<div class="chat-msg ${m.sender_id===profile.id?'mine':'theirs'}">${escapeHtml(m.message)}</div>`).join('');
+  list.innerHTML = data.map(m => `<div class="chat-msg ${m.sender_id===profile.id?'mine':'theirs'}">${esc(m.message)}</div>`).join('');
 }
 
 async function sendAdminMsg(){
@@ -182,11 +187,11 @@ async function loadRequests(){
 
   body.innerHTML = data.map(r => `
     <tr>
-      <td>#${r.id.slice(0,8)}</td>
-      <td>${r.activity_type || '—'}</td>
-      <td>${r.last_audited_budget || '—'}</td>
+      <td>#${esc(r.id.slice(0,8))}</td>
+      <td>${esc(r.activity_type || '—')}</td>
+      <td>${esc(r.last_audited_budget || '—')}</td>
       <td>
-        <a href="submit-offer.html?request_id=${r.id}" class="btn" style="padding:7px 16px;font-size:12.5px;margin-top:0;">تقديم عرض تفصيلي</a>
+        <a href="submit-offer.html?request_id=${esc(r.id)}" class="btn" style="padding:7px 16px;font-size:12.5px;margin-top:0;">تقديم عرض تفصيلي</a>
       </td>
     </tr>`).join('');
 }
@@ -204,15 +209,15 @@ async function loadOffers(){
   const statusMap = {submitted:'مُرسَل', accepted:'مقبول ✓', rejected:'مرفوض'};
   area.innerHTML = data.map(o => `
     <div class="card">
-      <p style="font-size:14px;font-weight:700;margin-bottom:4px;">طلب #${o.request_id.slice(0,8)} — ${o.service_requests?.activity_type || ''}</p>
-      <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">السعر: ${o.price} ر.س · المدة: ${o.duration_days} يوم · الحالة: ${statusMap[o.status]}</p>
-      <a href="../offer-view.html?id=${o.id}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">عرض تفاصيل العرض</a>
-      <button class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;" onclick="toggleChat('${o.id}')">فتح المحادثة</button>
-      ${o.status === 'accepted' ? `<button class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;" onclick="toggleStages('${o.id}','${o.request_id}')">متابعة المراحل</button>` : ''}
-      ${o.status === 'accepted' ? `<button class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;" onclick="togglePayments('${o.id}')">إدارة الدفعات</button>` : ''}
-      <div id="chat-${o.id}" style="display:none;"></div>
-      ${o.status === 'accepted' ? `<div id="stages-${o.id}" style="display:none;margin-top:10px;"></div>` : ''}
-      ${o.status === 'accepted' ? `<div id="payments-${o.id}" style="display:none;margin-top:10px;"></div>` : ''}
+      <p style="font-size:14px;font-weight:700;margin-bottom:4px;">طلب #${esc(o.request_id.slice(0,8))} — ${esc(o.service_requests?.activity_type || '')}</p>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">السعر: ${esc(o.price)} ر.س · المدة: ${esc(o.duration_days)} يوم · الحالة: ${statusMap[o.status]}</p>
+      <a href="../offer-view.html?id=${esc(o.id)}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">عرض تفاصيل العرض</a>
+      <button class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;" onclick="toggleChat('${esc(o.id)}')">فتح المحادثة</button>
+      ${o.status === 'accepted' ? `<button class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;" onclick="toggleStages('${esc(o.id)}','${esc(o.request_id)}')">متابعة المراحل</button>` : ''}
+      ${o.status === 'accepted' ? `<button class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;" onclick="togglePayments('${esc(o.id)}')">إدارة الدفعات</button>` : ''}
+      <div id="chat-${esc(o.id)}" style="display:none;"></div>
+      ${o.status === 'accepted' ? `<div id="stages-${esc(o.id)}" style="display:none;margin-top:10px;"></div>` : ''}
+      ${o.status === 'accepted' ? `<div id="payments-${esc(o.id)}" style="display:none;margin-top:10px;"></div>` : ''}
     </div>
   `).join('');
 }
@@ -229,7 +234,7 @@ async function loadPayments(offerId){
   const { data, error } = await supabase.from('offer_payments').select('*').eq('offer_id', offerId).order('created_at');
 
   let html = '<div class="card" style="background:var(--cream);">';
-  if(error){ html += `<p class="msg err">${escapeHtml(error.message)}</p>`; }
+  if(error){ html += `<p class="msg err">${esc(error.message)}</p>`; }
   else if(!data || !data.length){ html += '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد دفعات مسجّلة بعد.</p>'; }
   else {
     data.forEach(p => {
@@ -239,16 +244,16 @@ async function loadPayments(offerId){
       else { statusText = 'بانتظار استلام الدفعة'; statusColor = 'var(--ink-soft)'; }
 
       html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);">
-        <div><strong style="font-size:13px;">${p.label}</strong> — <span style="font-size:12.5px;">${p.amount} ر.س</span><br><span style="font-size:11.5px;color:${statusColor};">${statusText}</span></div>
-        ${!p.provider_confirmed ? `<button class="btn" style="padding:6px 12px;font-size:11px;margin-top:0;" onclick="confirmPaymentProvider('${p.id}','${offerId}')">تم استلام الدفعة</button>` : ''}
+        <div><strong style="font-size:13px;">${esc(p.label)}</strong> — <span style="font-size:12.5px;">${esc(p.amount)} ر.س</span><br><span style="font-size:11.5px;color:${esc(statusColor)};">${esc(statusText)}</span></div>
+        ${!p.provider_confirmed ? `<button class="btn" style="padding:6px 12px;font-size:11px;margin-top:0;" onclick="confirmPaymentProvider('${esc(p.id)}','${esc(offerId)}')">تم استلام الدفعة</button>` : ''}
       </div>`;
     });
   }
   html += `
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <input id="payLabel-${offerId}" placeholder="مثال: الدفعة الأولى" style="flex:1;">
-      <input id="payAmount-${offerId}" type="number" placeholder="المبلغ" style="width:110px;">
-      <button class="btn gold" style="margin:0;padding:9px 16px;" onclick="addPayment('${offerId}')">إضافة</button>
+      <input id="payLabel-${esc(offerId)}" placeholder="مثال: الدفعة الأولى" style="flex:1;">
+      <input id="payAmount-${esc(offerId)}" type="number" placeholder="المبلغ" style="width:110px;">
+      <button class="btn gold" style="margin:0;padding:9px 16px;" onclick="addPayment('${esc(offerId)}')">إضافة</button>
     </div>
   </div>`;
   el.innerHTML = html;
@@ -302,17 +307,17 @@ async function loadStages(requestId, containerId, canEdit){
 
   let html = '<div class="timeline">';
   autoStages.forEach(s => {
-    html += `<div class="tl-item ${s.done?'done':''}"><span class="tl-dot"></span><div class="tl-text"><strong>${s.name}</strong>${s.date?` <span class="tl-date">${new Date(s.date).toLocaleDateString('ar-SA')}</span>`:''}</div></div>`;
+    html += `<div class="tl-item ${s.done?'done':''}"><span class="tl-dot"></span><div class="tl-text"><strong>${esc(s.name)}</strong>${s.date?` <span class="tl-date">${esc(new Date(s.date).toLocaleDateString('ar-SA'))}</span>`:''}</div></div>`;
   });
   if(stages && stages.length){
     stages.forEach(s => {
       const cls = s.status === 'completed' ? 'done' : (s.status==='in_progress' ? 'active' : '');
       let actionBtn = '';
       if(canEdit && s.status !== 'completed'){
-        if(s.status === 'pending') actionBtn = `<button class="btn ghost" style="padding:5px 10px;font-size:11px;margin-top:4px;" onclick="updateStage('${s.id}','in_progress','${requestId}','${containerId}',${canEdit})">بدء المرحلة</button>`;
-        else actionBtn = `<button class="btn" style="padding:5px 10px;font-size:11px;margin-top:4px;" onclick="updateStage('${s.id}','completed','${requestId}','${containerId}',${canEdit})">إنهاء المرحلة</button>`;
+        if(s.status === 'pending') actionBtn = `<button class="btn ghost" style="padding:5px 10px;font-size:11px;margin-top:4px;" onclick="updateStage('${esc(s.id)}','in_progress','${esc(requestId)}','${esc(containerId)}',${esc(canEdit)})">بدء المرحلة</button>`;
+        else actionBtn = `<button class="btn" style="padding:5px 10px;font-size:11px;margin-top:4px;" onclick="updateStage('${esc(s.id)}','completed','${esc(requestId)}','${esc(containerId)}',${esc(canEdit)})">إنهاء المرحلة</button>`;
       }
-      html += `<div class="tl-item ${cls}"><span class="tl-dot"></span><div class="tl-text"><strong>${s.stage_name}</strong>${s.completed_at?` <span class="tl-date">${new Date(s.completed_at).toLocaleDateString('ar-SA')}</span>`:''}<br>${actionBtn}</div></div>`;
+      html += `<div class="tl-item ${esc(cls)}"><span class="tl-dot"></span><div class="tl-text"><strong>${esc(s.stage_name)}</strong>${s.completed_at?` <span class="tl-date">${esc(new Date(s.completed_at).toLocaleDateString('ar-SA'))}</span>`:''}<br>${actionBtn}</div></div>`;
     });
   } else {
     html += '<p style="font-size:12px;color:var(--ink-soft);">لم تبدأ مراحل التنفيذ بعد.</p>';
@@ -344,17 +349,17 @@ function toggleChat(offerId){
 
 async function renderChat(offerId){
   const el = document.getElementById(`chat-${offerId}`);
-  el.innerHTML = `<div class="chat-box"><div class="chat-msgs" id="msgs-${offerId}">جارٍ التحميل...</div>
-    <div class="chat-input-row"><input id="input-${offerId}" placeholder="اكتب رسالة..."><button class="btn" style="margin:0;padding:8px 16px;" onclick="sendMessage('${offerId}')">إرسال</button></div></div>`;
+  el.innerHTML = `<div class="chat-box"><div class="chat-msgs" id="msgs-${esc(offerId)}">جارٍ التحميل...</div>
+    <div class="chat-input-row"><input id="input-${esc(offerId)}" placeholder="اكتب رسالة..."><button class="btn" style="margin:0;padding:8px 16px;" onclick="sendMessage('${esc(offerId)}')">إرسال</button></div></div>`;
   loadMessages(offerId);
 }
 
 async function loadMessages(offerId){
   const { data, error } = await supabase.from('messages').select('*').eq('offer_id', offerId).order('created_at');
   const box = document.getElementById(`msgs-${offerId}`);
-  if(error){ box.innerHTML = `<p class="msg err">${escapeHtml(error.message)}</p>`; return; }
+  if(error){ box.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
   if(!data || !data.length){ box.innerHTML = '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد رسائل بعد.</p>'; return; }
-  box.innerHTML = data.map(m => `<div class="chat-msg ${m.sender_id === profile.id ? 'mine' : 'theirs'}">${escapeHtml(m.message)}</div>`).join('');
+  box.innerHTML = data.map(m => `<div class="chat-msg ${m.sender_id === profile.id ? 'mine' : 'theirs'}">${esc(m.message)}</div>`).join('');
   box.scrollTop = box.scrollHeight;
 }
 
@@ -376,7 +381,7 @@ async function uploadProviderDoc(){
   if(!fileInput.files.length){ msg.className='msg err'; msg.textContent='اختر ملفاً أولاً'; return; }
 
   const file = fileInput.files[0];
-  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  const _v = validateUpload(file); if(!_v.ok){ alert(_v.reason); return; } const safeName = safeFileName(file.name);
   const filePath = `${profile.id}/${Date.now()}_${safeName}`;
 
   const { error: upErr } = await supabase.storage.from('provider-documents').upload(filePath, file);
@@ -397,7 +402,7 @@ async function loadProviderDocs(){
   const body = document.getElementById('docsBody');
   if(error || !data || !data.length){ body.innerHTML = '<tr><td colspan="3">لا توجد مستندات مرفوعة بعد</td></tr>'; return; }
   const statusMap = {pending:'<span class="badge pending">قيد المراجعة</span>', verified:'<span class="badge ready">تم التحقق</span>', rejected:'<span class="badge notready">مرفوض</span>'};
-  body.innerHTML = data.map(d => `<tr><td>${d.doc_type}</td><td>${new Date(d.uploaded_at).toLocaleDateString('ar-SA')}</td><td>${statusMap[d.status]}</td></tr>`).join('');
+  body.innerHTML = data.map(d => `<tr><td>${esc(d.doc_type)}</td><td>${esc(new Date(d.uploaded_at).toLocaleDateString('ar-SA'))}</td><td>${statusMap[d.status]}</td></tr>`).join('');
 }
 
 init();

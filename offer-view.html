@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2E7D5B">
@@ -12,6 +16,7 @@
 
 <title>عرض سعر — إتقان</title>
 <link rel="stylesheet" href="assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .offer-doc{max-width:720px;margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:40px;position:relative;overflow:hidden;}
@@ -49,7 +54,7 @@
 </style>
 </head>
 <body>
-<header class="top"><div class="brand"><img src="assets/images/mubtada-logo.png" alt="مبتدأ"></div></header>
+<header class="top"><div class="brand"><img src="assets/images/logo.jpeg" alt="إتقان"></div></header>
 <main>
   <div class="print-actions">
     <button class="btn ghost" onclick="history.back()">→ رجوع</button>
@@ -99,10 +104,10 @@ async function init(){
     clientSignatureUrl = data?.signedUrl;
   }
 
-  const scopeHtml = (offer.scope_items || []).map(s => `<div class="scope-item"><span class="check">✔</span><span>${s}</span></div>`).join('') || '<p style="font-size:12.5px;color:var(--ink-soft);">لم يحدَّد نطاق خدمات.</p>';
+  const scopeHtml = (offer.scope_items || []).map(s => `<div class="scope-item"><span class="check">✔</span><span>${esc(s)}</span></div>`).join('') || '<p style="font-size:12.5px;color:var(--ink-soft);">لم يحدَّد نطاق خدمات.</p>';
 
-  const docsHtml = (offer.required_documents_list || []).map(d => `<div class="doc-item"><span class="check">•</span><span>${d}</span></div>`).join('')
-    + (offer.required_documents ? `<div class="doc-item"><span class="check">•</span><span>${offer.required_documents}</span></div>` : '');
+  const docsHtml = (offer.required_documents_list || []).map(d => `<div class="doc-item"><span class="check">•</span><span>${esc(d)}</span></div>`).join('')
+    + (offer.required_documents ? `<div class="doc-item"><span class="check">•</span><span>${esc(offer.required_documents)}</span></div>` : '');
 
   const fees = offer.government_fees || [];
   const feesTotal = fees.reduce((s,f) => s + (f.fee || 0), 0);
@@ -110,27 +115,27 @@ async function init(){
     <table class="fees-table">
       <thead><tr><th>الخدمة</th><th style="width:110px;">الرسم التقديري</th></tr></thead>
       <tbody>
-        ${fees.map(f => `<tr><td>${f.service}</td><td>${money(f.fee)} ر.س</td></tr>`).join('')}
-        <tr class="fees-total-row"><td>الإجمالي التقديري (يتحمّله العميل)</td><td>${money(feesTotal)} ر.س</td></tr>
+        ${fees.map(f => `<tr><td>${esc(f.service)}</td><td>${esc(money(f.fee))} ر.س</td></tr>`).join('')}
+        <tr class="fees-total-row"><td>الإجمالي التقديري (يتحمّله العميل)</td><td>${esc(money(feesTotal))} ر.س</td></tr>
       </tbody>
     </table>` : '';
 
   doc.innerHTML = `
-    <img class="watermark" src="assets/images/mubtada-logo.png">
+    <img class="watermark" src="assets/images/logo.jpeg">
     <div class="letterhead">
-      <img src="assets/images/mubtada-logo.png">
+      <img src="assets/images/logo.jpeg">
       <div class="lh-text">
-        <div class="lh-name-ar">${company?.company_name_ar || 'إتقان لخدمات الأعمال'}</div>
-        <div class="lh-name-en">${company?.company_name_en || 'Itqan Business Services'}</div>
+        <div class="lh-name-ar">${esc(company?.company_name_ar || 'إتقان لخدمات الأعمال')}</div>
+        <div class="lh-name-en">${esc(company?.company_name_en || 'Itqan Business Services')}</div>
       </div>
       <div class="lh-meta">
-        ${company?.cr_number ? `س.ت: ${company.cr_number}<br>` : ''}
-        ${company?.address || 'الرياض، السعودية'}<br>
-        ${company?.phone || ''}
+        ${company?.cr_number ? `س.ت: ${esc(company.cr_number)}<br>` : ''}
+        ${esc(company?.address || 'الرياض، السعودية')}<br>
+        ${esc(company?.phone || '')}
       </div>
     </div>
-    <h2>عرض تقديم خدمات — ${offer.service_providers?.company_name || ''}</h2>
-    <p class="sub">النشاط: ${offer.service_requests?.activity_type || '—'} · تاريخ العرض: ${new Date(offer.created_at).toLocaleDateString('ar-SA')} · مدة التنفيذ: ${offer.duration_days} يوم عمل تقريباً</p>
+    <h2>عرض تقديم خدمات — ${esc(offer.service_providers?.company_name || '')}</h2>
+    <p class="sub">النشاط: ${esc(offer.service_requests?.activity_type || '—')} · تاريخ العرض: ${esc(new Date(offer.created_at).toLocaleDateString('ar-SA'))} · مدة التنفيذ: ${esc(offer.duration_days)} يوم عمل تقريباً</p>
 
     <div class="sec-title">أولاً: نطاق الخدمات</div>
     ${scopeHtml}
@@ -143,28 +148,28 @@ async function init(){
 
     <div class="sec-title">رابعاً: المقابل المالي</div>
     <div class="fee-box">
-      <span style="font-size:13.5px;color:var(--ink);">أتعاب ${offer.service_providers?.company_name || 'مقدّم الخدمة'} (غير شامل ضريبة القيمة المضافة)</span>
-      <span class="amount">${money(offer.price)} ر.س</span>
+      <span style="font-size:13.5px;color:var(--ink);">أتعاب ${esc(offer.service_providers?.company_name || 'مقدّم الخدمة')} (غير شامل ضريبة القيمة المضافة)</span>
+      <span class="amount">${esc(money(offer.price))} ر.س</span>
     </div>
 
-    ${offer.payment_schedule ? `<div class="sec-title">آلية السداد</div><div class="notes-list"><p>${escapeHtml(offer.payment_schedule)}</p></div>` : ''}
-    ${offer.exclusions_notes ? `<div class="sec-title">ملاحظات مالية</div><div class="notes-list"><p>${escapeHtml(offer.exclusions_notes)}</p></div>` : ''}
-    ${offer.additional_services_discount ? `<div class="sec-title">خصم الخدمات الإضافية بعد التأسيس</div><p style="font-size:12.5px;color:var(--ink-soft);">خصم ${offer.additional_services_discount}% على الخدمات المحاسبية والموارد البشرية والدعم التشغيلي بعد اكتمال التأسيس.</p>` : ''}
+    ${offer.payment_schedule ? `<div class="sec-title">آلية السداد</div><div class="notes-list"><p>${esc(offer.payment_schedule)}</p></div>` : ''}
+    ${offer.exclusions_notes ? `<div class="sec-title">ملاحظات مالية</div><div class="notes-list"><p>${esc(offer.exclusions_notes)}</p></div>` : ''}
+    ${offer.additional_services_discount ? `<div class="sec-title">خصم الخدمات الإضافية بعد التأسيس</div><p style="font-size:12.5px;color:var(--ink-soft);">خصم ${esc(offer.additional_services_discount)}% على الخدمات المحاسبية والموارد البشرية والدعم التشغيلي بعد اكتمال التأسيس.</p>` : ''}
 
-    ${offer.pdf_file_path ? `<div class="sec-title">ملف مرفق</div><button class="btn ghost" style="padding:8px 16px;font-size:12.5px;" onclick="downloadAttachment('${offer.pdf_file_path}')">تحميل الملف المرفق</button>` : ''}
+    ${offer.pdf_file_path ? `<div class="sec-title">ملف مرفق</div><button class="btn ghost" style="padding:8px 16px;font-size:12.5px;" data-p="${esc(offer.pdf_file_path)}" onclick="downloadAttachment(this.dataset.p)">تحميل الملف المرفق</button>` : ''}
 
     <div class="sign-section">
       <div class="sign-box">
-        ${signatureUrl ? `<img src="${signatureUrl}">` : ''}
-        <div class="sign-line">${offer.provider_signature_name || 'التوقيع المعتمد'}</div>
-        <p style="font-size:11.5px;color:var(--ink-soft);">عن ${offer.service_providers?.company_name || 'مقدّم الخدمة'}</p>
-        ${stampUrl ? `<img src="${stampUrl}" style="margin-top:8px;">` : ''}
+        ${signatureUrl ? `<img src="${esc(signatureUrl)}">` : ''}
+        <div class="sign-line">${esc(offer.provider_signature_name || 'التوقيع المعتمد')}</div>
+        <p style="font-size:11.5px;color:var(--ink-soft);">عن ${esc(offer.service_providers?.company_name || 'مقدّم الخدمة')}</p>
+        ${stampUrl ? `<img src="${esc(stampUrl)}" style="margin-top:8px;">` : ''}
       </div>
       <div class="sign-box">
         ${offer.status === 'accepted' ? `
-          ${clientSignatureUrl ? `<img src="${clientSignatureUrl}">` : ''}
-          <div class="sign-line">${offer.client_signature_name || 'العميل'}</div>
-          <div class="approved-stamp" style="margin-top:8px;">تم اعتماد العرض ${offer.client_signed_at ? '— ' + new Date(offer.client_signed_at).toLocaleDateString('ar-SA') : ''}</div>
+          ${clientSignatureUrl ? `<img src="${esc(clientSignatureUrl)}">` : ''}
+          <div class="sign-line">${esc(offer.client_signature_name || 'العميل')}</div>
+          <div class="approved-stamp" style="margin-top:8px;">تم اعتماد العرض ${offer.client_signed_at ? esc('— ' + new Date(offer.client_signed_at).toLocaleDateString('ar-SA')) : ''}</div>
         ` : '<p style="font-size:11.5px;color:var(--ink-soft);">بانتظار اعتماد العميل</p>'}
       </div>
     </div>
@@ -174,7 +179,7 @@ async function init(){
 async function downloadAttachment(path){
   const { data, error } = await supabase.storage.from('offer-attachments').createSignedUrl(path, 60);
   if(error){ alert(error.message); return; }
-  window.open(data.signedUrl, '_blank');
+  openSignedUrl(data.signedUrl);
 }
 
 init();

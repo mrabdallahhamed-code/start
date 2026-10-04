@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7D5B">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="مبتدأ">
+
+<title>تقييم الوضع — مبتدأ من إتقان</title>
+<link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .yn-row{display:flex;gap:10px;margin-top:8px;}
+  .yn-btn{flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--line);background:var(--white);cursor:pointer;font-weight:700;font-size:13.5px;text-align:center;transition:all .15s;}
+  .yn-btn.selected{border-color:var(--green-dark);background:var(--green-tint);color:var(--green-dark);}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <nav>
+      <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
+      <a href="status-assessment.html" class="side-link active"><span class="ic">🧭</span> تقييم الوضع</a>
+      <div class="side-group-label">الطلبات</div>
+      <a href="requests.html" class="side-link sub"><span class="ic">🏢</span> طلبات التأسيس</a>
+      <a href="post-incorp.html" class="side-link sub"><span class="ic">🗂️</span> طلبات بعد التأسيس</a>
+      <a href="journey.html" class="side-link sub"><span class="ic">🛤️</span> رحلة الطلب</a>
+      <a href="offers.html" class="side-link sub"><span class="ic">💰</span> العروض</a>
+      <a href="profile.html" class="side-link"><span class="ic">👤</span> بياناتي</a>
+      <a href="messages.html" class="side-link"><span class="ic">💬</span> الرسائل</a>
+      <a href="files.html" class="side-link"><span class="ic">📁</span> ملفاتي</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <div style="flex:1;display:flex;flex-direction:column;">
+    <header class="app-topbar">
+      <a class="topbar-btn" href="https://wa.me/966569051686" target="_blank" title="تواصل معنا">💬</a>
+      <button class="topbar-btn" id="langToggleBtn" onclick="toggleLang()">EN</button>
+      <div id="notifBellContainer"></div>
+    </header>
+    <main class="app-main">
+      <div class="app-main-inner" style="max-width:560px;">
+        <h1 class="page-title" id="pageTitle">تقييم الوضع</h1>
+        <p id="pageSub" style="font-size:13px;color:var(--ink-soft);margin-top:-8px;margin-bottom:16px;">أجب على سؤالين فقط، وسنجهّز لك عرض سعر التأسيس.</p>
+        <div class="card" id="formArea"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="../assets/js/supabaseClient.js"></script>
+<script>
+const ENTITY_TYPES = [
+  { key:'sole_proprietorship', label:'مؤسسة فردية' },
+  { key:'llc_single', label:'شركة ذات مسؤولية محدودة (شخص واحد)' },
+  { key:'llc', label:'شركة ذات مسؤولية محدودة' },
+  { key:'closed_jsc_single', label:'شركة مساهمة مغلقة (شخص واحد)' },
+  { key:'closed_jsc', label:'شركة مساهمة مغلقة' },
+  { key:'simplified_jsc', label:'شركة مساهمة مبسطة' },
+  { key:'professional_company', label:'شركة مهنية' },
+];
+
+let profile;
+const editId = new URLSearchParams(window.location.search).get('edit_id');
+let existingRequest = null;
+let entityKnown = null; // true/false/null
+let tradeNameChosen = null;
+
+async function init(){
+  profile = await requireRole(['client']);
+  if(!profile) return;
+  initNotificationBell(profile.id);
+
+  if(window.__clientMeta && window.__clientMeta.incorporation_path !== 'saudi_national'){
+    window.location.replace('assessment.html'); return; // مسار غير سعودي وصل هنا بالخطأ
+  }
+
+  if(editId){
+    const { data: req, error } = await supabase.from('service_requests').select('*').eq('id', editId).eq('client_id', profile.id).single();
+    if(error || !req){ document.getElementById('formArea').innerHTML = '<p class="msg err">تعذر تحميل الطلب.</p>'; return; }
+    const twoHoursMs = 2 * 60 * 60 * 1000;
+    const expired = (Date.now() - new Date(req.created_at).getTime()) > twoHoursMs;
+    if(req.status !== 'pending_admin_review' || expired){
+      document.getElementById('formArea').innerHTML = '<p class="msg err">لم يعد بإمكانك تعديل هذا الطلب — تواصل مع فريق إتقان أو قدّم طلباً جديداً.</p>';
+      return;
+    }
+    existingRequest = req;
+    entityKnown = req.entity_type_known;
+    tradeNameChosen = req.trade_name_chosen;
+    document.getElementById('pageTitle').textContent = 'تعديل تقييمك';
+    document.getElementById('pageSub').textContent = 'لديك حتى ساعتين من وقت التقديم لتعديل طلبك، طالما ما وصلك عرض بعد.';
+  }
+
+  render();
+}
+
+function render(){
+  const area = document.getElementById('formArea');
+  area.innerHTML = `
+    <label>هل تم تحديد نوع الكيان؟</label>
+    <div class="yn-row">
+      <div class="yn-btn ${entityKnown === true ? 'selected' : ''}" id="btnEntityYes">نعم</div>
+      <div class="yn-btn ${entityKnown === false ? 'selected' : ''}" id="btnEntityNo">لا</div>
+    </div>
+    <div id="entitySection" style="display:${entityKnown === true ? 'block' : 'none'};margin-top:16px;">
+      <label>نوع الكيان</label>
+      <select id="saudi_entity_type">
+        <option value="">اختر...</option>
+        ${ENTITY_TYPES.map(t => `<option value="${esc(t.key)}">${esc(t.label)}</option>`).join('')}
+      </select>
+      <label style="margin-top:14px;">هل تم اختيار الاسم التجاري؟</label>
+      <div class="yn-row">
+        <div class="yn-btn ${tradeNameChosen === true ? 'selected' : ''}" id="btnNameYes">نعم</div>
+        <div class="yn-btn ${tradeNameChosen === false ? 'selected' : ''}" id="btnNameNo">لا</div>
+      </div>
+    </div>
+    <label style="margin-top:16px;">ملاحظات إضافية (اختياري)</label>
+    <textarea id="notes" rows="3" placeholder="أي تفاصيل تحب تشاركها مع فريق إتقان">${esc(existingRequest?.notes || '')}</textarea>
+    <button class="btn gold" id="submitBtn">${existingRequest ? 'حفظ التعديلات' : 'طلب عرض سعر'}</button>
+    <div id="msg" role="alert"></div>
+  `;
+  if(existingRequest && entityKnown === true){
+    const sel = document.getElementById('saudi_entity_type');
+    if(sel) sel.value = existingRequest.saudi_entity_type || '';
+  }
+  document.getElementById('btnEntityYes').addEventListener('click', () => { entityKnown = true; render(); });
+  document.getElementById('btnEntityNo').addEventListener('click', () => { entityKnown = false; tradeNameChosen = null; render(); });
+  const ny = document.getElementById('btnNameYes'), nn = document.getElementById('btnNameNo');
+  if(ny) ny.addEventListener('click', () => { tradeNameChosen = true; render(); });
+  if(nn) nn.addEventListener('click', () => { tradeNameChosen = false; render(); });
+  document.getElementById('submitBtn').addEventListener('click', submit);
+}
+
+async function submit(){
+  const msg = document.getElementById('msg');
+  if(entityKnown === null){ msg.className = 'msg err'; msg.textContent = 'الرجاء الإجابة على سؤال نوع الكيان.'; return; }
+
+  let saudi_entity_type = null;
+  if(entityKnown === true){
+    saudi_entity_type = document.getElementById('saudi_entity_type').value;
+    if(!saudi_entity_type){ msg.className = 'msg err'; msg.textContent = 'الرجاء اختيار نوع الكيان.'; return; }
+    if(tradeNameChosen === null){ msg.className = 'msg err'; msg.textContent = 'الرجاء الإجابة على سؤال الاسم التجاري.'; return; }
+  }
+
+  const notes = document.getElementById('notes').value.trim();
+  const payload = {
+    entity_type_known: entityKnown,
+    saudi_entity_type,
+    trade_name_chosen: entityKnown === true ? tradeNameChosen : false,
+    notes,
+  };
+
+  if(existingRequest){
+    const { error } = await supabase.from('service_requests').update(payload).eq('id', existingRequest.id);
+    if(error){ msg.className = 'msg err'; msg.textContent = error.message; return; }
+    await notifyAdmins('العميل عدّل تقييم وضعه', profile.full_name, '../admin/requests.html');
+  } else {
+    const { error } = await supabase.from('service_requests').insert({ client_id: profile.id, status: 'pending_admin_review', ...payload });
+    if(error){ msg.className = 'msg err'; msg.textContent = error.message; return; }
+    await notifyAdmins('طلب تأسيس سعودي جديد', profile.full_name + ' أرسل تقييم وضع جديد', '../admin/requests.html');
+  }
+  window.location.href = 'requests.html';
+}
+
+init();
+</script>
+</body>
+</html>

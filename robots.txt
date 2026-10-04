@@ -1,27 +1,2 @@
 User-agent: *
-Allow: /
-Disallow: /client/
-Disallow: /admin/
-Disallow: /provider/
-Disallow: /offer-view.html
-
-# روبوتات الذكاء الاصطناعي — مسموح لها صراحة تقرأ المحتوى العام
-User-agent: GPTBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: Claude-Web
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-Sitemap: https://start.itqanbs.sa/sitemap.xml
+Disallow: /

@@ -1,13 +1,36 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=auth/login.html">
-<link rel="canonical" href="https://start.itqanbs.sa/auth/login.html">
-<title>إتقان — جارٍ التحويل...</title>
-<script>window.location.replace('auth/login.html');</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مبتدأ من إتقان</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7D5B">
+<link rel="icon" type="image/png" href="/assets/icons/favicon-48.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/supabaseClient.js"></script>
 </head>
 <body>
-<p style="font-family:sans-serif;text-align:center;padding:40px;">جارٍ التحويل لصفحة تسجيل الدخول... <a href="auth/login.html">اضغط هنا لو ما تحوّلت تلقائياً</a></p>
+<main style="max-width:480px;text-align:center;padding-top:90px;">
+  <img src="/assets/images/mubtada-logo.png" alt="مبتدأ" width="180" height="209" style="height:auto;max-width:60%;">
+  <p style="margin-top:18px;color:var(--ink-soft);font-size:14px;">جارٍ التحويل…</p>
+  <noscript><p><a href="/auth/login.html">تسجيل الدخول</a></p></noscript>
+</main>
+<script>
+(async function(){
+  try{
+    const { data: { session } } = await supabase.auth.getSession();
+    if(session){
+      const p = await getCurrentProfile();
+      if(p){ window.location.replace(homeForRole(p.role)); return; }
+    }
+  }catch(e){}
+  window.location.replace('/auth/login.html');
+})();
+</script>
 </body>
 </html>
