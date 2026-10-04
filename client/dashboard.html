@@ -105,6 +105,8 @@
             <div class="stat-box"><div class="n" id="statDays">0</div><div class="l">يوم منذ بداية الطلب</div></div>
           </div>
 
+          <div class="card" id="postIncorpCta" style="display:none;background:var(--green-tint);"></div>
+
           <div class="card">
             <h3 style="margin-bottom:12px;">💬 آخر رسائل من فريق إتقان</h3>
             <div id="recentMsgs"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
@@ -168,6 +170,28 @@ async function showMainContent(){
     else if(latestRequest.status === 'completed') stageText = 'مكتمل ✓';
   }
   document.getElementById('statStage').textContent = stageText;
+
+  // تأسيسك اكتمل؟ نوجّهك مباشرة لخدمات ما بعد التأسيس (الموارد البشرية، المحاسبة، التسويق...)، ثم إلى صمام بعد قبول عرضها
+  if(latestRequest && latestRequest.status === 'completed'){
+    const { data: piReq } = await supabase.from('post_incorp_requests').select('status').eq('client_id', profile.id).order('created_at', {ascending:false}).limit(1).maybeSingle();
+    const cta = document.getElementById('postIncorpCta');
+    cta.style.display = 'block';
+    if(!piReq){
+      cta.innerHTML = `<h3 style="margin-bottom:6px;">🎉 تهانينا، اكتمل تأسيس شركتك!</h3>
+        <p style="font-size:13.5px;color:var(--ink);margin-bottom:12px;">تحتاج دعماً في الموارد البشرية أو المحاسبة أو التسويق أو غيرها بعد التأسيس؟ أخبرنا باحتياجك وسنجهّز لك عرضاً مخصصاً.</p>
+        <a href="post-incorp.html" class="btn gold" style="margin:0;padding:9px 18px;font-size:13px;">اطلب خدمات ما بعد التأسيس ←</a>`;
+    } else if(piReq.status === 'quoted'){
+      cta.innerHTML = `<h3 style="margin-bottom:6px;">📩 وصلك عرض لخدمات ما بعد التأسيس</h3>
+        <p style="font-size:13.5px;color:var(--ink);margin-bottom:12px;">راجع العرض ووافق عليه للمتابعة — بعد القبول يصبح بإمكانك الدخول إلى منصة صمام لمتابعة خدماتك.</p>
+        <a href="post-incorp.html" class="btn gold" style="margin:0;padding:9px 18px;font-size:13px;">مراجعة العرض ←</a>`;
+    } else if(piReq.status === 'accepted'){
+      cta.innerHTML = `<h3 style="margin-bottom:6px;">🎉 خدماتك بعد التأسيس جاهزة</h3>
+        <p style="font-size:13.5px;color:var(--ink);margin-bottom:12px;">يمكنك الآن الدخول إلى منصة صمام لمتابعة خدماتك أولاً بأول.</p>
+        <a href="post-incorp.html" class="btn gold" style="margin:0;padding:9px 18px;font-size:13px;">الذهاب لصمام ←</a>`;
+    } else {
+      cta.style.display = 'none';
+    }
+  }
 
   // عدد الأيام منذ بداية الطلب (أو منذ التسجيل لو ما فيه طلب)
   const startDate = latestRequest ? new Date(latestRequest.created_at) : new Date(profile.created_at || Date.now());
