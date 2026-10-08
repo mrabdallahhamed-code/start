@@ -47,6 +47,7 @@
     <p data-i18n="forgot_sub" class="hint mb-12">اكتب بريدك الإلكتروني وسنرسل لك رابط تعيين كلمة مرور جديدة.</p>
     <label for="forgotEmail" data-i18n="login_email">البريد الإلكتروني</label>
     <input id="forgotEmail" type="email" autocomplete="email" maxlength="254">
+    <div id="captchaBoxForgot" class="mt-12"></div>
     <button class="btn" type="button" id="forgotBtn" data-i18n="forgot_send_btn">إرسال رابط الاستعادة</button>
     <div id="forgotMsg" role="alert"></div>
     <p style="margin-top:10px;font-size:13px;"><a href="#" id="forgotBack" data-i18n="forgot_back">← رجوع لتسجيل الدخول</a></p>
@@ -98,12 +99,25 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   await afterLogin();
 });
 
-document.getElementById('forgotLink').addEventListener('click', e => { e.preventDefault(); document.getElementById('loginCard').style.display='none'; document.getElementById('forgotCard').style.display='block'; });
+// تحقق أمني مستقل لنموذج «نسيت كلمة المرور» (رمز Turnstile يُستخدم مرة واحدة فقط)
+window.__forgotCaptchaToken = null; let __forgotWidget = null;
+function renderForgotCaptcha(){
+  if(!captchaRequired() || __forgotWidget !== null) return;
+  const tryRender = () => {
+    if(!window.turnstile) return setTimeout(tryRender, 300);
+    __forgotWidget = window.turnstile.render('#captchaBoxForgot', { sitekey: window.APP_CONFIG.turnstileSiteKey, callback: t => { window.__forgotCaptchaToken = t; } });
+  };
+  tryRender();
+}
+document.getElementById('forgotLink').addEventListener('click', e => { e.preventDefault(); document.getElementById('loginCard').style.display='none'; document.getElementById('forgotCard').style.display='block'; renderForgotCaptcha(); });
 document.getElementById('forgotBack').addEventListener('click', e => { e.preventDefault(); document.getElementById('forgotCard').style.display='none'; document.getElementById('loginCard').style.display='block'; });
 document.getElementById('forgotBtn').addEventListener('click', async () => {
   const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
   if(!email){ showMsg('forgotMsg','err', L('أدخل بريدك الإلكتروني','Enter your email')); return; }
-  await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/auth/reset-password.html' });
+  if(captchaRequired() && !window.__forgotCaptchaToken){ showMsg('forgotMsg','err', L('أكمل التحقق الأمني.','Complete the security check.')); return; }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/auth/reset-password.html', captchaToken: window.__forgotCaptchaToken || undefined });
+  if(window.turnstile && __forgotWidget !== null){ try{ window.turnstile.reset(__forgotWidget); window.__forgotCaptchaToken = null; }catch(x){} }
+  if(error && /captcha/i.test(error.message || '')){ showMsg('forgotMsg','err', L('فشل التحقق الأمني، حاول مرة أخرى.','Security check failed, please try again.')); return; }
   showMsg('forgotMsg','ok', L('إن كان البريد مسجّلاً لدينا فقد وصلك رابط تعيين كلمة مرور جديدة (تحقق من مجلد الرسائل غير المرغوبة أيضاً).','If the email is registered, a reset link has been sent (check spam too).'));
 });
 
