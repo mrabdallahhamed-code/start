@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>ملف مقدّم الخدمة — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -21,23 +21,23 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+  <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
   <button class="btn ghost" onclick="signOut()">تسجيل الخروج</button>
 </header>
 <main>
-  <a href="dashboard.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع للوحة الرئيسية</a>
-  <h1 class="page-title" style="margin-top:10px;">ملف مقدّم الخدمة: <span id="providerName">...</span></h1>
+  <a href="dashboard.html" class="link-soft">← رجوع للوحة الرئيسية</a>
+  <h1 class="page-title mt-10">ملف مقدّم الخدمة: <span id="providerName">...</span></h1>
 
   <div class="card">
-    <h3 style="margin-bottom:10px;">بيانات التواصل وحالة الاعتماد</h3>
+    <h3 class="mb-10">بيانات التواصل وحالة الاعتماد</h3>
     <p style="font-size:13.5px;margin-bottom:6px;">📞 <span id="pPhone">—</span> · 📮 الوسيلة المفضلة: <span id="pPreferred">—</span></p>
     <p style="font-size:13.5px;margin-bottom:14px;">التخصص: <span id="pSpecialty">—</span></p>
     <div id="verifyBadge"></div>
-    <button class="btn" id="verifyBtn" style="margin-top:12px;" onclick="toggleVerify()"></button>
+    <button class="btn mt-12" id="verifyBtn" onclick="toggleVerify()"></button>
   </div>
 
   <div class="card" id="docsSection">
-    <h3 style="margin-bottom:10px;">مستندات مقدّم الخدمة</h3>
+    <h3 class="mb-10">مستندات مقدّم الخدمة</h3>
     <table>
       <thead><tr><th>النوع</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr></thead>
       <tbody id="docsBody"><tr><td colspan="4">جارٍ التحميل...</td></tr></tbody>
@@ -45,12 +45,12 @@
   </div>
 
   <div class="card">
-    <h3 style="margin-bottom:10px;">مراسلة مقدّم الخدمة</h3>
-    <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">مفيدة مثلاً لطلب إكمال مستنداته قبل اعتماده.</p>
-    <div id="msgsList"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
+    <h3 class="mb-10">مراسلة مقدّم الخدمة</h3>
+    <p class="hint mb-10">مفيدة مثلاً لطلب إكمال مستنداته قبل اعتماده.</p>
+    <div id="msgsList"><p class="txt-soft">جارٍ التحميل...</p></div>
     <div style="display:flex;gap:8px;margin-top:14px;">
       <input id="msgInput" placeholder="اكتب رسالة لمقدّم الخدمة...">
-      <button class="btn gold" style="margin:0;padding:10px 18px;" onclick="sendMsg()">إرسال</button>
+      <button class="btn gold btn-pad m-0" onclick="sendMsg()">إرسال</button>
     </div>
   </div>
 </main>
@@ -64,7 +64,7 @@ async function init(){
   if(!admin) return;
 
   providerId = new URLSearchParams(window.location.search).get('id');
-  if(!providerId){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">لم يتم تحديد مقدّم خدمة.</p>'; return; }
+  if(!providerId){ document.body.innerHTML = '<p class="empty-box">لم يتم تحديد مقدّم خدمة.</p>'; return; }
 
   const { data: profileData } = await supabase.from('profiles').select('*').eq('id', providerId).single();
   const { data: providerData } = await supabase.from('service_providers').select('*').eq('id', providerId).single();
@@ -105,10 +105,10 @@ async function loadDocs(){
       <td>${esc(new Date(d.uploaded_at).toLocaleDateString('ar-SA'))}</td>
       <td>${statusMap[d.status]}</td>
       <td>
-        <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" data-p="${esc(d.file_path)}" onclick="viewDoc(this.dataset.p)">عرض الملف</button>
+        <button class="btn ghost btn-xs" data-p="${esc(d.file_path)}" onclick="viewDoc(this.dataset.p)">عرض الملف</button>
         ${d.status==='pending' ? `
-          <button class="btn" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="reviewDoc('${esc(d.id)}','verified')">اعتماد</button>
-          <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="reviewDoc('${esc(d.id)}','rejected')">رفض</button>
+          <button class="btn btn-xs" onclick="reviewDoc('${esc(d.id)}','verified')">اعتماد</button>
+          <button class="btn ghost btn-xs" onclick="reviewDoc('${esc(d.id)}','rejected')">رفض</button>
         ` : ''}
       </td>
     </tr>`).join('');
@@ -131,7 +131,7 @@ async function loadMsgs(){
   const { data, error } = await supabase.from('admin_messages').select('*').eq('recipient_id', providerId).order('created_at');
   const list = document.getElementById('msgsList');
   if(error){ list.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
-  if(!data || !data.length){ list.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد رسائل بعد.</p>'; return; }
+  if(!data || !data.length){ list.innerHTML = '<p class="txt-soft">لا توجد رسائل بعد.</p>'; return; }
   list.innerHTML = data.map(m => `<div style="font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:${m.sender_id===admin.id?'var(--green-tint)':'var(--cream)'};border:1px solid var(--line);">${esc(m.message)}</div>`).join('');
 }
 

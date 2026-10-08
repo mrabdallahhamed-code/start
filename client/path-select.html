@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#2E7D5B">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>نوع التأسيس — مبتدأ من إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -28,8 +28,8 @@
 </head>
 <body>
 <header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div></header>
-<main style="max-width:560px;">
-  <h1 class="page-title" style="text-align:center;">ما نوع التأسيس الذي تحتاجه؟</h1>
+<main class="mw-560">
+  <h1 class="page-title txt-center">ما نوع التأسيس الذي تحتاجه؟</h1>
   <p style="font-size:13.5px;color:var(--ink-soft);text-align:center;margin-top:6px;">يمكنك تغيير هذا الاختيار لاحقاً من صفحة «بياناتي».</p>
   <div class="path-grid">
     <div class="path-card" id="cardForeign">
@@ -43,8 +43,8 @@
       <div class="path-desc">أنت مواطن سعودي، وتريد تأسيس شركة محلية لك.</div>
     </div>
   </div>
-  <div id="msg" role="alert" style="margin-top:14px;"></div>
-  <p style="text-align:center;font-size:13px;margin-top:18px;"><a href="country-select.html">← تغيير الدولة</a></p>
+  <div id="msg" role="alert" class="mt-14"></div>
+  <p class="foot-note"><a href="country-select.html">← تغيير الدولة</a></p>
 </main>
 <script src="../assets/js/supabaseClient.js"></script>
 <script>
@@ -67,5 +67,6 @@ async function init(){
 }
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>

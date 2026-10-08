@@ -24,9 +24,9 @@
 </head>
 <body>
 <header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div><button id="langToggleBtn" onclick="toggleLang()">EN</button></header>
-<main style="max-width:480px;">
-  <img class="auth-logo" src="../assets/images/mubtada-logo.png" alt="مبتدأ — منصة الاستثمار من إتقان" width="150" height="174">
-  <h1 class="page-title" data-i18n="login_title" style="text-align:center;">تسجيل الدخول</h1>
+<main class="mw-480">
+  <img class="auth-logo" src="../assets/images/mubtada-logo.png" alt="مبتدأ من إتقان — منصة الاستثمار من إتقان" width="150" height="174">
+  <h1 class="page-title txt-center" data-i18n="login_title">تسجيل الدخول</h1>
   <div class="card" id="loginCard">
     <form id="loginForm" autocomplete="on" novalidate>
       <label for="email" data-i18n="login_email">البريد الإلكتروني</label>
@@ -34,16 +34,16 @@
       <label for="password" data-i18n="login_password">كلمة المرور</label>
       <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
       <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;cursor:pointer;"><input id="remember" type="checkbox" style="width:auto;"><span data-i18n="login_remember">تذكّرني على هذا الجهاز</span></label>
-      <div id="captchaBox" style="margin-top:12px;"></div>
+      <div id="captchaBox" class="mt-12"></div>
       <button class="btn" type="submit" id="loginBtn" data-i18n="login_btn">دخول</button>
       <div id="msg" role="alert"></div>
     </form>
     <p style="margin-top:10px;font-size:13px;"><a href="#" id="forgotLink" data-i18n="login_forgot_link">نسيت كلمة المرور؟</a></p>
     <p style="margin-top:6px;font-size:13px;"><span data-i18n="login_no_account">ليس لديك حساب؟</span> <a href="register.html" data-i18n="login_register_link">إنشاء حساب جديد</a></p>
   </div>
-  <div class="card" id="forgotCard" style="display:none;">
-    <h3 style="margin-bottom:10px;" data-i18n="forgot_title">استعادة كلمة المرور</h3>
-    <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;" data-i18n="forgot_sub">اكتب بريدك الإلكتروني وسنرسل لك رابط تعيين كلمة مرور جديدة.</p>
+  <div class="card is-hidden" id="forgotCard">
+    <h3 data-i18n="forgot_title" class="mb-10">استعادة كلمة المرور</h3>
+    <p data-i18n="forgot_sub" class="hint mb-12">اكتب بريدك الإلكتروني وسنرسل لك رابط تعيين كلمة مرور جديدة.</p>
     <label for="forgotEmail" data-i18n="login_email">البريد الإلكتروني</label>
     <input id="forgotEmail" type="email" autocomplete="email" maxlength="254">
     <button class="btn" type="button" id="forgotBtn" data-i18n="forgot_send_btn">إرسال رابط الاستعادة</button>

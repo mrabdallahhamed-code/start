@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#2E7D5B">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>تقييم الوضع — مبتدأ من إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -25,7 +25,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="status-assessment.html" class="side-link active"><span class="ic">🧭</span> تقييم الوضع</a>
@@ -39,25 +39,25 @@
       <a href="files.html" class="side-link"><span class="ic">📁</span> ملفاتي</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar">
       <a class="topbar-btn" href="https://wa.me/966569051686" target="_blank" title="تواصل معنا">💬</a>
       <button class="topbar-btn" id="langToggleBtn" onclick="toggleLang()">EN</button>
       <div id="notifBellContainer"></div>
     </header>
     <main class="app-main">
-      <div class="app-main-inner" style="max-width:560px;">
+      <div class="app-main-inner mw-560">
         <h1 class="page-title" id="pageTitle">تقييم الوضع</h1>
         <p id="pageSub" style="font-size:13px;color:var(--ink-soft);margin-top:-8px;margin-bottom:16px;">أجب على سؤالين فقط، وسنجهّز لك عرض سعر التأسيس.</p>
         <div class="card" id="formArea"></div>
   <div class="card" style="margin-top:16px;background:#FFF8E8;border:1px solid #F0E0B0;">
     <h3 style="margin-bottom:6px;font-size:15px;">📊 تحتاج دراسة جدوى قبل التأسيس؟</h3>
     <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;line-height:1.8;">إتقان توفّر دراسات جدوى ودراسات متخصصة عبر متجرها الإلكتروني، لمساعدتك على اتخاذ قرار التأسيس بثقة قبل أن تمضي قدماً.</p>
-    <a href="https://store.itqanbs.sa/?src=mubtada" target="_blank" rel="noopener" class="btn ghost" style="margin:0;padding:8px 16px;font-size:12.5px;">تصفح متجر الدراسات ←</a>
+    <a href="https://store.itqanbs.sa/?src=mubtada" target="_blank" rel="noopener" class="btn ghost btn-sm m-0">تصفح متجر الدراسات ←</a>
   </div>
       </div>
     </main>
@@ -124,7 +124,7 @@ function render(){
         <option value="">اختر...</option>
         ${ENTITY_TYPES.map(t => `<option value="${esc(t.key)}">${esc(t.label)}</option>`).join('')}
       </select>
-      <label style="margin-top:14px;">هل تم اختيار الاسم التجاري؟</label>
+      <label class="mt-14">هل تم اختيار الاسم التجاري؟</label>
       <div class="yn-row">
         <div class="yn-btn ${tradeNameChosen === true ? 'selected' : ''}" id="btnNameYes">نعم</div>
         <div class="yn-btn ${tradeNameChosen === false ? 'selected' : ''}" id="btnNameNo">لا</div>
@@ -180,5 +180,6 @@ async function submit(){
 
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>

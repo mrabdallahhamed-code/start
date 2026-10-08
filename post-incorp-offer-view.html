@@ -86,11 +86,11 @@ async function init(){
   }
 
   const needsHtml = Object.entries(req.service_needs || {}).map(([cat, needs]) => `
-    <div style="margin-bottom:12px;">
+    <div class="mb-12">
       <p style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px;">${esc(cat)}</p>
       ${needs.map(n => `<div class="scope-item" style="display:flex;gap:8px;font-size:13px;padding:3px 0;"><span style="color:var(--green);">✔</span><span>${esc(n)}</span></div>`).join('')}
     </div>
-  `).join('') || '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد خدمات محددة.</p>';
+  `).join('') || '<p class="hint">لا توجد خدمات محددة.</p>';
 
   const fees = req.government_fees || [];
   const feesTotal = fees.reduce((s,f) => s + (f.fee || 0), 0);

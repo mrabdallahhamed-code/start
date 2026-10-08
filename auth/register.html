@@ -26,9 +26,9 @@
 </head>
 <body>
 <header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div><button id="langToggleBtn" onclick="toggleLang()">EN</button></header>
-<main style="max-width:480px;">
-  <img class="auth-logo" src="../assets/images/mubtada-logo.png" alt="مبتدأ — منصة الاستثمار من إتقان" width="130" height="151">
-  <h1 class="page-title" data-i18n="register_title" style="text-align:center;">إنشاء حساب جديد</h1>
+<main class="mw-480">
+  <img class="auth-logo" src="../assets/images/mubtada-logo.png" alt="مبتدأ من إتقان — منصة الاستثمار من إتقان" width="130" height="151">
+  <h1 class="page-title txt-center" data-i18n="register_title">إنشاء حساب جديد</h1>
   <div class="card">
     <form id="regForm" autocomplete="on" novalidate>
       <label for="full_name" data-i18n="register_fullname">الاسم الكامل</label>
@@ -43,7 +43,7 @@
       <input id="password2" type="password" autocomplete="new-password" maxlength="128" required>
       <p class="pw-hint" data-i18n="register_pw_hint">10 أحرف على الأقل، وتشمل حرفاً كبيراً وصغيراً ورقماً ورمزاً.</p>
       <label class="consent"><input id="consent" type="checkbox"><span data-i18n-html="register_consent">أوافق على <a href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام</a> و<a href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>.</span></label>
-      <div id="captchaBox" style="margin-top:12px;"></div>
+      <div id="captchaBox" class="mt-12"></div>
       <button class="btn" type="submit" id="regBtn" data-i18n="register_btn">إنشاء الحساب</button>
       <div id="msg" role="alert"></div>
     </form>

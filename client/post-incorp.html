@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>خدمات ما بعد التأسيس — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -27,7 +27,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -41,11 +41,11 @@
       <a href="files.html" class="side-link"><span class="ic">📁</span> ملفاتي</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar">
       <a class="topbar-btn" href="https://wa.me/966569051686" target="_blank" title="تواصل معنا">💬</a>
       <button class="topbar-btn" id="langToggleBtn" onclick="toggleLang()">EN</button>
@@ -59,7 +59,7 @@
           <p>كل ما تحتاجه لإدارة شركتك بعد التأسيس، مباشرة من فريق إتقان</p>
         </div>
 
-        <div class="card" id="postIncorpArea"><p style="color:var(--ink-soft);font-size:13.5px;">جارٍ التحميل...</p></div>
+        <div class="card" id="postIncorpArea"><p class="txt-soft-lg">جارٍ التحميل...</p></div>
 
       </div>
     </main>
@@ -96,11 +96,11 @@ async function loadPostIncorp(){
 
   if(!data || !data.length){
     area.innerHTML = `
-      <h3 style="margin-bottom:10px;">اختر ما تحتاجه</h3>
+      <h3 class="mb-10">اختر ما تحتاجه</h3>
       <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">اختر الخدمات اللي تحتاجها، وحدّد المطلوب بالتفصيل، وفريق إتقان يجهّز لك عرض سعر مخصص.</p>
       <div id="piCategories">
         ${postIncorpCategories.map((c,i) => `
-          <div class="service-card" style="margin-bottom:10px;">
+          <div class="service-card mb-10">
             <div class="service-head" style="cursor:default;">
               <div class="check-item" style="display:grid;grid-template-columns:1fr 26px;align-items:center;gap:10px;width:100%;">
                 <label for="pi-${esc(i)}" style="margin:0;font-weight:700;font-size:14px;">${esc(c)}</label>
@@ -129,7 +129,7 @@ async function loadPostIncorp(){
   const req = data[0];
   const statusLabels = { pending_review:'قيد المراجعة — بانتظار عرض من إتقان', quoted:'وصلك عرض سعر', accepted:'تم القبول ✓', rejected:'تم الرفض' };
 
-  let html = `<h3 style="margin-bottom:10px;">طلبك الحالي</h3>`;
+  let html = `<h3 class="mb-10">طلبك الحالي</h3>`;
   html += `<p style="font-size:13.5px;margin-bottom:10px;">حالة الطلب: <strong>${esc(statusLabels[req.status])}</strong></p>`;
   const needsHtml = Object.entries(req.service_needs || {}).map(([cat, needs]) => `<strong>${esc(cat)}:</strong> ${esc(needs.join('، '))}`).join('<br>');
   html += `<p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;">${needsHtml}</p>`;
@@ -143,9 +143,9 @@ async function loadPostIncorp(){
         <button class="btn ghost" onclick="respondPostIncorp('${esc(req.id)}','rejected')">رفض</button>
       </div>`;
   } else if(req.status === 'accepted'){
-    html += `<a href="../post-incorp-offer-view.html?id=${esc(req.id)}" class="btn ghost" style="padding:8px 16px;font-size:12.5px;">عرض التفاصيل الكاملة</a>
-      <a href="../post-incorp-contract-view.html?request_id=${esc(req.id)}" class="btn gold" style="padding:8px 16px;font-size:12.5px;">عرض الاتفاقية والتوقيع</a>
-      <button onclick="goToSimamFromClient()" class="btn gold" style="padding:8px 16px;font-size:12.5px;">🎉 الانتقال إلى صمام لمتابعة خدماتك ←</button>`;
+    html += `<a href="../post-incorp-offer-view.html?id=${esc(req.id)}" class="btn ghost btn-sm">عرض التفاصيل الكاملة</a>
+      <a href="../post-incorp-contract-view.html?request_id=${esc(req.id)}" class="btn gold btn-sm">عرض الاتفاقية والتوقيع</a>
+      <button onclick="goToSimamFromClient()" class="btn gold btn-sm">🎉 الانتقال إلى صمام من إتقان لمتابعة خدماتك ←</button>`;
   } else if(req.status === 'rejected'){
     html += `<button class="btn gold" onclick="resetPostIncorp()">طلب جديد</button>`;
   }
@@ -207,10 +207,11 @@ async function goToSimamFromClient(){
   } catch(e){
     window.open('https://simam.itqanbs.sa', '_blank', 'noopener,noreferrer');
   }
-  btn.disabled = false; btn.textContent = '🎉 الانتقال إلى صمام لمتابعة خدماتك ←';
+  btn.disabled = false; btn.textContent = '🎉 الانتقال إلى صمام من إتقان لمتابعة خدماتك ←';
 }
 
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>

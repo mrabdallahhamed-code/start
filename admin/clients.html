@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>العملاء وتصنيفاتها — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -22,7 +22,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link active"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -32,11 +32,11 @@
       <a href="team.html" class="side-link"><span class="ic">🧑‍💼</span> الفريق</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar">
       <div id="notifBellContainer"></div>
     </header>
@@ -51,12 +51,12 @@
           <button onclick="setFilter('ready')">جاهز</button>
         </div>
 
-        <div class="card" id="bulkMsgCard" style="display:none;">
-          <h3 style="margin-bottom:10px;">إرسال تذكير جماعي</h3>
-          <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">سيُرسَل هذا النص لكل العملاء الظاهرين حالياً بالقائمة (<span id="bulkCount">0</span> عميل).</p>
+        <div class="card is-hidden" id="bulkMsgCard">
+          <h3 class="mb-10">إرسال تذكير جماعي</h3>
+          <p class="hint mb-10">سيُرسَل هذا النص لكل العملاء الظاهرين حالياً بالقائمة (<span id="bulkCount">0</span> عميل).</p>
           <div style="display:flex;gap:8px;">
             <input id="bulkMsgInput" placeholder="مثال: فضلاً أكمل بوصلة الجاهزية لمتابعة طلبك">
-            <button class="btn gold" style="margin:0;padding:10px 18px;" onclick="sendBulkMsg()">إرسال للكل</button>
+            <button class="btn gold btn-pad m-0" onclick="sendBulkMsg()">إرسال للكل</button>
           </div>
           <div id="bulkMsgStatus"></div>
         </div>
@@ -130,9 +130,9 @@ function renderClients(){
       <td>${esc(c.profiles?.full_name || c.id)}</td>
       <td>${esc(c.nationality || '—')}</td>
       <td>${statusBadge}</td>
-      <td><a href="client-detail.html?id=${esc(c.id)}#docsSection" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">عرض المستندات</a></td>
-      <td><a href="client-detail.html?id=${esc(c.id)}#checklistSection" class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;">عرض الإجراءات</a></td>
-      <td><a href="client-detail.html?id=${esc(c.id)}#messagesSection" class="btn gold" style="padding:6px 12px;font-size:12px;margin-top:0;">💬 مراسلة</a></td>
+      <td><a href="client-detail.html?id=${esc(c.id)}#docsSection" class="btn ghost btn-xs">عرض المستندات</a></td>
+      <td><a href="client-detail.html?id=${esc(c.id)}#checklistSection" class="btn ghost btn-xs">عرض الإجراءات</a></td>
+      <td><a href="client-detail.html?id=${esc(c.id)}#messagesSection" class="btn gold btn-xs">💬 مراسلة</a></td>
     </tr>`;
   }).join('');
 }

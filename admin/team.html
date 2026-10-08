@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>الفريق — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -22,7 +22,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -32,18 +32,18 @@
       <a href="team.html" class="side-link active"><span class="ic">🧑‍💼</span> الفريق</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar"><div id="notifBellContainer"></div></header>
     <main class="app-main">
       <div class="app-main-inner">
         <h1 class="page-title">فريق إتقان الإداري</h1>
 
         <div class="card">
-          <h3 style="margin-bottom:10px;">كيف يُضاف موظف جديد؟</h3>
+          <h3 class="mb-10">كيف يُضاف موظف جديد؟</h3>
           <ol style="font-size:13px;color:var(--ink-soft);padding-right:18px;line-height:2;">
             <li>اطلب من الموظف يسجّل حساب عادي من الصفحة الرئيسية للموقع (نفس فورم التسجيل العادي)</li>
             <li>بعد ما يسجّل، دوّر عن حسابه بالبحث أدناه بواسطة بريده الإلكتروني</li>
@@ -52,17 +52,17 @@
         </div>
 
         <div class="card">
-          <h3 style="margin-bottom:10px;">البحث وترقية حساب</h3>
+          <h3 class="mb-10">البحث وترقية حساب</h3>
           <div style="display:flex;gap:8px;">
             <input id="searchInput" placeholder="ابحث بالبريد الإلكتروني...">
             <button class="btn" style="margin:0;padding:11px 20px;" onclick="searchAccounts()">بحث</button>
           </div>
-          <div id="searchResults" style="margin-top:14px;"></div>
+          <div id="searchResults" class="mt-14"></div>
         </div>
 
         <div class="card">
-          <h3 style="margin-bottom:10px;">الأعضاء الحاليون بصلاحية أدمن</h3>
-          <div id="adminsList"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
+          <h3 class="mb-10">الأعضاء الحاليون بصلاحية أدمن</h3>
+          <div id="adminsList"><p class="txt-soft">جارٍ التحميل...</p></div>
         </div>
       </div>
     </main>
@@ -84,11 +84,11 @@ async function loadAdmins(){
   const { data, error } = await supabase.from('profiles').select('id, full_name, email').eq('role', 'admin').order('full_name');
   const list = document.getElementById('adminsList');
   if(error){ list.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
-  if(!data || !data.length){ list.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا يوجد أعضاء أدمن.</p>'; return; }
+  if(!data || !data.length){ list.innerHTML = '<p class="txt-soft">لا يوجد أعضاء أدمن.</p>'; return; }
 
   list.innerHTML = data.map(a => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);">
-      <div><strong style="font-size:13.5px;">${esc(a.full_name)}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${esc(a.email || 'بريد غير مسجّل (حساب قديم)')}</span></div>
+      <div><strong style="font-size:13.5px;">${esc(a.full_name)}</strong><br><span class="txt-soft-sm">${esc(a.email || 'بريد غير مسجّل (حساب قديم)')}</span></div>
       ${a.id !== myProfile.id ? `<button class="btn ghost" style="padding:6px 14px;font-size:12px;margin-top:0;" onclick="demote('${esc(a.id)}')">تنزيل لعميل</button>` : `<span class="badge ready">أنت</span>`}
     </div>`).join('');
 }
@@ -100,11 +100,11 @@ async function searchAccounts(){
 
   const { data, error } = await supabase.from('profiles').select('id, full_name, email, role').ilike('email', `%${q}%`).limit(10);
   if(error){ results.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
-  if(!data || !data.length){ results.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد نتائج — تأكد الحساب مسجّل حديثاً (الحسابات القديمة قبل هذا التحديث ما تحتوي بريدها هنا، دوّر عنها بـ Supabase Table Editor بدلاً من ذلك).</p>'; return; }
+  if(!data || !data.length){ results.innerHTML = '<p class="txt-soft">لا توجد نتائج — تأكد الحساب مسجّل حديثاً (الحسابات القديمة قبل هذا التحديث ما تحتوي بريدها هنا، دوّر عنها بـ Supabase Table Editor بدلاً من ذلك).</p>'; return; }
 
   results.innerHTML = data.map(p => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);">
-      <div><strong style="font-size:13.5px;">${esc(p.full_name)}</strong><br><span style="font-size:12px;color:var(--ink-soft);">${esc(p.email)} — ${p.role === 'admin' ? 'أدمن حالياً' : 'حساب عميل'}</span></div>
+      <div><strong style="font-size:13.5px;">${esc(p.full_name)}</strong><br><span class="txt-soft-sm">${esc(p.email)} — ${p.role === 'admin' ? 'أدمن حالياً' : 'حساب عميل'}</span></div>
       ${p.role !== 'admin' ? `<button class="btn gold" style="padding:6px 14px;font-size:12px;margin-top:0;" onclick="promote('${esc(p.id)}')">ترقية لأدمن</button>` : '<span class="badge ready">أدمن ✓</span>'}
     </div>`).join('');
 }

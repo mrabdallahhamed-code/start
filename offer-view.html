@@ -104,7 +104,7 @@ async function init(){
     clientSignatureUrl = data?.signedUrl;
   }
 
-  const scopeHtml = (offer.scope_items || []).map(s => `<div class="scope-item"><span class="check">✔</span><span>${esc(s)}</span></div>`).join('') || '<p style="font-size:12.5px;color:var(--ink-soft);">لم يحدَّد نطاق خدمات.</p>';
+  const scopeHtml = (offer.scope_items || []).map(s => `<div class="scope-item"><span class="check">✔</span><span>${esc(s)}</span></div>`).join('') || '<p class="hint">لم يحدَّد نطاق خدمات.</p>';
 
   const docsHtml = (offer.required_documents_list || []).map(d => `<div class="doc-item"><span class="check">•</span><span>${esc(d)}</span></div>`).join('')
     + (offer.required_documents ? `<div class="doc-item"><span class="check">•</span><span>${esc(offer.required_documents)}</span></div>` : '');
@@ -141,10 +141,10 @@ async function init(){
     ${scopeHtml}
 
     <div class="sec-title">ثانياً: المستندات المطلوبة من العميل</div>
-    ${docsHtml || '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد مستندات محددة.</p>'}
+    ${docsHtml || '<p class="hint">لا توجد مستندات محددة.</p>'}
 
     <div class="sec-title">ثالثاً: الرسوم الحكومية التقديرية</div>
-    ${feesHtml || '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد رسوم حكومية مقدَّرة بهذا العرض.</p>'}
+    ${feesHtml || '<p class="hint">لا توجد رسوم حكومية مقدَّرة بهذا العرض.</p>'}
 
     <div class="sec-title">رابعاً: المقابل المالي</div>
     <div class="fee-box">
@@ -154,9 +154,9 @@ async function init(){
 
     ${offer.payment_schedule ? `<div class="sec-title">آلية السداد</div><div class="notes-list"><p>${esc(offer.payment_schedule)}</p></div>` : ''}
     ${offer.exclusions_notes ? `<div class="sec-title">ملاحظات مالية</div><div class="notes-list"><p>${esc(offer.exclusions_notes)}</p></div>` : ''}
-    ${offer.additional_services_discount ? `<div class="sec-title">خصم الخدمات الإضافية بعد التأسيس</div><p style="font-size:12.5px;color:var(--ink-soft);">خصم ${esc(offer.additional_services_discount)}% على الخدمات المحاسبية والموارد البشرية والدعم التشغيلي بعد اكتمال التأسيس.</p>` : ''}
+    ${offer.additional_services_discount ? `<div class="sec-title">خصم الخدمات الإضافية بعد التأسيس</div><p class="hint">خصم ${esc(offer.additional_services_discount)}% على الخدمات المحاسبية والموارد البشرية والدعم التشغيلي بعد اكتمال التأسيس.</p>` : ''}
 
-    ${offer.pdf_file_path ? `<div class="sec-title">ملف مرفق</div><button class="btn ghost" style="padding:8px 16px;font-size:12.5px;" data-p="${esc(offer.pdf_file_path)}" onclick="downloadAttachment(this.dataset.p)">تحميل الملف المرفق</button>` : ''}
+    ${offer.pdf_file_path ? `<div class="sec-title">ملف مرفق</div><button class="btn ghost btn-sm" data-p="${esc(offer.pdf_file_path)}" onclick="downloadAttachment(this.dataset.p)">تحميل الملف المرفق</button>` : ''}
 
     <div class="sign-section">
       <div class="sign-box">
@@ -184,5 +184,6 @@ async function downloadAttachment(path){
 
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>

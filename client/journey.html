@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 <title>رحلة الطلب — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
 <script src="/assets/js/security.js"></script>
@@ -52,7 +52,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -66,11 +66,11 @@
       <a href="files.html" class="side-link"><span class="ic">📁</span> ملفاتي</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar">
       <a class="topbar-btn" href="https://wa.me/966569051686" target="_blank" title="تواصل معنا">💬</a>
       <button class="topbar-btn" id="langToggleBtn" onclick="toggleLang()">EN</button>
@@ -79,7 +79,7 @@
     <main class="app-main">
       <div class="app-main-inner" style="max-width:620px;">
         <h1 class="page-title">رحلة الطلب</h1>
-        <div id="journeyArea"><p style="color:var(--ink-soft);font-size:13.5px;">جارٍ التحميل...</p></div>
+        <div id="journeyArea"><p class="txt-soft-lg">جارٍ التحميل...</p></div>
       </div>
     </main>
   </div>
@@ -105,7 +105,7 @@ async function init(){
   if(reqErr) throw new Error('فشل جلب الطلب: ' + reqErr.message);
 
   if(!requests || !requests.length){
-    area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">ما عندك طلب تأسيس حالياً.</p>';
+    area.innerHTML = '<p class="txt-soft-lg">ما عندك طلب تأسيس حالياً.</p>';
     return;
   }
 
@@ -113,13 +113,13 @@ async function init(){
   const acceptedOffer = offers && offers.find(o => o.status === 'accepted');
 
   if(!acceptedOffer){
-    area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">رحلة الطلب تبدأ بعد ما توافق على عرض من العروض الواردة. <a href="offers.html">شوف العروض</a></p>';
+    area.innerHTML = '<p class="txt-soft-lg">رحلة الطلب تبدأ بعد ما توافق على عرض من العروض الواردة. <a href="offers.html">شوف العروض</a></p>';
     return;
   }
 
   await loadStages(requests[0].id, area, acceptedOffer.duration_days);
  } catch(err){
-  document.getElementById('journeyArea').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${esc(err.message || err)}</div>`;
+  document.getElementById('journeyArea').innerHTML = `<div class="alert-danger"><strong>⚠ خطأ فعلي:</strong><br>${esc(err.message || err)}</div>`;
   console.error(err);
  }
 }
@@ -129,7 +129,7 @@ const STAGE_ICONS = ['🤝','📦','📜','🏢'];
 async function loadStages(requestId, area, contractDurationDays){
   const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
   if(error){ area.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
-  if(!stages || !stages.length){ area.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">مراحل التنفيذ بتظهر هنا قريباً.</p>'; return; }
+  if(!stages || !stages.length){ area.innerHTML = '<p class="txt-soft-lg">مراحل التنفيذ بتظهر هنا قريباً.</p>'; return; }
 
   const completedCount = stages.filter(s => s.status === 'completed').length;
   const pct = Math.round((completedCount / stages.length) * 100);
@@ -189,8 +189,8 @@ async function loadStages(requestId, area, contractDurationDays){
           <div class="upload-row">
             <textarea id="reply-${esc(s.id)}" rows="2" placeholder="اكتب ردّك هنا (لو مو محتاج ترفع ملف)..." style="margin-bottom:8px;"></textarea>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn gold" style="padding:8px 16px;font-size:12.5px;" onclick="sendReply('${esc(s.id)}')">📝 إرسال الرد المكتوب</button>
-              <label class="btn ghost" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع ملف بدل ذلك<input type="file" style="display:none;" onchange="uploadDoc('${esc(s.id)}', this, '${esc(requestId)}')"></label>
+              <button class="btn gold btn-sm" onclick="sendReply('${esc(s.id)}')">📝 إرسال الرد المكتوب</button>
+              <label class="btn ghost" style="padding:8px 16px;font-size:12.5px;cursor:pointer;">📤 رفع ملف بدل ذلك<input type="file" onchange="uploadDoc('${esc(s.id)}', this, '${esc(requestId)}')" class="is-hidden"></label>
             </div>
           </div>` : ''}
       </div>
@@ -235,5 +235,6 @@ async function downloadDoc(filePath){
 
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>

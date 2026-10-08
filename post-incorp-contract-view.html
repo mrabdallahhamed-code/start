@@ -154,7 +154,7 @@ function render(){
       <div class="field-row"><label>البريد الإلكتروني</label><span>${esc(companySettings.email || 'info@itqanbs.sa')}</span></div>
       <div class="field-row"><label>رقم الهاتف</label><span>${esc(companySettings.phone || '966569051686+')}</span></div>
     </div>
-    <p style="font-size:12px;color:var(--ink-soft);">ويشار إليها فيما بعد لأغراض هذا العقد بـ "الطرف الأول".</p>
+    <p class="txt-soft-sm">ويشار إليها فيما بعد لأغراض هذا العقد بـ "الطرف الأول".</p>
 
     <h3>الطرف الثاني — العميل</h3>
     <div class="party-box">
@@ -165,7 +165,7 @@ function render(){
       ${editableField('يمثله في هذا العقد', 'client_rep_name', clientName, true)}
       ${editableField('الصفة', 'client_rep_title', '', true)}
     </div>
-    <p style="font-size:12px;color:var(--ink-soft);">ويشار إليه فيما بعد لأغراض هذا العقد بـ "الطرف الثاني".</p>
+    <p class="txt-soft-sm">ويشار إليه فيما بعد لأغراض هذا العقد بـ "الطرف الثاني".</p>
 
     <h3>التمهيد</h3>
     <p>لما كان الطرف الأول شركة متخصصة في توفير خدمات الدعم الإداري والمحاسبي والتسويقي والتشغيلي للشركات والاستشارات، ولرغبة الطرف الثاني في الاستفادة من الطرف الأول في عملية التشغيل من خلال إبرام هذا العقد وفقاً لما يتم الاتفاق عليه بين الطرفين بموجبه، وبناءً على رغبة الطرفين في إيجاد علاقة تعامل بينهما لخدمة مصالحهما المشتركة وتحديد حقوق والتزامات كل طرف تجاه الآخر، فقد اتفق الطرفان وهما بكامل أهليتهما المعتبرة شرعاً على ما يلي.</p>
@@ -205,7 +205,7 @@ function render(){
 
     <h3>سادساً: مدة الاتفاقية</h3>
     ${editableField('تاريخ بداية الاتفاقية', 'agreement_start_date', '', true)}
-    <p style="margin-top:10px;">تُبرم هذه الاتفاقية لمدة سنة ميلادية واحدة قابلة للتجديد لمدد مماثلة بشرط موافقة الطرفين الكتابية.</p>
+    <p class="mt-10">تُبرم هذه الاتفاقية لمدة سنة ميلادية واحدة قابلة للتجديد لمدد مماثلة بشرط موافقة الطرفين الكتابية.</p>
 
     <h3>سابعاً: سرية المعلومات</h3>
     <p>يقر الطرفان بسرية محتويات هذه الاتفاقية والشؤون الخاصة بالعملاء والمعلومات التي يتم الحصول عليها جراء تنفيذها، ولا يجوز استخدامها بخلاف ما يتصل بها أو إفشاؤها لأي طرف آخر.</p>
@@ -258,7 +258,7 @@ function renderSignatureBlock(title, side, canSignNow){
     return `
       <div class="sig-block">
         <p style="font-weight:700;font-size:13px;margin-bottom:6px;">${esc(title)}</p>
-        <input id="sigName-${esc(side)}" placeholder="الاسم الكامل" style="margin-bottom:6px;">
+        <input id="sigName-${esc(side)}" placeholder="الاسم الكامل" class="mb-6">
         <canvas class="sig-canvas-small" id="sigCanvas-${esc(side)}"></canvas>
         <div style="display:flex;gap:8px;">
           <button class="btn ghost" style="padding:8px 12px;font-size:11.5px;margin:0;" onclick="clearSigPad('${esc(side)}')">مسح</button>
@@ -271,7 +271,7 @@ function renderSignatureBlock(title, side, canSignNow){
   return `
     <div class="sig-block">
       <p style="font-weight:700;font-size:13px;margin-bottom:6px;">${esc(title)}</p>
-      <p style="font-size:12px;color:var(--ink-soft);">بانتظار توقيع هذا الطرف.</p>
+      <p class="txt-soft-sm">بانتظار توقيع هذا الطرف.</p>
     </div>`;
 }
 

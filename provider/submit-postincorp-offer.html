@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>تجهيز عرض — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -27,25 +27,25 @@
 </style>
 </head>
 <body>
-<header class="top"><div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div></header>
+<header class="top"><div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div></header>
 <main style="max-width:680px;">
-  <a href="dashboard.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع للوحة الرئيسية</a>
-  <h1 class="page-title" style="margin-top:10px;">تجهيز عرض خدمات ما بعد التأسيس</h1>
+  <a href="dashboard.html" class="link-soft">← رجوع للوحة الرئيسية</a>
+  <h1 class="page-title mt-10">تجهيز عرض خدمات ما بعد التأسيس</h1>
 
   <div class="card">
-    <h3 style="margin-bottom:10px;">الخدمات المطلوبة من العميل</h3>
-    <div id="clientNeeds"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
+    <h3 class="mb-10">الخدمات المطلوبة من العميل</h3>
+    <div id="clientNeeds"><p class="txt-soft">جارٍ التحميل...</p></div>
   </div>
 
   <div class="card">
-    <h3 style="margin-bottom:6px;">الرسوم الحكومية التقديرية (إن وجدت)</h3>
-    <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">اختياري — اتركها فاضية لو الخدمة ما فيها رسوم حكومية.</p>
+    <h3 class="mb-6">الرسوم الحكومية التقديرية (إن وجدت)</h3>
+    <p class="hint mb-10">اختياري — اتركها فاضية لو الخدمة ما فيها رسوم حكومية.</p>
     <div id="feesList"></div>
-    <button class="btn ghost" style="padding:8px 16px;font-size:12.5px;" onclick="addFeeRow('', '')">+ إضافة رسم</button>
+    <button class="btn ghost btn-sm" onclick="addFeeRow('', '')">+ إضافة رسم</button>
   </div>
 
   <div class="card">
-    <h3 style="margin-bottom:10px;">المقابل المالي (أتعاب إتقان)</h3>
+    <h3 class="mb-10">المقابل المالي (أتعاب إتقان)</h3>
     <label>قيمة الأتعاب (ر.س، غير شامل ضريبة القيمة المضافة)</label>
     <input id="price" type="number" placeholder="مثال: 5000">
     <label>آلية السداد</label>
@@ -56,7 +56,7 @@
   </div>
 
   <div class="card">
-    <h3 style="margin-bottom:10px;">التوقيع والختم الرسمي</h3>
+    <h3 class="mb-10">التوقيع والختم الرسمي</h3>
     <label>اسم المفوّض بالتوقيع</label>
     <input id="provider_signature_name" placeholder="الاسم الكامل">
     <label>توقيع ممثل الشركة (صورة، اختياري)</label>
@@ -78,15 +78,15 @@ let clientId;
 async function init(){
   profile = await requireRole(['provider']);
   if(!profile) return;
-  if(!requestId){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">لم يتم تحديد الطلب.</p>'; return; }
+  if(!requestId){ document.body.innerHTML = '<p class="empty-box">لم يتم تحديد الطلب.</p>'; return; }
 
   const { data, error } = await supabase.from('post_incorp_requests').select('service_needs, client_notes, client_id, assigned_provider_id').eq('id', requestId).single();
   if(error || !data){ document.getElementById('clientNeeds').innerHTML = `<p class="msg err">${esc(error?.message || 'تعذر تحميل الطلب')}</p>`; return; }
-  if(data.assigned_provider_id !== profile.id){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">هذا الطلب غير موجّه لك.</p>'; return; }
+  if(data.assigned_provider_id !== profile.id){ document.body.innerHTML = '<p class="empty-box">هذا الطلب غير موجّه لك.</p>'; return; }
   clientId = data.client_id;
 
   const needsHtml = Object.entries(data.service_needs || {}).map(([cat, needs]) => `
-    <div style="margin-bottom:10px;">
+    <div class="mb-10">
       <strong style="font-size:13.5px;color:var(--green-dark);">${esc(cat)}</strong>
       <ul class="service-list">${needs.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
     </div>

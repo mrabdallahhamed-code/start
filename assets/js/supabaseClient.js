@@ -152,13 +152,62 @@ async function initNotificationBell(profileId){
     </div>`;
   }
   await refreshNotifBadge(profileId);
+  subscribeNotifications(profileId);
 }
 
-async function refreshNotifBadge(profileId){
+// ---------- الإشعارات الفورية (Supabase Realtime) ----------
+// تصل الإشعارات الجديدة لحظياً بدون تحديث الصفحة. يتطلب تفعيل Realtime على جدول notifications.
+// احتياطاً: فحص دوري كل دقيقة لو كان Realtime غير مفعّل أو انقطع الاتصال.
+let __notifChannel = null, __notifPoll = null, __lastNotifCount = null;
+function subscribeNotifications(profileId){
+  if(__notifChannel) return;
+  try{
+    __notifChannel = supabase.channel('notif-' + profileId)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'recipient_id=eq.' + profileId },
+        (payload) => onNewNotification(profileId, payload.new))
+      .subscribe();
+  }catch(e){ __notifChannel = null; }
+  clearInterval(__notifPoll);
+  __notifPoll = setInterval(() => { if(document.visibilityState === 'visible') refreshNotifBadge(profileId, true); }, 60000);
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refreshNotifBadge(profileId, true); });
+}
+
+async function onNewNotification(profileId, n){
+  __lastNotifCount = null;
+  await refreshNotifBadge(profileId);
+  const panel = document.getElementById('notifPanel');
+  if(panel && panel.style.display !== 'none') loadNotifList();
+  if(n) showNotifToast(n);
+}
+
+function showNotifToast(n){
+  let wrap = document.getElementById('notifToastWrap');
+  if(!wrap){
+    wrap = document.createElement('div');
+    wrap.id = 'notifToastWrap';
+    wrap.className = 'notif-toast-wrap';
+    document.body.appendChild(wrap);
+  }
+  const el = document.createElement('div');
+  el.className = 'notif-toast';
+  el.setAttribute('role', 'status');
+  el.innerHTML = `<p class="notif-toast-title">🔔 ${esc(n.title)}</p>${n.body ? `<p class="notif-toast-body">${esc(n.body)}</p>` : ''}`;
+  el.addEventListener('click', () => { el.remove(); handleNotifClick(n.id, n.link); });
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 7000);
+}
+
+async function refreshNotifBadge(profileId, fromPoll){
   const { data } = await supabase.from('notifications').select('id').eq('recipient_id', profileId).eq('is_read', false);
   const badge = document.getElementById('notifBadge');
   if(!badge) return;
   const count = data ? data.length : 0;
+  // الفحص الدوري: لو زاد العدد (Realtime غير مفعّل) نحدّث القائمة المفتوحة
+  if(fromPoll && __lastNotifCount !== null && count > __lastNotifCount){
+    const panel = document.getElementById('notifPanel');
+    if(panel && panel.style.display !== 'none') loadNotifList();
+  }
+  __lastNotifCount = count;
   if(count > 0){ badge.style.display = 'block'; badge.textContent = count > 9 ? '9+' : String(count); }
   else { badge.style.display = 'none'; }
 }

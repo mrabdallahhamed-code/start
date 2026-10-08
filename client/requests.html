@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>طلبات التأسيس — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -22,7 +22,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -36,11 +36,11 @@
       <a href="files.html" class="side-link"><span class="ic">📁</span> ملفاتي</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar">
       <a class="topbar-btn" href="https://wa.me/966569051686" target="_blank" title="تواصل معنا">💬</a>
       <button class="topbar-btn" id="langToggleBtn" onclick="toggleLang()">EN</button>
@@ -50,7 +50,7 @@
       <div class="app-main-inner">
         <h1 class="page-title">طلبات التأسيس</h1>
         <button class="btn gold" onclick="handleNewRequestClick()">+ طلب عرض سعر جديد</button>
-        <div id="reqList" style="margin-top:18px;"><p style="color:var(--ink-soft);font-size:13.5px;">جارٍ التحميل...</p></div>
+        <div id="reqList" class="mt-18"><p class="txt-soft-lg">جارٍ التحميل...</p></div>
       </div>
     </main>
   </div>
@@ -88,7 +88,7 @@ async function loadRequests(){
     .order('created_at', {ascending:false});
 
   if(error){ list.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
-  if(!requests || !requests.length){ list.innerHTML = '<p style="font-size:13.5px;color:var(--ink-soft);">ما عندك أي طلب تأسيس حالياً.</p>'; return; }
+  if(!requests || !requests.length){ list.innerHTML = '<p class="txt-soft-lg">ما عندك أي طلب تأسيس حالياً.</p>'; return; }
 
   const statusMap = {
     pending_admin_review: 'قيد المراجعة — فريق إتقان يجهّز عرضك',
@@ -111,11 +111,11 @@ async function loadRequests(){
     return `
     <div class="list-item-card">
       <p style="font-size:14px;margin-bottom:4px;"><strong>${esc(statusMap[r.status] || r.status)}</strong></p>
-      <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;">${subLine} · تاريخ الطلب: ${esc(new Date(r.created_at).toLocaleDateString('ar-SA'))}</p>
-      <a href="offers.html?request_id=${esc(r.id)}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">عرض العروض</a>
-      <a href="journey.html?request_id=${esc(r.id)}" class="btn ghost" style="padding:7px 14px;font-size:12.5px;margin-top:0;">رحلة الطلب</a>
-      ${canEdit ? `<a href="${editHref}" class="btn gold" style="padding:7px 14px;font-size:12.5px;margin-top:0;">تعديل الطلب</a>` : ''}
-      ${simamReady ? `<button onclick="goToSimam('${esc(r.id)}')" class="btn gold" style="padding:7px 14px;font-size:12.5px;margin-top:0;">🎉 الانتقال إلى صمام لمتابعة خدماتك ←</button>` : ''}
+      <p class="hint mb-12">${subLine} · تاريخ الطلب: ${esc(new Date(r.created_at).toLocaleDateString('ar-SA'))}</p>
+      <a href="offers.html?request_id=${esc(r.id)}" class="btn ghost btn-sm-flush">عرض العروض</a>
+      <a href="journey.html?request_id=${esc(r.id)}" class="btn ghost btn-sm-flush">رحلة الطلب</a>
+      ${canEdit ? `<a href="${editHref}" class="btn gold btn-sm-flush">تعديل الطلب</a>` : ''}
+      ${simamReady ? `<button onclick="goToSimam('${esc(r.id)}')" class="btn gold btn-sm-flush">🎉 الانتقال إلى صمام من إتقان لمتابعة خدماتك ←</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -135,10 +135,11 @@ async function goToSimam(requestId){
   } catch(e){
     window.open('https://simam.itqanbs.sa', '_blank', 'noopener,noreferrer');
   }
-  btn.disabled = false; btn.textContent = '🎉 الانتقال إلى صمام لمتابعة خدماتك ←';
+  btn.disabled = false; btn.textContent = '🎉 الانتقال إلى صمام من إتقان لمتابعة خدماتك ←';
 }
 
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>

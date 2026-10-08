@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 <title>تسجيل التأسيس النهائي — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
 <script src="/assets/js/security.js"></script>
@@ -21,7 +21,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -31,17 +31,17 @@
       <a href="team.html" class="side-link"><span class="ic">🧑‍💼</span> الفريق</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar"><div id="notifBellContainer"></div></header>
     <main class="app-main">
-      <div class="app-main-inner" style="max-width:560px;">
-        <a href="requests.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع لطلبات العروض</a>
-        <h1 class="page-title" style="margin-top:10px;">تسجيل التأسيس النهائي</h1>
-        <p style="font-size:13px;color:var(--ink-soft);margin-top:-14px;margin-bottom:20px;">أدخل بيانات الشركة السعودية بعد وصول السجل التجاري الفعلي من الجهات الحكومية. هذا الإدخال يُعتبر تأكيداً رسمياً لاكتمال التأسيس، وسيُفعَّل بموجبه ملف الشركة تلقائياً على منصة "صمام" لمتابعة خدمات ما بعد التأسيس.</p>
+      <div class="app-main-inner mw-560">
+        <a href="requests.html" class="link-soft">← رجوع لطلبات العروض</a>
+        <h1 class="page-title mt-10">تسجيل التأسيس النهائي</h1>
+        <p class="page-sub">أدخل بيانات الشركة السعودية بعد وصول السجل التجاري الفعلي من الجهات الحكومية. هذا الإدخال يُعتبر تأكيداً رسمياً لاكتمال التأسيس، وسيُفعَّل بموجبه ملف الشركة تلقائياً على منصة "صمام من إتقان" لمتابعة خدمات ما بعد التأسيس.</p>
 
         <div class="card">
           <label>اسم الشركة السعودية (كما بالسجل التجاري)</label>
@@ -62,7 +62,7 @@
           <label>تاريخ إصدار السجل التجاري</label>
           <input id="issue_date" type="date">
 
-          <button class="btn gold" onclick="finalizeIncorporation()">تأكيد اكتمال التأسيس ومزامنة صمام</button>
+          <button class="btn gold" onclick="finalizeIncorporation()">تأكيد اكتمال التأسيس ومزامنة صمام من إتقان</button>
           <div id="msg"></div>
         </div>
       </div>
@@ -79,7 +79,7 @@ async function init(){
   profile = await requireRole(['admin']);
   if(!profile) return;
   initNotificationBell(profile.id);
-  if(!requestId){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">لم يتم تحديد الطلب.</p>'; return; }
+  if(!requestId){ document.body.innerHTML = '<p class="empty-box">لم يتم تحديد الطلب.</p>'; return; }
 
   const { data: req } = await supabase.from('service_requests').select('client_id, final_company_name, final_cr_number, final_entity_type').eq('id', requestId).single();
   if(req){
@@ -114,10 +114,10 @@ async function finalizeIncorporation(){
   if(error){ msg.className = 'msg err'; msg.textContent = error.message; return; }
 
   msg.className = 'msg ok';
-  msg.textContent = 'تم تسجيل بيانات التأسيس. جارٍ تفعيل ملف الشركة على منصة صمام...';
+  msg.textContent = 'تم تسجيل بيانات التأسيس. جارٍ تفعيل ملف الشركة على منصة صمام من إتقان...';
 
   if(clientId){
-    await createNotification(clientId, 'تهانينا! تم تأسيس شركتك 🎉', 'شركتك ' + company_name + ' صارت رسمية — تابع خدماتك القادمة من منصة صمام', '../client/dashboard.html');
+    await createNotification(clientId, 'تهانينا! تم تأسيس شركتك 🎉', 'شركتك ' + company_name + ' صارت رسمية — تابع خدماتك القادمة من منصة صمام من إتقان', '../client/dashboard.html');
   }
 
   setTimeout(() => { window.location.href = 'requests.html'; }, 2000);

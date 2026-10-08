@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 <title>متابعة مراحل التنفيذ — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
 <script src="/assets/js/security.js"></script>
@@ -36,7 +36,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -46,20 +46,20 @@
       <a href="team.html" class="side-link"><span class="ic">🧑‍💼</span> الفريق</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar"><div id="notifBellContainer"></div></header>
     <main class="app-main">
       <div class="app-main-inner" style="max-width:620px;">
-        <a href="requests.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع لطلبات العروض</a>
-        <h1 class="page-title" style="margin-top:10px;">متابعة مراحل التنفيذ</h1>
-        <p id="clientNameLine" style="font-size:13px;color:var(--ink-soft);margin-top:-14px;margin-bottom:20px;"></p>
+        <a href="requests.html" class="link-soft">← رجوع لطلبات العروض</a>
+        <h1 class="page-title mt-10">متابعة مراحل التنفيذ</h1>
+        <p id="clientNameLine" class="page-sub"></p>
 
         <div id="paymentsBox" class="card" style="display:none;margin-bottom:16px;">
-  <h3 style="margin-bottom:10px;">💳 الدفعات</h3>
+  <h3 class="mb-10">💳 الدفعات</h3>
   <div id="paymentsList"></div>
   <div style="display:grid;grid-template-columns:1fr 120px auto;gap:8px;margin-top:12px;align-items:end;">
     <div><label for="payLabel" style="font-size:12px;">وصف الدفعة</label><input id="payLabel" maxlength="120" placeholder="مثال: الدفعة الأولى"></div>
@@ -67,9 +67,9 @@
     <button class="btn" style="margin:0;padding:11px 16px;" onclick="addPayment()">إضافة</button>
   </div>
 </div>
-<div id="stagesContainer"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
+<div id="stagesContainer"><p class="txt-soft">جارٍ التحميل...</p></div>
 
-        <div id="finalizeBox" style="display:none;" class="card">
+        <div id="finalizeBox" class="card is-hidden">
           <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">✅ كل المراحل اكتملت — الخطوة الأخيرة: سجّل بيانات الشركة النهائية.</p>
           <a id="finalizeLink" href="#" class="btn gold" style="width:100%;">تسجيل التأسيس النهائي ←</a>
         </div>
@@ -89,7 +89,7 @@ async function init(){
     profile = await requireRole(['admin']);
     if(!profile) return;
     initNotificationBell(profile.id);
-    if(!requestId){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">لم يتم تحديد الطلب.</p>'; return; }
+    if(!requestId){ document.body.innerHTML = '<p class="empty-box">لم يتم تحديد الطلب.</p>'; return; }
 
     const { data: req, error: reqErr } = await supabase.from('service_requests').select('client_id, clients(profiles(full_name))').eq('id', requestId).single();
     if(reqErr) throw new Error('فشل جلب بيانات الطلب: ' + reqErr.message);
@@ -102,7 +102,7 @@ async function init(){
     await loadStages();
     await loadPaymentsPanel();
   } catch(err){
-    document.getElementById('stagesContainer').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${esc(err.message || err)}</div>`;
+    document.getElementById('stagesContainer').innerHTML = `<div class="alert-danger"><strong>⚠ خطأ فعلي:</strong><br>${esc(err.message || err)}</div>`;
     console.error(err);
   }
 }
@@ -131,8 +131,8 @@ function renderDurationCard(stages){
 
   return `<div class="card" style="margin-bottom:16px;background:${contractDurationDays && (elapsedDays > contractDurationDays) ? '#FCECEA' : 'var(--paper)'};">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-      <div><strong style="font-size:15px;">⏱️ ${esc(elapsedDays)} يوم</strong> <span style="font-size:12px;color:var(--ink-soft);">${allDone ? '(من البدء للاكتمال)' : '(منذ بدء أول مرحلة، مستمر)'}</span></div>
-      <div style="font-size:12.5px;">${deviationHtml}</div>
+      <div><strong style="font-size:15px;">⏱️ ${esc(elapsedDays)} يوم</strong> <span class="txt-soft-sm">${allDone ? '(من البدء للاكتمال)' : '(منذ بدء أول مرحلة، مستمر)'}</span></div>
+      <div class="txt-12">${deviationHtml}</div>
     </div>
   </div>`;
 }
@@ -142,7 +142,7 @@ async function loadStages(){
     const { data: stages, error } = await supabase.from('request_stages').select('*').eq('request_id', requestId).order('stage_order');
     const container = document.getElementById('stagesContainer');
     if(error) throw new Error('فشل جلب المراحل: ' + error.message);
-    if(!stages || !stages.length){ container.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لم تُنشأ مراحل التنفيذ بعد.</p>'; return; }
+    if(!stages || !stages.length){ container.innerHTML = '<p class="txt-soft">لم تُنشأ مراحل التنفيذ بعد.</p>'; return; }
 
   let html = renderDurationCard(stages);
   for(const s of stages){
@@ -160,13 +160,13 @@ async function loadStages(){
 
     let actions = '';
     if(s.status === 'pending'){
-      actions = `<button class="btn ghost" style="padding:6px 14px;font-size:11.5px;margin-top:0;" onclick="updateStage('${esc(s.id)}','in_progress')">بدء المرحلة</button>`;
+      actions = `<button class="btn ghost btn-xxs" onclick="updateStage('${esc(s.id)}','in_progress')">بدء المرحلة</button>`;
     } else if(s.status === 'in_progress' || s.status === 'waiting_client'){
       actions = `
-        <button class="btn gold" style="padding:6px 14px;font-size:11.5px;margin-top:0;" onclick="updateStage('${esc(s.id)}','completed')">إنهاء المرحلة</button>
-        <button class="btn ghost" style="padding:6px 14px;font-size:11.5px;margin-top:0;" onclick="promptWaiting('${esc(s.id)}')">طلب رد العميل</button>
+        <button class="btn gold btn-xxs" onclick="updateStage('${esc(s.id)}','completed')">إنهاء المرحلة</button>
+        <button class="btn ghost btn-xxs" onclick="promptWaiting('${esc(s.id)}')">طلب رد العميل</button>
         <label class="btn ghost" style="padding:6px 14px;font-size:11.5px;margin-top:0;cursor:pointer;">رفع ملف
-          <input type="file" style="display:none;" onchange="uploadDoc('${esc(s.id)}', this)">
+          <input type="file" onchange="uploadDoc('${esc(s.id)}', this)" class="is-hidden">
         </label>`;
     }
 
@@ -187,7 +187,7 @@ async function loadStages(){
   const allDone = stages.every(s => s.status === 'completed');
   document.getElementById('finalizeBox').style.display = allDone ? 'block' : 'none';
   } catch(err){
-    document.getElementById('stagesContainer').innerHTML = `<div style="background:#FCECEA;border:2px solid #B5442E;border-radius:10px;padding:16px;color:#7A3325;font-size:13px;"><strong>⚠ خطأ فعلي:</strong><br>${esc(err.message || err)}</div>`;
+    document.getElementById('stagesContainer').innerHTML = `<div class="alert-danger"><strong>⚠ خطأ فعلي:</strong><br>${esc(err.message || err)}</div>`;
     console.error(err);
   }
 }
@@ -257,11 +257,11 @@ async function loadPaymentsPanel(){
   const { data, error } = await supabase.from('offer_payments').select('*').eq('offer_id', offer.id).order('created_at');
   const el = document.getElementById('paymentsList');
   if(error){ el.textContent = error.message; return; }
-  if(!data || !data.length){ el.innerHTML = '<p style="font-size:12.5px;color:var(--ink-soft);">لا توجد دفعات بعد.</p>'; return; }
+  if(!data || !data.length){ el.innerHTML = '<p class="hint">لا توجد دفعات بعد.</p>'; return; }
   el.innerHTML = data.map(p => {
     const st = p.provider_confirmed ? '✅ مؤكَّدة الاستلام' : (p.client_confirmed ? '🟡 العميل أبلغ بالسداد — طابقها مع كشف الحساب ثم أكّد' : '⏳ لم تُسدَّد بعد');
     return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
-      <div><strong style="font-size:13px;">${esc(p.label)}</strong> — <span style="font-size:12.5px;">${esc(p.amount)} ر.س</span><br><span style="font-size:11.5px;color:var(--ink-soft);">${esc(st)}${p.client_note ? ' — ' + esc(p.client_note) : ''}</span></div>
+      <div><strong class="txt-13">${esc(p.label)}</strong> — <span class="txt-12">${esc(p.amount)} ر.س</span><br><span style="font-size:11.5px;color:var(--ink-soft);">${esc(st)}${p.client_note ? ' — ' + esc(p.client_note) : ''}</span></div>
       ${p.provider_confirmed ? '' : `<button class="btn gold" style="padding:6px 12px;font-size:11.5px;margin:0;" onclick="confirmPayment('${esc(p.id)}')">تأكيد استلام الدفعة</button>`}
     </div>`;
   }).join('');

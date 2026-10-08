@@ -15,18 +15,18 @@
 </head>
 <body>
 <header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div></header>
-<main style="max-width:480px;">
-  <h1 class="page-title" style="text-align:center;">المصادقة الثنائية</h1>
-  <div class="card" id="enrollCard" style="display:none;">
+<main class="mw-480">
+  <h1 class="page-title txt-center">المصادقة الثنائية</h1>
+  <div class="card is-hidden" id="enrollCard">
     <p style="font-size:13.5px;line-height:1.9;margin-bottom:8px;">حسابك أدمن، ولذلك يلزم تفعيل المصادقة الثنائية. افتح تطبيق مصادقة (Google Authenticator أو Microsoft Authenticator أو Authy) وامسح الرمز:</p>
     <img id="qr" class="qr" alt="رمز QR للمصادقة الثنائية">
     <p style="font-size:12px;color:var(--ink-soft);text-align:center;">أو أدخل المفتاح يدوياً:</p>
     <div class="secret" id="secret"></div>
-    <label for="code1" style="margin-top:14px;">الرمز المكوّن من 6 أرقام</label>
+    <label for="code1" class="mt-14">الرمز المكوّن من 6 أرقام</label>
     <input id="code1" inputmode="numeric" maxlength="6" autocomplete="one-time-code" dir="ltr" style="text-align:center;letter-spacing:6px;">
     <button class="btn" id="enrollBtn">تفعيل</button>
   </div>
-  <div class="card" id="verifyCard" style="display:none;">
+  <div class="card is-hidden" id="verifyCard">
     <p style="font-size:13.5px;line-height:1.9;margin-bottom:8px;">أدخل الرمز الحالي من تطبيق المصادقة:</p>
     <input id="code2" inputmode="numeric" maxlength="6" autocomplete="one-time-code" dir="ltr" style="text-align:center;letter-spacing:6px;">
     <button class="btn" id="verifyBtn">تأكيد</button>
@@ -68,5 +68,6 @@ document.getElementById('enrollBtn').addEventListener('click', () => verify('cod
 document.getElementById('verifyBtn').addEventListener('click', () => verify('code2'));
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>

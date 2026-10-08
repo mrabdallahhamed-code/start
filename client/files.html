@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>ملفاتي — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -22,7 +22,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -36,11 +36,11 @@
       <a href="files.html" class="side-link active"><span class="ic">📁</span> ملفاتي</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar">
       <a class="topbar-btn" href="https://wa.me/966569051686" target="_blank" title="تواصل معنا">💬</a>
       <button class="topbar-btn" id="langToggleBtn" onclick="toggleLang()">EN</button>
@@ -51,7 +51,7 @@
         <h1 class="page-title">ملفاتي</h1>
 
         <div class="card">
-          <h3 style="margin-bottom:12px;">رفع مستند جديد</h3>
+          <h3 class="mb-12">رفع مستند جديد</h3>
           <label>نوع المستند</label>
           <input id="docType" placeholder="مثال: عقد التأسيس، جواز السفر">
           <label>الملف</label>
@@ -61,7 +61,7 @@
         </div>
 
         <div class="card">
-          <h3 style="margin-bottom:12px;">مستنداتي المرفوعة</h3>
+          <h3 class="mb-12">مستنداتي المرفوعة</h3>
           <table>
             <thead><tr><th>النوع</th><th>تاريخ الرفع</th><th>الحالة</th></tr></thead>
             <tbody id="docsBody"><tr><td colspan="3">جارٍ التحميل...</td></tr></tbody>
@@ -123,5 +123,6 @@ async function uploadDoc(){
 
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>

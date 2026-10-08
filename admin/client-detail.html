@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>ملف العميل — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -22,7 +22,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="clients.html" class="side-link active"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
@@ -32,21 +32,21 @@
       <a href="team.html" class="side-link"><span class="ic">🧑‍💼</span> الفريق</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar">
       <div id="notifBellContainer"></div>
     </header>
     <main class="app-main">
       <div class="app-main-inner">
-  <a href="clients.html" style="font-size:13px;color:var(--ink-soft);text-decoration:none;">← رجوع لقائمة العملاء</a>
-  <h1 class="page-title" style="margin-top:10px;">ملف العميل: <span id="clientName">...</span></h1>
+  <a href="clients.html" class="link-soft">← رجوع لقائمة العملاء</a>
+  <h1 class="page-title mt-10">ملف العميل: <span id="clientName">...</span></h1>
 
   <div class="card">
-    <h3 style="margin-bottom:10px;">بيانات التواصل والتصنيف</h3>
+    <h3 class="mb-10">بيانات التواصل والتصنيف</h3>
     <p style="font-size:13.5px;margin-bottom:6px;">📞 <span id="clientPhone">—</span> · 📮 الوسيلة المفضلة: <span id="clientPreferred">—</span></p>
     <p style="font-size:13.5px;margin-bottom:12px;">الجنسية: <span id="clientNationality">—</span></p>
     <label>تصنيف الجاهزية</label>
@@ -59,8 +59,8 @@
   </div>
 
   <div class="card" id="checklistSection">
-    <h3 style="margin-bottom:10px;">إجراءات العميل</h3>
-    <div id="checklistItems"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
+    <h3 class="mb-10">إجراءات العميل</h3>
+    <div id="checklistItems"><p class="txt-soft">جارٍ التحميل...</p></div>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <input id="newItem" placeholder="مثال: تعديل عقد التأسيس">
       <button class="btn" style="margin:0;padding:10px 16px;" onclick="addChecklistItem()">إضافة</button>
@@ -68,12 +68,12 @@
   </div>
 
   <div class="card">
-    <h3 style="margin-bottom:10px;">إجابات بوصلة الجاهزية</h3>
-    <div id="assessmentAnswers"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
+    <h3 class="mb-10">إجابات بوصلة الجاهزية</h3>
+    <div id="assessmentAnswers"><p class="txt-soft">جارٍ التحميل...</p></div>
   </div>
 
   <div class="card" id="docsSection">
-    <h3 style="margin-bottom:10px;">مستندات العميل</h3>
+    <h3 class="mb-10">مستندات العميل</h3>
     <table>
       <thead><tr><th>النوع</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr></thead>
       <tbody id="docsBody"><tr><td colspan="4">جارٍ التحميل...</td></tr></tbody>
@@ -81,12 +81,12 @@
   </div>
 
   <div class="card" id="messagesSection">
-    <h3 style="margin-bottom:10px;">مراسلة العميل</h3>
-    <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">مفيدة مثلاً لطلب إكمال مستنداته قبل اعتماده.</p>
-    <div id="msgsList"><p style="font-size:13px;color:var(--ink-soft);">جارٍ التحميل...</p></div>
+    <h3 class="mb-10">مراسلة العميل</h3>
+    <p class="hint mb-10">مفيدة مثلاً لطلب إكمال مستنداته قبل اعتماده.</p>
+    <div id="msgsList"><p class="txt-soft">جارٍ التحميل...</p></div>
     <div style="display:flex;gap:8px;margin-top:14px;">
       <input id="msgInput" placeholder="اكتب رسالة للعميل...">
-      <button class="btn gold" style="margin:0;padding:10px 18px;" onclick="sendMsg()">إرسال</button>
+      <button class="btn gold btn-pad m-0" onclick="sendMsg()">إرسال</button>
     </div>
   </div>
       </div>
@@ -104,7 +104,7 @@ async function init(){
   initNotificationBell(admin.id);
 
   clientId = new URLSearchParams(window.location.search).get('id');
-  if(!clientId){ document.body.innerHTML = '<p style="padding:40px;text-align:center;">لم يتم تحديد عميل.</p>'; return; }
+  if(!clientId){ document.body.innerHTML = '<p class="empty-box">لم يتم تحديد عميل.</p>'; return; }
   clientProfileId = clientId;
 
   const { data: profileData } = await supabase.from('profiles').select('*').eq('id', clientId).single();
@@ -129,20 +129,20 @@ function renderAssessmentAnswers(c){
     return;
   }
   const yn = v => v === true ? '<span class="badge ready">نعم</span>' : v === false ? '<span class="badge notready">لا</span>' : '<span class="badge pending">—</span>';
-  let html = `<p style="font-size:13px;margin-bottom:8px;"><strong>يمتلك شركة خارجية؟</strong> ${yn(c.has_foreign_company)}</p>`;
+  let html = `<p class="txt-13 mb-8"><strong>يمتلك شركة خارجية؟</strong> ${yn(c.has_foreign_company)}</p>`;
 
   if(c.has_foreign_company){
     html += `
-      <p style="font-size:13px;margin-bottom:8px;"><strong>ذات مسؤولية محدودة (LLC)؟</strong> ${yn(c.is_llc)}</p>
-      <p style="font-size:13px;margin-bottom:8px;"><strong>عقد تأسيس ساري؟</strong> ${yn(c.has_incorporation_contract)}</p>
-      <p style="font-size:13px;margin-bottom:8px;"><strong>قوائم مالية مدققة؟</strong> ${yn(c.has_audited_financials)}</p>
-      <p style="font-size:13px;margin-bottom:8px;"><strong>اسم الشركة الأجنبية:</strong> ${esc(c.foreign_company_name || '—')}</p>
-      <p style="font-size:13px;margin-bottom:8px;"><strong>دولة الشركة:</strong> ${esc(c.foreign_company_country || '—')}</p>
+      <p class="txt-13 mb-8"><strong>ذات مسؤولية محدودة (LLC)؟</strong> ${yn(c.is_llc)}</p>
+      <p class="txt-13 mb-8"><strong>عقد تأسيس ساري؟</strong> ${yn(c.has_incorporation_contract)}</p>
+      <p class="txt-13 mb-8"><strong>قوائم مالية مدققة؟</strong> ${yn(c.has_audited_financials)}</p>
+      <p class="txt-13 mb-8"><strong>اسم الشركة الأجنبية:</strong> ${esc(c.foreign_company_name || '—')}</p>
+      <p class="txt-13 mb-8"><strong>دولة الشركة:</strong> ${esc(c.foreign_company_country || '—')}</p>
     `;
   } else {
     html += `
-      <p style="font-size:13px;margin-bottom:8px;"><strong>الدولة المفضلة للشركة:</strong> ${esc(c.preferred_company_country || '—')}</p>
-      <p style="font-size:13px;margin-bottom:8px;"><strong>نوع النشاط المطلوب:</strong> ${esc(c.activity_type || '—')}</p>
+      <p class="txt-13 mb-8"><strong>الدولة المفضلة للشركة:</strong> ${esc(c.preferred_company_country || '—')}</p>
+      <p class="txt-13 mb-8"><strong>نوع النشاط المطلوب:</strong> ${esc(c.activity_type || '—')}</p>
     `;
   }
   html += `<p style="font-size:11.5px;color:var(--ink-faint);margin-top:6px;">تاريخ إكمال التقييم: ${esc(new Date(c.assessment_completed_at).toLocaleDateString('ar-SA'))}</p>`;
@@ -160,7 +160,7 @@ async function updateStatus(){
 async function loadChecklist(){
   const { data, error } = await supabase.from('readiness_checklist').select('*').eq('client_id', clientId).order('position');
   const container = document.getElementById('checklistItems');
-  if(error || !data || !data.length){ container.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد إجراءات مضافة بعد.</p>'; return; }
+  if(error || !data || !data.length){ container.innerHTML = '<p class="txt-soft">لا توجد إجراءات مضافة بعد.</p>'; return; }
   container.innerHTML = data.map(item => `
     <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
       <input type="checkbox" ${item.is_complete ? 'checked' : ''} onchange="toggleItem('${esc(item.id)}', this.checked)">
@@ -196,10 +196,10 @@ async function loadDocs(){
       <td>${esc(new Date(d.uploaded_at).toLocaleDateString('ar-SA'))}</td>
       <td>${statusMap[d.status]}</td>
       <td>
-        <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" data-p="${esc(d.file_path)}" onclick="viewDoc(this.dataset.p)">عرض الملف</button>
+        <button class="btn ghost btn-xs" data-p="${esc(d.file_path)}" onclick="viewDoc(this.dataset.p)">عرض الملف</button>
         ${d.status==='pending' ? `
-          <button class="btn" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="reviewDoc('${esc(d.id)}','verified')">اعتماد</button>
-          <button class="btn ghost" style="padding:6px 12px;font-size:12px;margin-top:0;" onclick="reviewDoc('${esc(d.id)}','rejected')">رفض</button>
+          <button class="btn btn-xs" onclick="reviewDoc('${esc(d.id)}','verified')">اعتماد</button>
+          <button class="btn ghost btn-xs" onclick="reviewDoc('${esc(d.id)}','rejected')">رفض</button>
         ` : ''}
       </td>
     </tr>`).join('');
@@ -222,7 +222,7 @@ async function loadMsgs(){
   const { data, error } = await supabase.from('admin_messages').select('*').eq('recipient_id', clientId).order('created_at');
   const list = document.getElementById('msgsList');
   if(error){ list.innerHTML = `<p class="msg err">${esc(error.message)}</p>`; return; }
-  if(!data || !data.length){ list.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">لا توجد رسائل بعد.</p>'; return; }
+  if(!data || !data.length){ list.innerHTML = '<p class="txt-soft">لا توجد رسائل بعد.</p>'; return; }
   list.innerHTML = data.map(m => `<div style="font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:${m.sender_id===admin.id?'var(--green-tint)':'var(--cream)'};border:1px solid var(--line);">${esc(m.message)}</div>`).join('');
 }
 

@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مبتدأ">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
 
 <title>بوصلة الجاهزية — إتقان</title>
 <link rel="stylesheet" href="../assets/css/itqan.css">
@@ -38,7 +38,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ" width="34" height="36" style="height:36px;width:auto;"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
     <nav>
       <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
       <a href="assessment.html" class="side-link active"><span class="ic">🧭</span> بوصلة الجاهزية</a>
@@ -52,18 +52,18 @@
       <a href="files.html" class="side-link"><span class="ic">📁</span> ملفاتي</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn ghost" style="width:100%;margin:0;" onclick="signOut()">تسجيل الخروج</button>
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
     </div>
   </aside>
 
-  <div style="flex:1;display:flex;flex-direction:column;">
+  <div class="app-col">
     <header class="app-topbar">
       <a class="topbar-btn" href="https://wa.me/966569051686" target="_blank" title="تواصل معنا">💬</a>
       <button class="topbar-btn" id="langToggleBtn" onclick="toggleLang()">EN</button>
       <div id="notifBellContainer"></div>
     </header>
     <main class="app-main">
-      <div class="app-main-inner" style="max-width:560px;">
+      <div class="app-main-inner mw-560">
         <h1 class="page-title">بوصلة الجاهزية</h1>
         <p style="font-size:13px;color:var(--ink-soft);margin-bottom:20px;margin-top:-14px;">جاوب على الأسئلة اللي تنطبق عليك، واضغط "إنهاء التقييم" بالأسفل.</p>
 
@@ -76,12 +76,12 @@
             </div>
           </div>
 
-          <div class="q-group" id="noCompanySection" style="display:none;">
+          <div class="q-group is-hidden" id="noCompanySection">
             <div class="q-label">من أي دولة تفضل أن تكون شركتك الخارجية؟</div>
             <p style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">بما إنك لا تملك شركة خارجية حالياً، سيقوم فريق إتقان بتوفير شركة مناسبة لك.</p>
             <input id="preferredCountry" placeholder="مثال: الإمارات، مصر، بريطانيا...">
 
-            <div class="q-label" style="margin-top:18px;">ما هو نوع النشاط المطلوب؟</div>
+            <div class="q-label mt-18">ما هو نوع النشاط المطلوب؟</div>
             <select id="noCompanyActivityType">
               <option value="">اختر...</option>
               <option>خدمي</option>
@@ -90,7 +90,7 @@
               <option>تجاري</option>
             </select>
 
-            <div class="q-label" style="margin-top:18px;">ما هي جنسيتك؟</div>
+            <div class="q-label mt-18">ما هي جنسيتك؟</div>
             <input id="noCompanyNationality" placeholder="مثال: مصري، هندي، باكستاني...">
           </div>
 
@@ -254,5 +254,6 @@ async function finish(){
 
 init();
 </script>
+<script src="/assets/js/i18n-app.js"></script>
 </body>
 </html>
