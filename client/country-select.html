@@ -21,6 +21,7 @@
   @media(max-width:520px){.country-grid{grid-template-columns:1fr;}}
   .country-card{border:1.5px solid var(--line);border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:var(--white);transition:all .15s;}
   .country-card:hover{border-color:var(--green-dark);box-shadow:var(--shadow);}
+  .country-card:last-child:nth-child(odd){grid-column:1/-1;}
   .country-card.disabled{opacity:.55;}
   .country-flag{font-size:34px;margin-bottom:8px;}
   .country-name{font-weight:700;font-size:15px;color:var(--ink);}
@@ -43,6 +44,7 @@ const COUNTRIES = [
   { code:'AE', flag:'🇦🇪', name:'الإمارات' },
   { code:'BH', flag:'🇧🇭', name:'البحرين' },
   { code:'QA', flag:'🇶🇦', name:'قطر' },
+  { code:'EG', flag:'🇪🇬', name:'مصر' },
 ];
 let profile;
 document.getElementById('logout').addEventListener('click', e => { e.preventDefault(); signOut(); });
