@@ -3,7 +3,7 @@
 <head>
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="../assets/css/itqan.css">
 <script src="/assets/js/security.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/analytics.js" defer></script>
 </head>
 <body>
 <div class="app-shell">
@@ -49,6 +50,12 @@
           <button onclick="setFilter('incomplete')">لم يكمل التقييم</button>
           <button onclick="setFilter('not_ready')">غير جاهز</button>
           <button onclick="setFilter('ready')">جاهز</button>
+          <button onclick="setFilter('waitlist')">قائمة انتظار الدول</button>
+        </div>
+        <div class="card is-hidden" id="waitlistCard">
+          <h3 class="mb-10">المهتمون بالدول غير المفعّلة بعد</h3>
+          <p class="hint mb-10">عملاء اختاروا دولة غير السعودية ووصلوا لصفحة «قريباً» — استخدمها لتقدير الطلب قبل فتح أي دولة.</p>
+          <div id="waitlistStats" class="waitlist-stats"></div>
         </div>
 
         <div class="card is-hidden" id="bulkMsgCard">
@@ -63,8 +70,8 @@
 
         <div class="card">
           <table>
-            <thead><tr><th>العميل</th><th>الجنسية</th><th>الحالة الحالية</th><th>مستندات العميل</th><th>الإجراءات</th><th>مراسلة</th></tr></thead>
-            <tbody id="clientsBody"><tr><td colspan="6">جارٍ التحميل...</td></tr></tbody>
+            <thead><tr><th>العميل</th><th>الجنسية</th><th>دولة التأسيس</th><th>الحالة الحالية</th><th>مستندات العميل</th><th>الإجراءات</th><th>مراسلة</th></tr></thead>
+            <tbody id="clientsBody"><tr><td colspan="7">جارٍ التحميل...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -87,12 +94,25 @@ async function init(){
 async function loadClients(){
   const { data, error } = await supabase
     .from('clients')
-    .select('id, nationality, readiness_status, assessment_completed_at, profiles(full_name)')
+    .select('id, nationality, country, readiness_status, assessment_completed_at, profiles(full_name)')
     .order('created_at', {ascending:false});
 
-  if(error || !data){ document.getElementById('clientsBody').innerHTML = '<tr><td colspan="6">تعذر التحميل</td></tr>'; return; }
+  if(error || !data){ document.getElementById('clientsBody').innerHTML = '<tr><td colspan="7">تعذر التحميل</td></tr>'; return; }
   allClients = data;
   renderClients();
+}
+
+const COUNTRY_NAMES = { SA:'السعودية', AE:'الإمارات', BH:'البحرين', QA:'قطر', EG:'مصر' };
+function renderWaitlist(){
+  const card = document.getElementById('waitlistCard');
+  card.style.display = currentFilter === 'waitlist' ? 'block' : 'none';
+  if(currentFilter !== 'waitlist') return;
+  const counts = {};
+  allClients.forEach(c => { if(c.country && c.country !== 'SA') counts[c.country] = (counts[c.country] || 0) + 1; });
+  const rows = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  document.getElementById('waitlistStats').innerHTML = rows.length
+    ? rows.map(([k,v]) => `<div class="waitlist-stat"><span class="waitlist-num">${esc(v)}</span><span>${esc(COUNTRY_NAMES[k] || k)}</span></div>`).join('')
+    : '<p class="txt-soft">لا يوجد أحد في قائمة الانتظار بعد.</p>';
 }
 
 function setFilter(filter){
@@ -106,6 +126,7 @@ function getFiltered(){
   if(currentFilter === 'incomplete') return allClients.filter(c => !c.assessment_completed_at);
   if(currentFilter === 'not_ready') return allClients.filter(c => c.assessment_completed_at && c.readiness_status === 'not_ready');
   if(currentFilter === 'ready') return allClients.filter(c => c.readiness_status === 'ready');
+  if(currentFilter === 'waitlist') return allClients.filter(c => c.country && c.country !== 'SA');
   return allClients;
 }
 
@@ -115,9 +136,10 @@ function renderClients(){
   const filtered = getFiltered();
 
   bulkCard.style.display = currentFilter === 'all' ? 'none' : 'block';
+  renderWaitlist();
   document.getElementById('bulkCount').textContent = filtered.length;
 
-  if(!filtered.length){ body.innerHTML = '<tr><td colspan="6">لا يوجد عملاء مطابقون</td></tr>'; return; }
+  if(!filtered.length){ body.innerHTML = '<tr><td colspan="7">لا يوجد عملاء مطابقون</td></tr>'; return; }
 
   const statusMap = {pending_review:'<span class="badge pending">قيد المراجعة</span>', ready:'<span class="badge ready">جاهز</span>', not_ready:'<span class="badge notready">غير جاهز</span>'};
 
@@ -129,6 +151,7 @@ function renderClients(){
     <tr>
       <td>${esc(c.profiles?.full_name || c.id)}</td>
       <td>${esc(c.nationality || '—')}</td>
+      <td>${esc(COUNTRY_NAMES[c.country] || c.country || '—')}</td>
       <td>${statusBadge}</td>
       <td><a href="client-detail.html?id=${esc(c.id)}#docsSection" class="btn ghost btn-xs">عرض المستندات</a></td>
       <td><a href="client-detail.html?id=${esc(c.id)}#checklistSection" class="btn ghost btn-xs">عرض الإجراءات</a></td>
