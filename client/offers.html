@@ -176,7 +176,7 @@ async function sendMessage(offerId){
   input.value = '';
   loadMessages(offerId);
 
-  notifyAdmins('رسالة جديدة من العميل', text.slice(0,60), 'admin/requests.html');
+  notifyAdmins('رسالة جديدة من العميل: ' + (profile.full_name || 'عميل'), text.slice(0,60), 'admin/requests.html');
 }
 
 function togglePayments(offerId){

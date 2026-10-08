@@ -104,7 +104,7 @@ async function sendMsg(){
 
   input.value = '';
   loadThread();
-  notifyAdmins('رسالة جديدة من عميل', text.slice(0,60), '../admin/client-detail.html?id=' + profile.id + '#messagesSection');
+  notifyAdmins('رسالة جديدة من العميل: ' + (profile.full_name || 'عميل'), text.slice(0,60), '../admin/client-detail.html?id=' + profile.id + '#messagesSection');
 }
 
 init();

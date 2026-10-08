@@ -208,7 +208,7 @@ async function sendReply(stageId){
   const { error } = await supabase.rpc('client_reply_stage', { p_stage: stageId, p_text: text });
   if(error){ alert(error.message); return; }
 
-  notifyAdmins('العميل ردّ على طلبك', text.slice(0,60), '../admin/requests.html');
+  notifyAdmins('العميل ' + (profile.full_name || 'عميل') + ' ردّ على طلبك', text.slice(0,60), '../admin/requests.html');
 
   init();
 }
@@ -223,7 +223,7 @@ async function uploadDoc(stageId, input, requestId){
   await supabase.from('stage_documents').insert({ stage_id: stageId, file_path: filePath, file_name: file.name, uploaded_by_role: 'client' });
 
   // إشعار الأدمن بوصول الرد
-  notifyAdmins('العميل رفع ملف مطلوب', 'بانتظار مراجعتك', '../admin/requests.html');
+  notifyAdmins('العميل ' + (profile.full_name || 'عميل') + ' رفع ملف مطلوب', 'بانتظار مراجعتك', '../admin/requests.html');
 
   init();
 }

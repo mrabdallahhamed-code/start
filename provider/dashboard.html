@@ -165,7 +165,7 @@ async function sendAdminMsg(){
   if(error){ alert(error.message); return; }
   input.value = '';
   loadAdminMsgs();
-  createNotification(admins[0].id, 'رسالة جديدة من مقدّم خدمة', text.slice(0,60), '../admin/dashboard.html');
+  createNotification(admins[0].id, 'رسالة جديدة من مقدّم الخدمة: ' + (profile.full_name || 'مقدّم خدمة'), text.slice(0,60), '../admin/dashboard.html');
 }
 
 async function init(){
