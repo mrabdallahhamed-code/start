@@ -188,6 +188,7 @@ async function submitPostIncorp(){
 }
 
 async function respondPostIncorp(id, decision){
+  if(decision !== 'rejected' && !(await requireFullAccount())) return;
   const { error } = await supabase.rpc('respond_post_incorp', { p_request: id, p_decision: decision });
   if(error){ alert(error.message); return; }
   loadPostIncorp();

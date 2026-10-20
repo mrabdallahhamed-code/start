@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إكمال الحساب — مبتدأ من إتقان</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7D5B">
+<link rel="icon" type="image/png" href="/assets/icons/favicon-48.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="../assets/js/i18n.js"></script>
+<script src="../assets/js/supabaseClient.js"></script>
+<script src="/assets/js/auth-common.js"></script>
+<style>
+  #langToggleBtn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:var(--white);font-size:11px;font-weight:800;cursor:pointer;color:var(--green-dark);letter-spacing:.5px;}
+  .auth-logo{display:block;margin:0 auto 18px;width:130px;height:auto;}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13px;line-height:1.7;}
+  .consent input{width:auto;margin-top:5px;}
+  .pw-hint{font-size:12px;color:var(--ink-soft);margin-top:6px;}
+</style>
+<script src="/assets/js/analytics.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div><button id="langToggleBtn" onclick="toggleLang()">EN</button></header>
+<main class="mw-480">
+  <h1 class="page-title txt-center">إكمال الحساب</h1>
+  <p class="txt-soft-lg txt-center mb-12">أضف بريدك الإلكتروني وكلمة مرور. كل بياناتك وطلباتك الحالية تبقى كما هي، وستتمكن من الدخول من أي جهاز.</p>
+  <div class="card">
+    <form id="caForm" novalidate>
+      <div id="emailWrap">
+        <label for="email">البريد الإلكتروني</label>
+        <input id="email" type="email" autocomplete="email" inputmode="email" maxlength="254">
+      </div>
+      <label for="password">كلمة المرور</label>
+      <input id="password" type="password" autocomplete="new-password" maxlength="128">
+      <label for="password2">تأكيد كلمة المرور</label>
+      <input id="password2" type="password" autocomplete="new-password" maxlength="128">
+      <p class="pw-hint">10 أحرف على الأقل، وتشمل حرفاً كبيراً وصغيراً ورقماً ورمزاً.</p>
+      <button class="btn gold" type="submit" id="caBtn">حفظ وإكمال الحساب</button>
+      <div id="msg" role="alert"></div>
+    </form>
+  </div>
+</main>
+<script>
+const params = new URLSearchParams(location.search);
+const next = safeInternalPath(params.get('next') || '') || '/client/dashboard.html';
+let mode = 'full'; // full = بريد + كلمة مرور ، password = كلمة المرور فقط (بعد تأكيد البريد)
+(async function(){
+  const { data: { user } } = await supabase.auth.getUser();
+  if(!user){ window.location.replace('/auth/login.html'); return; }
+  if(!user.is_anonymous){ mode = 'password'; document.getElementById('emailWrap').style.display = 'none'; }
+})();
+document.getElementById('caForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const password = document.getElementById('password').value, password2 = document.getElementById('password2').value;
+  const probs = passwordProblems(password);
+  if(probs.length){ showMsg('msg','err', L('كلمة المرور ضعيفة: ','Weak password: ') + probs.join(L('، ',', '))); return; }
+  if(password !== password2){ showMsg('msg','err', L('كلمتا المرور غير متطابقتين.','Passwords do not match.')); return; }
+  const btn = document.getElementById('caBtn'); btn.disabled = true;
+  if(mode === 'full'){
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ btn.disabled = false; showMsg('msg','err', L('بريد إلكتروني غير صالح.','Invalid email.')); return; }
+    const { error: e1 } = await supabase.auth.updateUser({ email }, { emailRedirectTo: location.origin + '/auth/complete-account.html?next=' + encodeURIComponent(next) });
+    if(e1){ btn.disabled = false; showMsg('msg','err', /already|registered|exists/i.test(e1.message||'') ? L('هذا البريد مسجّل مسبقاً — سجّل الدخول به بدلاً من ذلك.','This email is already registered — sign in with it instead.') : L('تعذّر حفظ البريد. حاول لاحقاً.','Could not save the email. Try later.')); return; }
+  }
+  // إن كان تأكيد البريد مفعّلاً، لن تُقبل كلمة المرور قبل التأكيد
+  const { error: e2 } = await supabase.auth.updateUser({ password });
+  btn.disabled = false;
+  if(e2){
+    showMsg('msg','ok', L('أرسلنا رابط تأكيد إلى بريدك. افتحه ثم أكمل كلمة المرور من الصفحة التي ستفتح.','We sent a confirmation link to your email. Open it, then set your password on the page that opens.'));
+    return;
+  }
+  window.__isGuest = false;
+  showMsg('msg','ok', L('تم إكمال حسابك بنجاح ✓','Your account is complete ✓'));
+  setTimeout(() => window.location.replace(next), 900);
+});
+</script>
+<script src="/assets/js/i18n-app.js"></script>
+</body>
+</html>

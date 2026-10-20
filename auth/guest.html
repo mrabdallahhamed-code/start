@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ابدأ كضيف — مبتدأ من إتقان</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7D5B">
+<link rel="icon" type="image/png" href="/assets/icons/favicon-48.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/config.js"></script>
+<script src="../assets/js/i18n.js"></script>
+<script src="../assets/js/supabaseClient.js"></script>
+<script src="/assets/js/auth-common.js"></script>
+<style>
+  #langToggleBtn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:var(--white);font-size:11px;font-weight:800;cursor:pointer;color:var(--green-dark);letter-spacing:.5px;}
+  .auth-logo{display:block;margin:0 auto 18px;width:130px;height:auto;}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13px;line-height:1.7;}
+  .consent input{width:auto;margin-top:5px;}
+  .pw-hint{font-size:12px;color:var(--ink-soft);margin-top:6px;}
+</style>
+<script src="/assets/js/analytics.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div><button id="langToggleBtn" onclick="toggleLang()">EN</button></header>
+<main class="mw-480">
+  <img class="auth-logo" src="../assets/images/mubtada-logo.png" alt="مبتدأ من إتقان" width="130" height="151">
+  <h1 class="page-title txt-center" id="gTitle">ابدأ كضيف</h1>
+  <p class="txt-soft-lg txt-center mb-12" id="gSub">بدون بريد أو كلمة مرور — فقط اسمك ورقم جوالك ليتواصل معك فريق إتقان. يمكنك إكمال حسابك لاحقاً في أي وقت.</p>
+  <div class="card">
+    <form id="guestForm" autocomplete="on" novalidate>
+      <label for="full_name" id="lName">الاسم الكامل</label>
+      <input id="full_name" type="text" autocomplete="name" maxlength="120" required>
+      <label for="contact_phone" id="lPhone">رقم الجوال بالصيغة الدولية (مع رمز دولتك)</label>
+      <input id="contact_phone" type="tel" dir="ltr" style="text-align:left;" autocomplete="tel" maxlength="20" placeholder="+966501234567" required>
+      <p class="hint mt-10" id="phoneHint">ابدأ بعلامة + ثم رمز الدولة، مثال: السعودية ‎+966‎، مصر ‎+20‎، الإمارات ‎+971‎.</p>
+      <label class="consent"><input id="consent" type="checkbox"><span id="lConsent">أوافق على <a href="/terms.html" target="_blank" rel="noopener">شروط الاستخدام</a> و<a href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>، وعلى تواصل فريق إتقان معي عبر الجوال أو واتساب بخصوص طلبي.</span></label>
+      <div id="captchaBox" class="mt-12"></div>
+      <button class="btn gold" type="submit" id="guestBtn">ابدأ الآن</button>
+      <div id="msg" role="alert"></div>
+    </form>
+    <div class="or-sep" id="orSep">أو</div>
+    <p class="txt-13 txt-center"><a href="register.html" id="lReg">إنشاء حساب كامل</a> · <a href="login.html" id="lLogin">تسجيل الدخول</a></p>
+  </div>
+</main>
+<script>
+(function(){
+  if(getLang() !== 'en') return;
+  const T = {gTitle:'Continue as a guest', gSub:'No email or password — just your name and mobile number so the Itqan team can reach you. You can complete your account any time.', lName:'Full name', lPhone:'Mobile number in international format (with your country code)', phoneHint:'Start with + then your country code, e.g. Saudi Arabia +966, Egypt +20, UAE +971.', guestBtn:'Start now', orSep:'or', lReg:'Create a full account', lLogin:'Sign in'};
+  for(const k in T){ const el = document.getElementById(k); if(el) el.textContent = T[k]; }
+  document.getElementById('lConsent').innerHTML = 'I accept the <a href="/terms.html" target="_blank" rel="noopener">Terms of Use</a> and the <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>, and agree that the Itqan team may contact me by phone or WhatsApp about my request.';
+})();
+initCaptcha('captchaBox');
+document.getElementById('guestForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const full_name = document.getElementById('full_name').value.trim().replace(/\s+/g,' ');
+  // تنظيف الرقم: إزالة المسافات والشرطات والأقواس، وتحويل 00 في البداية إلى +
+  let phone = document.getElementById('contact_phone').value.trim().replace(/[\s\-()]/g,'');
+  phone = phone.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/^00/, '+');
+  const consent = document.getElementById('consent').checked;
+  if(!full_name || full_name.length < 3){ showMsg('msg','err', L('اكتب اسمك الكامل.','Enter your full name.')); return; }
+  if(!/^\+[1-9]\d{7,14}$/.test(phone)){ showMsg('msg','err', L('اكتب رقم الجوال بالصيغة الدولية: + ثم رمز الدولة ثم الرقم، مثال: ‎+966501234567‎ أو ‎+201001234567‎','Enter the number in international format: + country code then number, e.g. +966501234567 or +201001234567')); return; }
+  if(!consent){ showMsg('msg','err', L('يلزم الموافقة على الشروط وعلى التواصل معك.','You must accept the terms and agree to be contacted.')); return; }
+  if(captchaRequired() && !window.__captchaToken){ showMsg('msg','err', L('أكمل التحقق الأمني.','Complete the security check.')); return; }
+
+  const btn = document.getElementById('guestBtn'); btn.disabled = true;
+  const { error } = await supabase.auth.signInAnonymously({
+    options: {
+      captchaToken: captchaRequired() ? window.__captchaToken : undefined,
+      data: { full_name, contact_phone: phone, preferred_language: getLang(), is_guest: true, consent_at: new Date().toISOString(), consent_version: '2026-10-guest' }
+    }
+  });
+  if(window.turnstile){ try{ window.turnstile.reset(); window.__captchaToken = null; }catch(x){} }
+  if(error){
+    btn.disabled = false;
+    showMsg('msg','err', L('تعذّر البدء الآن. حاول مرة أخرى بعد قليل.','Could not start right now. Please try again shortly.'));
+    return;
+  }
+  try{
+    await getCurrentProfile(); // ينشئ الملف الشخصي بالاسم والجوال
+    await notifyAdmins('ضيف جديد: ' + full_name, 'بدأ كضيف — جواله: ' + phone, '../admin/clients.html');
+  }catch(x){}
+  window.location.replace('/client/dashboard.html');
+});
+</script>
+</body>
+</html>

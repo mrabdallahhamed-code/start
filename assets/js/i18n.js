@@ -223,3 +223,6 @@ function applyI18n(){
 }
 
 document.addEventListener('DOMContentLoaded', applyI18n);
+
+Object.assign(I18N.ar, { guest_cta:'ابدأ كضيف — بالاسم ورقم الجوال فقط', or_word:'أو' });
+Object.assign(I18N.en, { guest_cta:'Continue as a guest — name and mobile only', or_word:'or' });

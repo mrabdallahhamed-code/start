@@ -214,6 +214,7 @@ async function confirmPaymentClient(paymentId, offerId){
 }
 
 async function acceptOffer(offerId, requestId){
+  if(!(await requireFullAccount())) return;
   window.pendingAcceptOfferId = offerId;
   window.pendingAcceptRequestId = requestId;
   openSignatureModal();

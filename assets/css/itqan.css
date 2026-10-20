@@ -233,3 +233,10 @@ tbody tr:not(:last-child) td{border-bottom:1px solid var(--line-soft);}
 .waitlist-stats{display:flex;flex-wrap:wrap;gap:12px;}
 .waitlist-stat{display:flex;flex-direction:column;align-items:center;min-width:96px;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--green-tint);font-size:13px;color:var(--ink);}
 .waitlist-num{font-size:24px;font-weight:700;color:var(--green-dark);}
+
+/* ---------- شريط حساب الضيف ---------- */
+.guest-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 16px;padding:12px 16px;border-radius:12px;background:#FFF8E6;border:1px solid #F0D58C;font-size:13px;color:var(--ink);}
+.guest-banner a{white-space:nowrap;text-decoration:none;}
+.guest-cta{display:block;width:100%;text-align:center;text-decoration:none;}
+.or-sep{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink-soft);font-size:12.5px;}
+.or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--line);}

@@ -318,6 +318,7 @@ function clearSigPad(side){
 }
 
 async function confirmSign(side){
+  if(side === 'client' && !(await requireFullAccount())) return;
   const msg = document.getElementById(`sigMsg-${side}`);
   const name = document.getElementById(`sigName-${side}`).value.trim();
   if(!name){ msg.className = 'msg err'; msg.textContent = 'اكتب الاسم الكامل'; return; }

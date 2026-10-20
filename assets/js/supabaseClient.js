@@ -27,6 +27,7 @@ window.__me = null;
 async function getCurrentProfile(){
   const { data: { user } } = await supabase.auth.getUser();
   if(!user) return null;
+  window.__isGuest = !!user.is_anonymous; // حساب ضيف (دخول بالاسم والجوال فقط)
   let { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
   if(!data){
     // حساب بلا ملف شخصي: تُنشأ بياناته الآمنة (الدور client دائماً) ثم نعيد المحاولة
@@ -70,6 +71,7 @@ async function requireRole(allowedRoles){
     const passed = await enforceCountryGate(profile);
     if(!passed) return null;
   }
+  if(profile.role === 'client' && window.__isGuest) showGuestBanner();
   // الأدمن: خروج تلقائي دائماً. العميل: خروج عند الخمول فقط إن لم يفعّل "تذكّرني".
   if(profile.role === 'admin' || !__rememberOn()) startIdleTimer(profile.role);
   return profile;
@@ -102,12 +104,33 @@ function adaptSidebarForPath(path){
   });
 }
 
+// ---------- حساب الضيف ----------
+// الضيف يستخدم المنصة كاملة، لكن قبول العروض والتوقيع على العقود يتطلب إكمال الحساب (بريد + كلمة مرور)
+function showGuestBanner(){
+  if(document.getElementById('guestBanner')) return;
+  if(location.pathname.endsWith('/auth/complete-account.html')) return;
+  const b = document.createElement('div');
+  b.id = 'guestBanner'; b.className = 'guest-banner';
+  b.innerHTML = '<span>👋 أنت تستخدم المنصة كضيف. أكمل حسابك ببريدك وكلمة مرور حتى لا تفقد بياناتك وتتمكن من الدخول من أي جهاز.</span>' +
+    '<a class="btn gold btn-xs" href="/auth/complete-account.html?next=' + encodeURIComponent(location.pathname + location.search) + '">إكمال الحساب</a>';
+  const host = document.querySelector('.app-col') || document.querySelector('main') || document.body;
+  host.insertBefore(b, host.firstChild);
+}
+async function requireFullAccount(){
+  if(window.__isGuest === undefined) await getCurrentProfile();
+  if(!window.__isGuest) return true;
+  alert('لقبول العرض والتوقيع، أكمل حسابك أولاً ببريدك الإلكتروني وكلمة مرور — بياناتك وطلباتك ستبقى كما هي.');
+  window.location.href = '/auth/complete-account.html?next=' + encodeURIComponent(location.pathname + location.search);
+  return false;
+}
+
 function homeForRole(role){
   if(role === 'admin') return '/admin/dashboard.html';
   return '/client/dashboard.html';
 }
 
 async function signOut(){
+  if(window.__isGuest && !confirm('أنت تستخدم حساب ضيف — عند تسجيل الخروج لن تستطيع العودة لبياناتك إلا بعد إكمال حسابك. هل تريد الخروج فعلاً؟')) return;
   try{ await supabase.auth.signOut(); }catch(e){}
   try{ sessionStorage.clear(); }catch(e){}
   window.location.replace('/auth/login.html');

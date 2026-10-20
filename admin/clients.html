@@ -51,6 +51,7 @@
           <button onclick="setFilter('not_ready')">غير جاهز</button>
           <button onclick="setFilter('ready')">جاهز</button>
           <button onclick="setFilter('waitlist')">قائمة انتظار الدول</button>
+          <button onclick="setFilter('guests')">الضيوف</button>
         </div>
         <div class="card is-hidden" id="waitlistCard">
           <h3 class="mb-10">المهتمون بالدول غير المفعّلة بعد</h3>
@@ -70,8 +71,8 @@
 
         <div class="card">
           <table>
-            <thead><tr><th>العميل</th><th>الجنسية</th><th>دولة التأسيس</th><th>الحالة الحالية</th><th>مستندات العميل</th><th>الإجراءات</th><th>مراسلة</th></tr></thead>
-            <tbody id="clientsBody"><tr><td colspan="7">جارٍ التحميل...</td></tr></tbody>
+            <thead><tr><th>العميل</th><th>الجوال</th><th>الجنسية</th><th>دولة التأسيس</th><th>الحالة الحالية</th><th>مستندات العميل</th><th>الإجراءات</th><th>مراسلة</th></tr></thead>
+            <tbody id="clientsBody"><tr><td colspan="8">جارٍ التحميل...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -92,12 +93,11 @@ async function init(){
 }
 
 async function loadClients(){
-  const { data, error } = await supabase
-    .from('clients')
-    .select('id, nationality, country, readiness_status, assessment_completed_at, profiles(full_name)')
-    .order('created_at', {ascending:false});
+  const q = (cols) => supabase.from('clients').select(cols).order('created_at', {ascending:false});
+  let { data, error } = await q('id, nationality, country, readiness_status, assessment_completed_at, profiles(full_name, contact_phone, is_guest)');
+  if(error){ ({ data, error } = await q('id, nationality, country, readiness_status, assessment_completed_at, profiles(full_name, contact_phone)')); } // قبل تشغيل ملف SQL
 
-  if(error || !data){ document.getElementById('clientsBody').innerHTML = '<tr><td colspan="7">تعذر التحميل</td></tr>'; return; }
+  if(error || !data){ document.getElementById('clientsBody').innerHTML = '<tr><td colspan="8">تعذر التحميل</td></tr>'; return; }
   allClients = data;
   renderClients();
 }
@@ -126,6 +126,7 @@ function getFiltered(){
   if(currentFilter === 'incomplete') return allClients.filter(c => !c.assessment_completed_at);
   if(currentFilter === 'not_ready') return allClients.filter(c => c.assessment_completed_at && c.readiness_status === 'not_ready');
   if(currentFilter === 'ready') return allClients.filter(c => c.readiness_status === 'ready');
+  if(currentFilter === 'guests') return allClients.filter(c => c.profiles?.is_guest);
   if(currentFilter === 'waitlist') return allClients.filter(c => c.country && c.country !== 'SA');
   return allClients;
 }
@@ -139,7 +140,7 @@ function renderClients(){
   renderWaitlist();
   document.getElementById('bulkCount').textContent = filtered.length;
 
-  if(!filtered.length){ body.innerHTML = '<tr><td colspan="7">لا يوجد عملاء مطابقون</td></tr>'; return; }
+  if(!filtered.length){ body.innerHTML = '<tr><td colspan="8">لا يوجد عملاء مطابقون</td></tr>'; return; }
 
   const statusMap = {pending_review:'<span class="badge pending">قيد المراجعة</span>', ready:'<span class="badge ready">جاهز</span>', not_ready:'<span class="badge notready">غير جاهز</span>'};
 
@@ -149,7 +150,8 @@ function renderClients(){
       : (statusMap[c.readiness_status] || '—');
     return `
     <tr>
-      <td>${esc(c.profiles?.full_name || c.id)}</td>
+      <td>${esc(c.profiles?.full_name || c.id)}${c.profiles?.is_guest ? ' <span class="badge pending">ضيف</span>' : ''}</td>
+      <td>${c.profiles?.contact_phone ? `<a dir="ltr" href="https://wa.me/${esc(String(c.profiles.contact_phone).replace(/\D/g,''))}" target="_blank" rel="noopener">${esc(c.profiles.contact_phone)}</a>` : '—'}</td>
       <td>${esc(c.nationality || '—')}</td>
       <td>${esc(COUNTRY_NAMES[c.country] || c.country || '—')}</td>
       <td>${statusBadge}</td>

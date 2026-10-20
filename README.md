@@ -131,8 +131,8 @@
 
 ### SEO وجاهزية الذكاء الاصطناعي
 - `index.html`: أضيف meta description، keywords، Open Graph، Twitter Card، وبيانات JSON-LD (Schema.org Organization)
-- `robots.txt`: يسمح بفهرسة الصفحة الرئيسية، يمنع فهرسة اللوحات الداخلية المحمية بتسجيل دخول
-- `sitemap.xml`: خريطة الموقع الأساسية
+- `robots.txt`: يمنع فهرسة النطاق بالكامل عمداً (`start` منصة خاصة بتسجيل دخول). الموقع التعريفي المفهرَس في جوجل هو invest.itqanbs.sa
+- لا يوجد `sitemap.xml` لهذا النطاق؛ الـ sitemap يُقدَّم في Search Console لموقع invest.itqanbs.sa فقط
 - `llms.txt`: ملف وصف مخصص لمحركات الذكاء الاصطناعي (نمط ناشئ يشابه robots.txt، تشرح فيه هوية الموقع وروابطه الرئيسية للمساعدين الذكيين)
 
 ### ربط مع invest.itqanbs.sa

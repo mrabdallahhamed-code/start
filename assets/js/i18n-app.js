@@ -26,6 +26,13 @@
     'اكتب رسالتك هنا...': 'Write your message here...', 'اسمك الكامل': 'Your full name', 'صف احتياجك بإيجاز': 'Briefly describe what you need',
     'أي تفاصيل تحب تشاركها مع فريق إتقان': 'Any details you would like to share with the Itqan team', 'إظهار': 'Show', 'إخفاء': 'Hide',
     '10 أحرف على الأقل': 'At least 10 characters', 'وجرّب': 'and try',
+    '👋 أنت تستخدم المنصة كضيف. أكمل حسابك ببريدك وكلمة مرور حتى لا تفقد بياناتك وتتمكن من الدخول من أي جهاز.': '👋 You are using the platform as a guest. Complete your account with an email and password so you keep your data and can sign in from any device.',
+    'إكمال الحساب': 'Complete account', 'حفظ وإكمال الحساب': 'Save and complete account',
+    'أضف بريدك الإلكتروني وكلمة مرور. كل بياناتك وطلباتك الحالية تبقى كما هي، وستتمكن من الدخول من أي جهاز.': 'Add your email and a password. All your current data and requests stay as they are, and you can sign in from any device.',
+    'كلمة المرور': 'Password', '10 أحرف على الأقل، وتشمل حرفاً كبيراً وصغيراً ورقماً ورمزاً.': 'At least 10 characters, with upper- and lower-case letters, a digit and a symbol.',
+    'لقبول العرض والتوقيع، أكمل حسابك أولاً ببريدك الإلكتروني وكلمة مرور — بياناتك وطلباتك ستبقى كما هي.': 'To accept the offer and sign, first complete your account with an email and password — your data and requests will stay as they are.',
+    'أنت تستخدم حساب ضيف — عند تسجيل الخروج لن تستطيع العودة لبياناتك إلا بعد إكمال حسابك. هل تريد الخروج فعلاً؟': 'You are using a guest account — after signing out you cannot return to your data unless you complete your account. Sign out anyway?',
+    'ضيف': 'Guest',
     // ---------- رسائل الملفات ----------
     'لم يتم اختيار ملف': 'No file selected', 'حجم الملف أكبر من المسموح (': 'File is larger than allowed (', 'ميجا)': 'MB)',
     'نوع الملف غير مسموح. المسموح: PDF أو صورة (JPG/PNG) أو Word': 'File type not allowed. Allowed: PDF, image (JPG/PNG) or Word',
