@@ -145,11 +145,20 @@
 let profile;
 let hasForeign = null;
 
-const journeySteps = [
+// خطوات الرحلة تُقرأ من قاعدة البيانات (يعدّلها الأدمن من صفحة «الإجراءات»)، وهذه القائمة احتياطية فقط
+let journeySteps = [
   'تصديق الوثائق من السفارة السعودية بالبلد الأم', 'شحن الوثائق', 'التقديم على رخصة الاستثمار',
   'الحصول على رخصة الاستثمار', 'حجز الاسم التجاري', 'تأسيس الشركة وعقد التأسيس',
   'فتح ملف الموارد البشرية', 'فتح الملفات الحكومية'
 ];
+async function loadJourneySteps(){
+  try{
+    const { data } = await supabase.from('procedure_step_templates')
+      .select('step_name, step_order, procedure_stage_templates!inner(path, active)')
+      .eq('active', true).eq('procedure_stage_templates.path', 'readiness').order('step_order');
+    if(data && data.length) journeySteps = data.map(r => r.step_name);
+  }catch(e){}
+}
 const requiredDocTypes = ['عقد التأسيس (الشركة الأم)', 'جواز سفر ممثل الشركة', 'السجل التجاري الأجنبي'];
 const uploadedFiles = {};
 const toggleAnswers = {};
@@ -158,6 +167,7 @@ async function init(){
   profile = await requireRole(['client']);
   if(!profile) return;
   initNotificationBell(profile.id);
+  loadJourneySteps();
 
   const rows = document.getElementById('docUploadRows');
   requiredDocTypes.forEach((docType, i) => {

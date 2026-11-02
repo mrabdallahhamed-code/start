@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://fpjaupjwikaaxehcqprk.supabase.co; connect-src 'self' https://fpjaupjwikaaxehcqprk.supabase.co wss://fpjaupjwikaaxehcqprk.supabase.co https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7D5B">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="مبتدأ من إتقان">
+
+<title>الإجراءات — إتقان</title>
+<link rel="stylesheet" href="../assets/css/itqan.css">
+<script src="/assets/js/security.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/analytics.js" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><img src="../assets/images/mubtada-mark.png" alt="مبتدأ من إتقان" width="34" height="36" class="brand-mark"><span class="brand-name">مبتدأ <small>من إتقان</small></span></div>
+    <nav>
+      <a href="dashboard.html" class="side-link"><span class="ic">🏠</span> نظرة عامة</a>
+      <a href="clients.html" class="side-link"><span class="ic">👥</span> العملاء وتصنيفاتها</a>
+      <a href="requests.html" class="side-link"><span class="ic">🏢</span> طلبات العروض</a>
+      <a href="post-incorp.html" class="side-link"><span class="ic">🗂️</span> خدمات ما بعد التأسيس</a>
+      <a href="procedures.html" class="side-link active"><span class="ic">📋</span> الإجراءات</a>
+      <a href="company-settings.html" class="side-link"><span class="ic">🏛️</span> بيانات الشركة</a>
+      <a href="team.html" class="side-link"><span class="ic">🧑‍💼</span> الفريق</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn ghost w-full-flush" onclick="signOut()">تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <div class="app-col">
+    <header class="app-topbar"><div id="notifBellContainer"></div></header>
+    <main class="app-main">
+      <div class="app-main-inner" style="max-width:860px;">
+        <h1 class="page-title">إجراءات التأسيس</h1>
+        <p class="page-sub">من هنا تعدّل مراحل وخطوات التأسيس بدون رفع ملفات. التعديل يُطبَّق على الطلبات الجديدة تلقائياً، وعلى الطلبات الجارية فقط إذا اخترت ذلك.</p>
+        <div class="tabs" id="pathTabs">
+          <button class="active" data-path="foreign_investment">الاستثمار الأجنبي</button>
+          <button data-path="saudi_national">المواطن السعودي</button>
+          <button data-path="readiness">خطوات الرحلة (بعد بوصلة الجاهزية)</button>
+        </div>
+        <div id="msg" role="alert"></div>
+        <div id="stages"><p class="txt-soft">جارٍ التحميل...</p></div>
+        <div class="card" id="addStageCard">
+          <h3 class="mb-10">إضافة مرحلة جديدة</h3>
+          <div style="display:flex;gap:8px;"><input id="newStageName" placeholder="اسم المرحلة"><button class="btn gold btn-pad m-0" onclick="addStage()">إضافة</button></div>
+          <p class="hint mt-10">المرحلة الجديدة تظهر في الطلبات الجديدة فقط.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="../assets/js/supabaseClient.js"></script>
+<script>
+let currentPath = 'foreign_investment';
+let stages = [];
+const SKIP_LABEL = { has_foreign_company: 'تُتخطّى تلقائياً لمن يملك شركة أجنبية', trade_name_chosen: 'تُتخطّى تلقائياً لمن اختار الاسم التجاري' };
+
+function say(kind, text){ const m = document.getElementById('msg'); m.className = 'msg ' + kind; m.textContent = text; }
+
+async function init(){
+  const profile = await requireRole(['admin']);
+  if(!profile) return;
+  initNotificationBell(profile.id);
+  document.querySelectorAll('#pathTabs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#pathTabs button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active'); currentPath = b.dataset.path;
+    document.getElementById('addStageCard').style.display = currentPath === 'readiness' ? 'none' : 'block';
+    load();
+  }));
+  load();
+}
+
+async function load(){
+  const { data, error } = await supabase.from('procedure_stage_templates')
+    .select('*, procedure_step_templates(*)').eq('path', currentPath).eq('active', true).order('stage_order');
+  const box = document.getElementById('stages');
+  if(error){ box.innerHTML = '<div class="alert-danger">تعذّر التحميل. تأكد من تشغيل ملف SQL الخاص بالإجراءات.</div>'; return; }
+  stages = data || [];
+  box.innerHTML = stages.map((st, i) => {
+    const steps = (st.procedure_step_templates || []).filter(x => x.active).sort((a,b) => a.step_order - b.step_order);
+    return `<div class="card proc-stage">
+      <div class="proc-stage-head">
+        <span class="proc-num">${i + 1}</span>
+        <input class="proc-input proc-stage-name" value="${esc(st.stage_name)}" data-id="${esc(st.id)}" data-old="${esc(st.stage_name)}">
+        <button class="btn ghost btn-xs" onclick="saveStage('${esc(st.id)}', this)">حفظ الاسم</button>
+        ${currentPath !== 'readiness' ? `<button class="btn ghost btn-xs" onclick="moveStage('${esc(st.id)}', -1)" ${i === 0 ? 'disabled' : ''}>▲</button>
+        <button class="btn ghost btn-xs" onclick="moveStage('${esc(st.id)}', 1)" ${i === stages.length - 1 ? 'disabled' : ''}>▼</button>
+        <button class="btn ghost btn-xs proc-del" onclick="removeStage('${esc(st.id)}')">حذف المرحلة</button>` : ''}
+      </div>
+      ${st.skip_when ? `<p class="hint mb-10">↪ ${esc(SKIP_LABEL[st.skip_when] || '')}</p>` : ''}
+      <ol class="proc-steps">
+        ${steps.map((sp, j) => `<li>
+          <input class="proc-input" value="${esc(sp.step_name)}" id="step-${esc(sp.id)}" data-old="${esc(sp.step_name)}">
+          <button class="btn ghost btn-xs" onclick="saveStep('${esc(sp.id)}')">حفظ</button>
+          <button class="btn ghost btn-xs" onclick="moveStep('${esc(st.id)}','${esc(sp.id)}', -1)" ${j === 0 ? 'disabled' : ''}>▲</button>
+          <button class="btn ghost btn-xs" onclick="moveStep('${esc(st.id)}','${esc(sp.id)}', 1)" ${j === steps.length - 1 ? 'disabled' : ''}>▼</button>
+          <button class="btn ghost btn-xs proc-del" onclick="removeStep('${esc(sp.id)}')">حذف</button>
+        </li>`).join('')}
+      </ol>
+      <div class="proc-add">
+        <input class="proc-input" id="new-${esc(st.id)}" placeholder="خطوة جديدة في هذه المرحلة">
+        <button class="btn gold btn-xs" onclick="addStep('${esc(st.id)}')">+ إضافة خطوة</button>
+      </div>
+    </div>`;
+  }).join('') || '<p class="txt-soft">لا توجد مراحل.</p>';
+}
+
+function stamp(){ return new Date().toISOString(); }
+
+async function addStep(stageId){
+  const inp = document.getElementById('new-' + stageId);
+  const name = inp.value.trim();
+  if(name.length < 2){ say('err', 'اكتب اسم الخطوة أولاً'); return; }
+  const st = stages.find(s => s.id === stageId);
+  const max = Math.max(0, ...(st.procedure_step_templates || []).filter(x => x.active).map(x => x.step_order));
+  const { data, error } = await supabase.from('procedure_step_templates')
+    .insert({ stage_template_id: stageId, step_order: max + 1, step_name: name }).select().single();
+  if(error){ say('err', error.message); return; }
+  let extra = '';
+  if(confirm('تمت إضافة الخطوة للطلبات الجديدة.\n\nهل تريد إضافتها أيضاً للطلبات الجارية التي لم تنتهِ هذه المرحلة فيها بعد؟')){
+    const { data: n, error: e2 } = await supabase.rpc('admin_apply_step_to_open_requests', { p_step: data.id });
+    extra = e2 ? ' (تعذّر تطبيقها على الطلبات الجارية: ' + e2.message + ')' : ' وأُضيفت إلى ' + (n || 0) + ' طلب جارٍ.';
+  }
+  say('ok', 'تمت إضافة الخطوة' + extra);
+  load();
+}
+
+async function saveStep(stepId){
+  const inp = document.getElementById('step-' + stepId);
+  const name = inp.value.trim(), old = inp.dataset.old;
+  if(name.length < 2){ say('err', 'اسم الخطوة قصير جداً'); return; }
+  if(name === old){ say('ok', 'لا يوجد تغيير'); return; }
+  const { error } = await supabase.from('procedure_step_templates').update({ step_name: name, updated_at: stamp() }).eq('id', stepId);
+  if(error){ say('err', error.message); return; }
+  let extra = '';
+  if(confirm('تم حفظ الاسم الجديد للطلبات الجديدة.\n\nهل تريد تصحيح الاسم أيضاً في الطلبات الجارية (للخطوات التي لم تُنجز بعد فقط)؟')){
+    const { data: n, error: e2 } = await supabase.rpc('admin_rename_step_in_open_requests', { p_step: stepId, p_old_name: old });
+    extra = e2 ? ' (تعذّر التطبيق على الطلبات الجارية: ' + e2.message + ')' : ' وصُحّح في ' + (n || 0) + ' طلب جارٍ.';
+  }
+  say('ok', 'تم الحفظ' + extra);
+  load();
+}
+
+async function removeStep(stepId){
+  if(!confirm('حذف هذه الخطوة من الطلبات الجديدة؟\n(الطلبات الجارية لا تتأثر)')) return;
+  const { error } = await supabase.from('procedure_step_templates').update({ active: false, updated_at: stamp() }).eq('id', stepId);
+  if(error){ say('err', error.message); return; }
+  say('ok', 'تم حذف الخطوة من الطلبات الجديدة.'); load();
+}
+
+async function moveStep(stageId, stepId, dir){
+  const st = stages.find(s => s.id === stageId);
+  const steps = (st.procedure_step_templates || []).filter(x => x.active).sort((a,b) => a.step_order - b.step_order);
+  const i = steps.findIndex(x => x.id === stepId), j = i + dir;
+  if(j < 0 || j >= steps.length) return;
+  [steps[i], steps[j]] = [steps[j], steps[i]];
+  for(let k = 0; k < steps.length; k++){
+    await supabase.from('procedure_step_templates').update({ step_order: k + 1, updated_at: stamp() }).eq('id', steps[k].id);
+  }
+  load();
+}
+
+async function saveStage(stageId, btn){
+  const inp = btn.parentElement.querySelector('.proc-stage-name');
+  const name = inp.value.trim();
+  if(name.length < 2){ say('err', 'اسم المرحلة قصير جداً'); return; }
+  const { error } = await supabase.from('procedure_stage_templates').update({ stage_name: name, updated_at: stamp() }).eq('id', stageId);
+  if(error){ say('err', error.message); return; }
+  say('ok', 'تم حفظ اسم المرحلة للطلبات الجديدة.'); load();
+}
+
+async function moveStage(stageId, dir){
+  const i = stages.findIndex(s => s.id === stageId), j = i + dir;
+  if(j < 0 || j >= stages.length) return;
+  const arr = stages.slice(); [arr[i], arr[j]] = [arr[j], arr[i]];
+  for(let k = 0; k < arr.length; k++){
+    await supabase.from('procedure_stage_templates').update({ stage_order: k + 1, updated_at: stamp() }).eq('id', arr[k].id);
+  }
+  load();
+}
+
+async function removeStage(stageId){
+  if(!confirm('حذف هذه المرحلة بكل خطواتها من الطلبات الجديدة؟\n(الطلبات الجارية لا تتأثر)')) return;
+  const { error } = await supabase.from('procedure_stage_templates').update({ active: false, updated_at: stamp() }).eq('id', stageId);
+  if(error){ say('err', error.message); return; }
+  say('ok', 'تم حذف المرحلة من الطلبات الجديدة.'); load();
+}
+
+async function addStage(){
+  const name = document.getElementById('newStageName').value.trim();
+  if(name.length < 2){ say('err', 'اكتب اسم المرحلة أولاً'); return; }
+  const max = Math.max(0, ...stages.map(s => s.stage_order));
+  const { error } = await supabase.from('procedure_stage_templates').insert({ path: currentPath, stage_order: max + 1, stage_name: name });
+  if(error){ say('err', error.message); return; }
+  document.getElementById('newStageName').value = '';
+  say('ok', 'تمت إضافة المرحلة — أضف خطواتها الآن.'); load();
+}
+
+init();
+</script>
+</body>
+</html>

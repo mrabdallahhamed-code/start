@@ -240,3 +240,13 @@ tbody tr:not(:last-child) td{border-bottom:1px solid var(--line-soft);}
 .guest-cta{display:block;width:100%;text-align:center;text-decoration:none;}
 .or-sep{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink-soft);font-size:12.5px;}
 .or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--line);}
+
+/* ---------- صفحة الإجراءات (الأدمن) ---------- */
+.proc-stage-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.proc-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--green-dark);color:#fff;font-weight:700;font-size:13px;flex-shrink:0;}
+.proc-input{flex:1;min-width:180px;margin:0 !important;}
+.proc-stage-name{font-weight:700;}
+.proc-steps{margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:8px;}
+.proc-steps li{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.proc-add{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.proc-del{color:var(--danger) !important;}
